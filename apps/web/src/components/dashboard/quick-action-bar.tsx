@@ -10,6 +10,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { useQuickActions, type QuickActionState } from "@/hooks/use-quick-actions";
 import { getActivityCardClasses, type ActivityCategory } from "@/lib/activity-colors";
 import { formatElapsedTime } from "@/stores/timer-store";
+import { useFormatters } from "@/lib/format";
 import { LogModal } from "@/components/tracking/log-modal";
 import { ToastAction } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -44,14 +45,9 @@ export function QuickActionBar({ childId }: { childId: string }) {
   const [detailsFor, setDetailsFor] = useState<LogType | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  const { duration } = useFormatters();
   const pinned = user?.quickActions ?? [];
-
-  const formatDuration = (ms: number) => {
-    const totalMinutes = Math.max(1, Math.round(ms / 60000));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return hours > 0 ? t("durationHours", { hours, minutes }) : t("durationMinutes", { minutes });
-  };
+  const formatDuration = (ms: number) => duration(Math.max(1, ms / 60000));
 
   const handleTap = async (action: QuickAction) => {
     if (busy) return;

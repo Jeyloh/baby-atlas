@@ -1,4 +1,11 @@
 {
+  "modules": {
+    "title": "Development and health",
+    "vaccines": { "title": "Vaccines", "description": "The Norwegian programme with due dates" },
+    "speech": { "title": "Words and speech", "description": "Words, sounds and signs your child uses" },
+    "potty": { "title": "Ready for the potty?", "description": "Readiness signs, 18 to 36 months" },
+    "insights": { "title": "Insights", "description": "AI insights and trends (Premium)" }
+  },
   "childSelector": {
     "addChild": "Add child"
   },

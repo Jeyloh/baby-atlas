@@ -1,4 +1,11 @@
 {
+  "modules": {
+    "title": "Utvikling og helse",
+    "vaccines": { "title": "Vaksiner", "description": "Barnevaksinasjonsprogrammet med datoer" },
+    "speech": { "title": "Språk og ord", "description": "Ord, lyder og tegn barnet bruker" },
+    "potty": { "title": "Klar for potte?", "description": "Tegn på at barnet er klart, 18 til 36 måneder" },
+    "insights": { "title": "Innsikt", "description": "AI-innsikt og trender (Premium)" }
+  },
   "childSelector": {
     "addChild": "Legg til barn"
   },

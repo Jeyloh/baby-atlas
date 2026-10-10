@@ -21,8 +21,6 @@
   "started": "{action} startet",
   "stopped": "{action} stoppet etter {duration}",
   "bottleNeedsAmount": "Logg første flaske med mengde, så kan du gjenta den med ett trykk.",
-  "durationMinutes": "{minutes} min",
-  "durationHours": "{hours} t {minutes} min",
   "undo": "Angre",
   "undone": "Angret",
   "failed": "Kunne ikke lagre. Prøv igjen."

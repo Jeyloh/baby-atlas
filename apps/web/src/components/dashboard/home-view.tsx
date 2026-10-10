@@ -3,6 +3,8 @@
 import { trpc } from "@/lib/trpc/provider";
 import { useTranslations } from "next-intl";
 import { ActivityCard, useActivityDetails } from "@/components/dashboard/activity-card";
+import { QuickActionBar } from "@/components/dashboard/quick-action-bar";
+import { ModuleLinks } from "@/components/dashboard/module-links";
 
 interface HomeViewProps {
   childId: string;
@@ -60,6 +62,8 @@ export function HomeView({ childId }: HomeViewProps) {
 
   return (
     <div className="space-y-6">
+      <QuickActionBar childId={childId} />
+
       {/* Activity cards grid - 2 cols on mobile, 3 on tablet, 5 on desktop */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         <ActivityCard
@@ -144,6 +148,8 @@ export function HomeView({ childId }: HomeViewProps) {
           details={details.activity(lastActivity ?? null)}
         />
       </div>
+
+      <ModuleLinks childId={childId} />
     </div>
   );
 }

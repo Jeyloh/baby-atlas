@@ -103,9 +103,8 @@ export default function ChildDashboardPage({
 
 // Separate component to avoid running useChat when chat tab is not active
 function ChatTab({ childId }: { childId: string }) {
-  const { messages, isLoading, model, setModel, sendMessage, stop, clearMessages } = useChat({
-    childId,
-  });
+  const { messages, isLoading, model, setModel, sendMessage, stop, clearMessages, premiumRequired } =
+    useChat({ childId });
 
   return (
     <div className="h-[calc(100vh-220px)] min-h-[400px] border rounded-lg overflow-hidden">
@@ -117,6 +116,7 @@ function ChatTab({ childId }: { childId: string }) {
         isLoading={isLoading}
         model={model}
         onModelChange={setModel}
+        premiumRequired={premiumRequired}
       />
     </div>
   );

@@ -21,8 +21,6 @@
   "started": "{action} started",
   "stopped": "{action} stopped after {duration}",
   "bottleNeedsAmount": "Log your first bottle with an amount, then repeat it with one tap.",
-  "durationMinutes": "{minutes} min",
-  "durationHours": "{hours} h {minutes} min",
   "undo": "Undo",
   "undone": "Undone",
   "failed": "Could not save. Try again."
