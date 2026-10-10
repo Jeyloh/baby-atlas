@@ -6,12 +6,15 @@ import { scopeToolCall, isReadOnlyTool, UNSCOPED_TOOLS } from "@/lib/agent/scope
 import { checkUserSubscription } from "@/lib/subscription";
 import { buildSystemPrompt } from "@/lib/insights/system-prompt";
 import { getRequestLocale } from "@/lib/insights/request-locale";
+import { toAnthropicMessages } from "@/lib/chat/anthropic-messages";
+import { trimConversation } from "@/lib/chat/conversation";
+import type { ModelId } from "@/lib/chat/limits";
+import { chatRequestSchema } from "@/lib/chat/schema";
+import type { ChatStreamEvent } from "@/lib/chat/stream-events";
 
 export const runtime = "nodejs";
 // Configure based on your Vercel plan: Hobby=10, Pro=60, Enterprise=900
 export const maxDuration = 60;
-
-type ModelId = "haiku" | "sonnet" | "opus";
 
 const MODEL_MAP: Record<ModelId, string> = {
   haiku: "claude-haiku-5-5",
@@ -19,14 +22,11 @@ const MODEL_MAP: Record<ModelId, string> = {
   opus: "claude-opus-5-5",
 };
 
-interface ChatRequest {
-  childId: string;
-  message: string;
-  model?: ModelId;
-  conversationHistory?: Array<{
-    role: "user" | "assistant";
-    content: string;
-  }>;
+function jsonError(status: number, error: string) {
+  return new Response(JSON.stringify({ error }), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 // Convert MCP tool definitions to Anthropic tool format
@@ -103,24 +103,20 @@ export async function POST(request: Request) {
     // Validate session
     const session = await auth();
     if (!session?.user?.id) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+      return jsonError(401, "Unauthorized");
     }
 
-    const body: ChatRequest = await request.json();
-    const { childId, message, model = "sonnet", conversationHistory = [] } = body;
-
-    if (!childId || !message) {
-      return new Response(
-        JSON.stringify({ error: "Missing childId or message" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
+    const rawBody = await request.json().catch(() => null);
+    const parsed = chatRequestSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      const path = issue?.path.join(".");
+      return jsonError(
+        400,
+        `Invalid chat request${issue ? `: ${path ? `${path}: ` : ""}${issue.message}` : ""}`
       );
     }
+    const { childId, model } = parsed.data;
 
     // Verify user has access to this child via household membership
     const child = await prisma.child.findUnique({
@@ -178,70 +174,51 @@ export async function POST(request: Request) {
     const tools = convertToolsToAnthropicFormat(readOnly);
 
     // Build messages array
-    const messages: Anthropic.MessageParam[] = [
-      ...conversationHistory.map((msg) => ({
-        role: msg.role as "user" | "assistant",
-        content: msg.content,
-      })),
-      { role: "user" as const, content: message },
-    ];
+    const messages = toAnthropicMessages(trimConversation(parsed.data.messages));
 
     // Create streaming response
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        const send = (event: ChatStreamEvent) =>
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
         try {
           let currentMessages = [...messages];
           let continueLoop = true;
 
           while (continueLoop) {
             // Create a streaming message
-            const streamResponse = anthropic.messages.stream({
-              model: MODEL_MAP[model] || MODEL_MAP.sonnet,
-              max_tokens: 4096,
-              system: systemPrompt,
-              tools,
-              messages: currentMessages,
-            });
+            const streamResponse = anthropic.messages.stream(
+              {
+                model: MODEL_MAP[model],
+                max_tokens: 4096,
+                system: systemPrompt,
+                tools,
+                messages: currentMessages,
+              },
+              { signal: request.signal }
+            );
 
-            let fullResponse: Anthropic.Message | null = null;
-            let currentText = "";
-
-            // Stream the response
             for await (const event of streamResponse) {
               if (event.type === "content_block_delta") {
-                const delta = event.delta;
-                if ("text" in delta) {
-                  currentText += delta.text;
-                  // Send text delta to client
-                  const data = JSON.stringify({
-                    type: "text_delta",
-                    text: delta.text,
-                  });
-                  controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+                if (event.delta.type === "text_delta") {
+                  send({ type: "text_delta", text: event.delta.text });
                 }
               } else if (event.type === "message_start") {
-                // Send message start
-                const data = JSON.stringify({
-                  type: "message_start",
-                  id: event.message.id,
+                send({ type: "message_start", id: event.message.id });
+              } else if (
+                event.type === "content_block_start" &&
+                event.content_block.type === "tool_use"
+              ) {
+                send({
+                  type: "tool_use_start",
+                  id: event.content_block.id,
+                  name: event.content_block.name,
                 });
-                controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-              } else if (event.type === "content_block_start") {
-                if (event.content_block.type === "tool_use") {
-                  // Send tool use start
-                  const data = JSON.stringify({
-                    type: "tool_use_start",
-                    id: event.content_block.id,
-                    name: event.content_block.name,
-                  });
-                  controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-                }
               }
             }
 
-            // Get the final message
-            fullResponse = await streamResponse.finalMessage();
+            const fullResponse = await streamResponse.finalMessage();
 
             // Check if we need to handle tool use
             const toolUseBlocks = fullResponse.content.filter(
@@ -256,14 +233,17 @@ export async function POST(request: Request) {
               for (const toolUse of toolUseBlocks) {
                 const toolInput = toolUse.input as Record<string, unknown>;
 
-                // Send tool execution start
-                const toolStartData = JSON.stringify({
+                if (request.signal.aborted) {
+                  controller.close();
+                  return;
+                }
+
+                send({
                   type: "tool_executing",
                   id: toolUse.id,
                   name: toolUse.name,
                   input: toolInput,
                 });
-                controller.enqueue(encoder.encode(`data: ${toolStartData}\n\n`));
 
                 try {
                   // Execute the tool, scoped to the verified child
@@ -275,14 +255,12 @@ export async function POST(request: Request) {
 
                   const resultText = result.content[0]?.text ?? "No result";
 
-                  // Send tool result
-                  const toolResultData = JSON.stringify({
+                  send({
                     type: "tool_result",
                     id: toolUse.id,
                     name: toolUse.name,
                     result: resultText,
                   });
-                  controller.enqueue(encoder.encode(`data: ${toolResultData}\n\n`));
 
                   toolResults.push({
                     type: "tool_result",
@@ -293,14 +271,12 @@ export async function POST(request: Request) {
                   const errorMessage =
                     error instanceof Error ? error.message : "Tool execution failed";
 
-                  // Send tool error
-                  const toolErrorData = JSON.stringify({
+                  send({
                     type: "tool_error",
                     id: toolUse.id,
                     name: toolUse.name,
                     error: errorMessage,
                   });
-                  controller.enqueue(encoder.encode(`data: ${toolErrorData}\n\n`));
 
                   toolResults.push({
                     type: "tool_result",
@@ -327,12 +303,19 @@ export async function POST(request: Request) {
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
         } catch (error) {
+          if (request.signal.aborted) {
+            try {
+              controller.close();
+            } catch {
+              // already closed by the disconnect
+            }
+            return;
+          }
           console.error("Chat stream error:", error);
-          const errorMessage = JSON.stringify({
+          send({
             type: "error",
             error: error instanceof Error ? error.message : "Unknown error",
           });
-          controller.enqueue(encoder.encode(`data: ${errorMessage}\n\n`));
           controller.close();
         }
       },
