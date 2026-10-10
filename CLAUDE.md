@@ -1,10 +1,20 @@
-# Finnberry - Claude Context
+# Baby Atlas - Claude Context
 
 This file provides context for Claude when working on this codebase.
 
 ## Project Overview
 
-Finnberry is an open-source baby tracking application (clone of Huckleberry) with MCP integration. It helps parents track sleep, feeding, diapers, pumping, growth, temperature, activities, and medicine with real-time sync across caregivers.
+Baby Atlas is a baby and toddler tracker (0 to 3 years) for Norwegian parents. It is a fork of [bckenstler/finnberry](https://github.com/bckenstler/finnberry) (git remote `upstream`). It tracks sleep, feeding, diapers, pumping, growth, temperature, activities and medicine, plus toddler modules: vocabulary, potty readiness and the Norwegian vaccine programme.
+
+### Baby Atlas rules
+
+- **Language:** Norwegian Bokmål (`nb`) is the default, English (`en`) is secondary. next-intl without locale URLs; the locale comes from the `NEXT_LOCALE` cookie (`apps/web/src/i18n/`). Messages live in `apps/web/messages/{nb,en}/<namespace>.json` and are registered in each `index.ts`. English is typed against Bokmål, so a missing key fails type-check. No hard-coded UI strings.
+- **Units:** metric only (ml, kg/g, cm, °C) and 24-hour time. Time zone Europe/Oslo.
+- **Access control:** every tRPC procedure must check household membership. Use `householdProcedure` for inputs with `childId`/`householdId`/child or household `id` (it fails closed and requires all id fields to agree), `recordProcedure(model)` for inputs addressed by a record id, or `assertChildAccess(ctx, childId, { write })` inside a `protectedProcedure`. AI tool calls go through `scopeToolCall` (`apps/web/src/lib/agent/`).
+- **Premium:** logging is always free. AI chat, AI insights (`/api/ai/insights`) and trend statistics (`trpc.stats`) require premium: `User.isPremium` or an email in `PREMIUM_EMAILS`. See `apps/web/src/lib/subscription.ts` and `packages/api/src/premium.ts`.
+- **Quick actions:** one tap logs or toggles a timer, long press opens the detail form, every tap offers undo. Users pin up to 4 (`User.quickActions`). See `apps/web/src/hooks/use-quick-actions.ts`.
+- **Migrations:** `packages/db/prisma/migrations/` (baseline plus RLS on every table). Use `prisma migrate dev` for schema changes; new tables need `ENABLE ROW LEVEL SECURITY` in their migration.
+- **iOS:** Capacitor shell that loads the hosted app (`apps/web/capacitor.config.ts`, `apps/web/ios/`). See `apps/web/README.md`.
 
 ## Tech Stack
 
@@ -23,7 +33,7 @@ Finnberry is an open-source baby tracking application (clone of Huckleberry) wit
 ## Project Structure
 
 ```
-finnberry/
+baby-atlas/
 ├── apps/
 │   ├── web/                     # Next.js webapp
 │   │   ├── src/
@@ -82,19 +92,19 @@ pnpm lint                   # Run ESLint across all packages
 pnpm type-check             # Run TypeScript checks
 
 # Fresh worktree/clone setup
-# The web app imports from @finnberry/mcp-server/tools which requires the dist folder.
+# The web app imports from @baby-atlas/mcp-server/tools which requires the dist folder.
 # On a fresh clone or worktree, build the MCP server first:
-pnpm --filter @finnberry/mcp-server build
+pnpm --filter @baby-atlas/mcp-server build
 
 # Database
 pnpm db:generate            # Generate Prisma client
 pnpm db:push                # Push schema to database (no migration)
 pnpm db:migrate             # Run database migrations
-pnpm --filter @finnberry/db db:studio  # Open Prisma Studio
+pnpm --filter @baby-atlas/db db:studio  # Open Prisma Studio
 
 # Individual apps
-pnpm --filter @finnberry/web dev       # Run only web app
-pnpm --filter @finnberry/mcp-server build  # Build MCP server
+pnpm --filter @baby-atlas/web dev       # Run only web app
+pnpm --filter @baby-atlas/mcp-server build  # Build MCP server
 
 # Testing
 pnpm test                   # Run all tests (Vitest)
@@ -118,7 +128,7 @@ pnpm test:coverage          # Run tests with coverage report
 ### Test Structure
 
 ```
-finnberry/
+baby-atlas/
 ├── packages/
 │   ├── utils/src/*.test.ts        # Unit tests for utilities
 │   ├── schemas/src/*.test.ts      # Schema validation tests (11 files)
@@ -242,7 +252,7 @@ Supabase Realtime in `apps/web/src/hooks/use-realtime.ts`:
 
 The MCP server (`apps/mcp-server/`) provides:
 - **Tools**: Actions like `start-sleep`, `log-feeding`, `log-diaper`
-- **Resources**: Read-only data like `finnberry://children/{id}/today`
+- **Resources**: Read-only data like `babyatlas://children/{id}/today`
 - **Prompts**: AI analysis prompts like `analyze-sleep-patterns`
 
 ## Database Schema
@@ -311,7 +321,7 @@ If a user requests changes while on `main`:
 
 ### Imports
 - Use `@/` alias for web app internal imports
-- Use `@finnberry/` for monorepo package imports
+- Use `@baby-atlas/` for monorepo package imports
 
 ### Component Structure
 - UI components in `components/ui/` (shadcn/ui style)
@@ -345,14 +355,14 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 
 ## Testing the MCP Server
 
-1. Build: `pnpm --filter @finnberry/mcp-server build`
+1. Build: `pnpm --filter @baby-atlas/mcp-server build`
 2. Add to Claude Desktop config:
 ```json
 {
   "mcpServers": {
-    "finnberry": {
+    "baby-atlas": {
       "command": "node",
-      "args": ["/path/to/finnberry/apps/mcp-server/dist/index.js"],
+      "args": ["/path/to/baby-atlas/apps/mcp-server/dist/index.js"],
       "env": { "DATABASE_URL": "..." }
     }
   }
@@ -362,11 +372,7 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 
 ## Deploying to Vercel
 
-### One-Click Deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fbckenstler%2Ffinnberry&env=DATABASE_URL,DIRECT_URL,AUTH_SECRET,NEXTAUTH_URL&envDescription=Required%20environment%20variables%20for%20Finnberry&envLink=https%3A%2F%2Fgithub.com%2Fbckenstler%2Ffinnberry%23environment-variables&project-name=finnberry&repository-name=finnberry&root-directory=apps/web)
-
-### Manual Setup
+### Setup
 
 1. Import your repository in the Vercel dashboard
 2. Set **Root Directory** to `apps/web`
@@ -380,7 +386,7 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 | `DATABASE_URL` | Supabase PostgreSQL pooler connection string |
 | `DIRECT_URL` | Supabase direct connection (for migrations) |
 | `AUTH_SECRET` | Generate with: `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Your Vercel deployment URL (e.g., `https://finnberry.vercel.app`) |
+| `NEXTAUTH_URL` | Your deployment URL |
 
 ### Optional Environment Variables
 
@@ -392,7 +398,9 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (for realtime) |
 | `EMAIL_SERVER` | SMTP connection string for magic links |
 | `EMAIL_FROM` | Sender email address |
-| `ANTHROPIC_API_KEY` | Anthropic API key for AI chat feature |
+| `ANTHROPIC_API_KEY` | Anthropic API key for AI chat and insights |
+| `PREMIUM_EMAILS` | Comma-separated emails treated as premium (until payments exist) |
+| `CAP_SERVER_URL` | URL the iOS shell loads (Capacitor) |
 
 ### API Timeout Configuration
 
@@ -410,6 +418,8 @@ The default is set to 60 seconds (Pro plan). For Hobby plan, change `maxDuration
 
 - No photo upload for children yet
 - Growth charts with percentiles not implemented
-- PWA support not added
 - No data export (CSV/JSON) UI yet
 - Email sending for magic links needs SMTP config
+- No payments yet: premium is set by `User.isPremium` or `PREMIUM_EMAILS`. RevenueCat (iOS) or Stripe (web) should set `isPremium` via webhook.
+- Supabase Realtime `postgres_changes` (`use-realtime.ts`, only on the legacy sleep/feeding/diapers pages) stops working once RLS is on. Switch to Realtime Broadcast from the server if live sync is needed.
+- The MCP server (`apps/mcp-server`) trusts its arguments and is for single-user local use only. The web chat scopes calls via `scopeToolCall`.
