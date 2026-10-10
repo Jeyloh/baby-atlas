@@ -222,15 +222,12 @@ Timers persist in localStorage via Zustand (`apps/web/src/stores/timer-store.ts`
 
 ### AI Chat Interface
 
-The dashboard includes a Chat tab (`apps/web/src/components/chat/`) for natural language interaction:
-- Uses Anthropic SDK with streaming responses (`/api/chat` route)
-- Tool calling for logging activities and querying data
-- Model selection (Haiku, Sonnet, Opus)
-- Streaming text and tool execution visualization
-- Key files:
-  - `chat-interface.tsx` - Main chat container with messages and input
-  - `chat-message.tsx` - User/assistant message bubbles with tool call display
-  - `use-chat.ts` hook - Manages chat state, streaming, and abort handling
+The chat page and the dashboard Chat tab both render `Chat` (`apps/web/src/components/chat/chat.tsx`), built on assistant-ui (`@assistant-ui/react`, `LocalRuntime`):
+- `/api/chat` streams SSE events (`lib/chat/stream-events.ts`) from the Anthropic SDK, with tool calling scoped by `scopeToolCall`
+- `lib/chat/chat-model-adapter.ts` is the `ChatModelAdapter` that calls the route
+- Images: the client downscales to 1600 px JPEG (`lib/chat/downscale-image.ts`); the route validates with zod (`lib/chat/schema.ts`): jpeg/png/webp/gif, max 4 per message, max 5 MB decoded
+- History is trimmed to 20 messages and images older than the last 2 user turns become a placeholder (`lib/chat/conversation.ts`), on both client and server
+- UI components live in `components/assistant-ui/` (thread, composer, attachment, markdown, tool call row, model picker)
 
 ### Timeline Views
 

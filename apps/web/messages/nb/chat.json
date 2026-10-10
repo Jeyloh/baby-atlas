@@ -1,20 +1,55 @@
 {
   "title": "Prat med Baby Atlas",
-  "emptyDescription": "Be meg logge aktiviteter, hente oppsummeringer eller følge med på barnets dag. Prøv for eksempel «Hva har barnet gjort i dag?» eller «Logg en tissebleie».",
-  "placeholder": "Spør Baby Atlas om hva som helst …",
-  "modelLabel": "Modell:",
-  "newConversation": "Ny samtale",
-  "clear": "Tøm",
-  "thinking": "Tenker …",
-  "send": "Send",
-  "stop": "Stopp",
-  "assistantAvatar": "KI",
-  "input": "Input:",
-  "output": "Output:",
   "trackingFor": "Registrering for {name}",
   "notFound": "Fant ikke barnet",
   "backToDashboard": "Tilbake til oversikten",
   "errorTitle": "Feil",
+  "welcome": "Hei! Spør meg om barnets dag, eller be meg logge noe.",
+  "suggestions": {
+    "sleep": "Hvordan har søvnen vært denne uka?",
+    "diaper": "Logg en tissebleie nå",
+    "fever": "Er 38,5 i feber farlig?",
+    "summary": "Oppsummer dagen i dag"
+  },
+  "placeholder": "Spør Baby Atlas …",
+  "messageInput": "Melding",
+  "send": "Send",
+  "stop": "Stopp",
+  "newConversation": "Ny samtale",
+  "scrollToBottom": "Rull til bunnen",
+  "assistantWorking": "Baby Atlas jobber",
+  "actions": {
+    "copy": "Kopier",
+    "copied": "Kopiert",
+    "retry": "Prøv igjen",
+    "edit": "Rediger",
+    "cancel": "Avbryt",
+    "update": "Oppdater"
+  },
+  "attachments": {
+    "add": "Legg ved bilde",
+    "library": "Velg fra bildebiblioteket",
+    "camera": "Ta bilde",
+    "remove": "Fjern {name}",
+    "preview": "Forhåndsvis {name}",
+    "uploading": "Behandler bildet",
+    "image": "Bilde"
+  },
+  "model": {
+    "label": "Velg modell",
+    "haiku": "Haiku 5.5",
+    "haikuHint": "Raskest",
+    "sonnet": "Sonnet 5.5",
+    "sonnetHint": "Balansert",
+    "opus": "Opus 5.5",
+    "opusHint": "Mest kapabel"
+  },
+  "errors": {
+    "generic": "Noe gikk galt. Prøv igjen.",
+    "imageTooLarge": "Bildet er for stort.",
+    "imageFailed": "Kunne ikke lese bildet.",
+    "tooManyImages": "Du kan legge ved maks {max} bilder per melding."
+  },
   "tools": {
     "createMedicine": "Opprett medisin",
     "endActivity": "Avslutt aktivitet",

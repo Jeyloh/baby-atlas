@@ -2,13 +2,11 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Button } from "@/components/ui/button";
-import { ChatInterface } from "@/components/chat";
-import { useChat } from "@/hooks/use-chat";
-import { useToast } from "@/hooks/use-toast";
+import { Chat } from "@/components/chat";
 
 export default function ChatPage({
   params,
@@ -16,30 +14,11 @@ export default function ChatPage({
   params: Promise<{ childId: string }>;
 }) {
   const { childId } = use(params);
-  const { toast } = useToast();
   const t = useTranslations("chat");
   const tCommon = useTranslations("common");
 
   const { data: child, isLoading: childLoading } = trpc.child.get.useQuery({
     id: childId,
-  });
-
-  const {
-    messages,
-    isLoading,
-    premiumRequired,
-    sendMessage,
-    stop,
-    clearMessages,
-  } = useChat({
-    childId,
-    onError: (error) => {
-      toast({
-        title: t("errorTitle"),
-        description: error.message,
-        variant: "destructive",
-      });
-    },
   });
 
   if (childLoading) {
@@ -62,45 +41,22 @@ export default function ChatPage({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b">
-        <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="icon-sm">
-            <Link href={`/dashboard/${childId}`}>
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">{tCommon("back")}</span>
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-lg font-semibold">{t("title")}</h1>
-            <p className="text-sm text-muted-foreground">
-              {t("trackingFor", { name: child.name })}
-            </p>
-          </div>
+    <div className="-mx-4 -my-6 flex h-[calc(100dvh-4.0625rem)] flex-col">
+      <div className="flex shrink-0 items-center gap-2 border-b px-2 py-1">
+        <Button asChild variant="ghost" size="icon-sm">
+          <Link href={`/dashboard/${childId}`}>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">{tCommon("back")}</span>
+          </Link>
+        </Button>
+        <div className="min-w-0">
+          <h1 className="font-display truncate text-base font-semibold">{t("title")}</h1>
+          <p className="truncate text-xs text-muted-foreground">
+            {t("trackingFor", { name: child.name })}
+          </p>
         </div>
-        {messages.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearMessages}
-            className="gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            {t("clear")}
-          </Button>
-        )}
       </div>
-
-      {/* Chat interface */}
-      <ChatInterface
-        messages={messages}
-        onSendMessage={sendMessage}
-        onStop={stop}
-        isLoading={isLoading}
-        premiumRequired={premiumRequired}
-        className="flex-1 min-h-0 pt-4"
-      />
+      <Chat childId={childId} className="flex-1" />
     </div>
   );
 }

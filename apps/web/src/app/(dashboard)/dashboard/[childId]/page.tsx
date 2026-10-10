@@ -7,8 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HomeView } from "@/components/dashboard/home-view";
 import { ReportsView } from "@/components/dashboard/reports-view";
 import { ChildSelector } from "@/components/dashboard/child-selector";
-import { ChatInterface } from "@/components/chat";
-import { useChat } from "@/hooks/use-chat";
+import { Chat } from "@/components/chat";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Settings, Home, BarChart3, MessageCircle } from "lucide-react";
@@ -94,30 +93,11 @@ export default function ChildDashboardPage({
         </TabsContent>
 
         <TabsContent value="chat" className="mt-4">
-          <ChatTab childId={childId} />
+          <div className="h-[calc(100dvh-16.5rem)] min-h-[26rem] overflow-hidden rounded-lg border">
+            <Chat childId={childId} />
+          </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-// Separate component to avoid running useChat when chat tab is not active
-function ChatTab({ childId }: { childId: string }) {
-  const { messages, isLoading, model, setModel, sendMessage, stop, clearMessages, premiumRequired } =
-    useChat({ childId });
-
-  return (
-    <div className="h-[calc(100vh-220px)] min-h-[400px] border rounded-lg overflow-hidden">
-      <ChatInterface
-        messages={messages}
-        onSendMessage={sendMessage}
-        onStop={stop}
-        onClear={clearMessages}
-        isLoading={isLoading}
-        model={model}
-        onModelChange={setModel}
-        premiumRequired={premiumRequired}
-      />
     </div>
   );
 }

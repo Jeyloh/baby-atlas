@@ -1,20 +1,55 @@
 {
   "title": "Chat with Baby Atlas",
-  "emptyDescription": "Ask me to log activities, check summaries, or help you track your baby's day. Try saying \"What did the baby do today?\" or \"Log a wet diaper\".",
-  "placeholder": "Ask Baby Atlas anything ...",
-  "modelLabel": "Model:",
-  "newConversation": "New conversation",
-  "clear": "Clear",
-  "thinking": "Thinking ...",
-  "send": "Send",
-  "stop": "Stop",
-  "assistantAvatar": "AI",
-  "input": "Input:",
-  "output": "Output:",
   "trackingFor": "Tracking for {name}",
   "notFound": "Child not found",
   "backToDashboard": "Back to dashboard",
   "errorTitle": "Error",
+  "welcome": "Hi! Ask me about your baby's day, or tell me what to log.",
+  "suggestions": {
+    "sleep": "How has sleep been this week?",
+    "diaper": "Log a wet diaper now",
+    "fever": "Is 38.5 a dangerous fever?",
+    "summary": "Summarise today"
+  },
+  "placeholder": "Ask Baby Atlas ...",
+  "messageInput": "Message",
+  "send": "Send",
+  "stop": "Stop",
+  "newConversation": "New conversation",
+  "scrollToBottom": "Scroll to bottom",
+  "assistantWorking": "Baby Atlas is working",
+  "actions": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "retry": "Try again",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "update": "Update"
+  },
+  "attachments": {
+    "add": "Attach a photo",
+    "library": "Choose from photo library",
+    "camera": "Take a photo",
+    "remove": "Remove {name}",
+    "preview": "Preview {name}",
+    "uploading": "Processing the photo",
+    "image": "Photo"
+  },
+  "model": {
+    "label": "Choose model",
+    "haiku": "Haiku 5.5",
+    "haikuHint": "Fastest",
+    "sonnet": "Sonnet 5.5",
+    "sonnetHint": "Balanced",
+    "opus": "Opus 5.5",
+    "opusHint": "Most capable"
+  },
+  "errors": {
+    "generic": "Something went wrong. Try again.",
+    "imageTooLarge": "The photo is too large.",
+    "imageFailed": "Could not read the photo.",
+    "tooManyImages": "You can attach at most {max} photos per message."
+  },
   "tools": {
     "createMedicine": "Create medicine",
     "endActivity": "End activity",

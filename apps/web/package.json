@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
+    "@assistant-ui/react": "^0.15.26",
+    "@assistant-ui/react-markdown": "^0.14.20",
     "@auth/prisma-adapter": "^2.7.4",
     "@baby-atlas/api": "workspace:*",
     "@baby-atlas/db": "workspace:*",
