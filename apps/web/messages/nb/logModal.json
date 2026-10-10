@@ -1,1 +1,120 @@
-{}
+{
+  "save": "Lagre",
+  "stop": "Stopp",
+  "start": "START",
+  "startTimerInstead": "Bruk tidtaker i stedet",
+  "manualEntry": "Legg inn manuelt",
+  "notesPlaceholder": "Legg til notat (valgfritt)",
+  "setTime": "Velg tidspunkt",
+  "startTime": "Starttidspunkt",
+  "endTime": "Sluttidspunkt",
+  "time": "Tidspunkt",
+  "date": "Dato",
+  "amount": "Mengde",
+  "sleep": {
+    "timerStarted": "Søvntidtaker startet",
+    "recorded": "Søvn registrert",
+    "running": "Søvn pågår",
+    "log": "Registrer søvn",
+    "add": "Ny søvn"
+  },
+  "breast": {
+    "timerStarted": "Ammetidtaker startet",
+    "recorded": "Amming registrert",
+    "log": "Registrer amming",
+    "add": "Ny amming"
+  },
+  "bottle": {
+    "logged": "Flaskemåltid registrert",
+    "add": "Ny flaske"
+  },
+  "diaper": {
+    "logged": "Bleieskift registrert",
+    "add": "Ny bleie",
+    "color": "Farge"
+  },
+  "solids": {
+    "logged": "Fast føde registrert",
+    "add": "Ny fast føde",
+    "addFood": "Legg til mat",
+    "optionalCustom": "(egen mat er valgfritt)",
+    "foodPlaceholder": "Skriv inn mat eller velg fra listen under",
+    "addFoodAria": "Legg til mat",
+    "selectedFoods": "Valgt mat",
+    "popular": "Vanligste matvarer",
+    "selectedCount": "Valgt",
+    "foods": {
+      "avocado": "avokado",
+      "banana": "banan",
+      "apple": "eple",
+      "riceCereal": "risgrøt",
+      "sweetPotato": "søtpotet",
+      "oatmeal": "havregrøt",
+      "spinach": "spinat",
+      "chicken": "kylling",
+      "peas": "erter",
+      "pear": "pære",
+      "yogurt": "yoghurt",
+      "carrot": "gulrot",
+      "broccoli": "brokkoli",
+      "prune": "sviske",
+      "greenBean": "grønne bønner",
+      "mango": "mango"
+    }
+  },
+  "pumping": {
+    "timerStarted": "Pumpetidtaker startet",
+    "recorded": "Pumping registrert",
+    "running": "Pumping pågår",
+    "add": "Ny pumping",
+    "modeTotal": "Totalt",
+    "modeLeftRight": "Venstre og høyre",
+    "total": "Totalt",
+    "left": "Venstre",
+    "right": "Høyre"
+  },
+  "medicine": {
+    "created": "Medisin opprettet",
+    "logged": "Medisin registrert",
+    "title": "Medisin",
+    "type": "Medisin:",
+    "selectExisting": "Velg eksisterende",
+    "addNew": "+ Legg til ny",
+    "namePlaceholder": "Navn på medisin",
+    "dosagePlaceholder": "Standarddose (for eksempel 5 ml)",
+    "create": "Opprett medisin",
+    "none": "Ingen medisiner. Legg til en først.",
+    "defaultDosage": "Standarddose: {dosage}",
+    "amountPlaceholder": "Legg til mengde (valgfritt)",
+    "units": {
+      "ml": "ml",
+      "drops": "dråper",
+      "tsp": "ts"
+    }
+  },
+  "growth": {
+    "recorded": "Vekst registrert",
+    "add": "Ny vekstmåling",
+    "weight": "Vekt",
+    "height": "Lengde",
+    "headCircumference": "Hodeomkrets"
+  },
+  "temperature": {
+    "recorded": "Kroppstemperatur registrert",
+    "add": "Ny kroppstemperatur",
+    "low": "Lav",
+    "normal": "Normal",
+    "elevated": "Litt forhøyet",
+    "fever": "Feber",
+    "highFever": "Høy feber"
+  },
+  "activity": {
+    "timerStarted": "Aktivitetstidtaker startet",
+    "recorded": "Aktivitet registrert",
+    "running": "Aktivitet pågår",
+    "log": "Registrer aktivitet",
+    "add": "Ny aktivitet",
+    "type": "Aktivitetstype",
+    "select": "Velg aktivitet"
+  }
+}

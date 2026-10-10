@@ -1,1 +1,35 @@
-{}
+{
+  "errorTitle": "Feil",
+  "profile": {
+    "backToDashboard": "Tilbake til oversikten",
+    "notFound": "Fant ikke brukeren",
+    "title": "Profilinnstillinger",
+    "updated": "Profilen er oppdatert",
+    "displayName": "Visningsnavn",
+    "namePlaceholder": "Ditt navn",
+    "email": "E-post",
+    "emailLocked": "E-postadressen kan ikke endres",
+    "saving": "Lagrer …",
+    "saveChanges": "Lagre endringer",
+    "language": {
+      "title": "Språk",
+      "description": "Velg språket du vil bruke i appen.",
+      "label": "Språk"
+    },
+    "session": {
+      "title": "Økt",
+      "description": "Administrer den gjeldende innloggingen din.",
+      "signOut": "Logg ut"
+    },
+    "danger": {
+      "title": "Faresone",
+      "description": "Slett kontoen din og alle tilknyttede data permanent.",
+      "deleteAccount": "Slett konto",
+      "dialogTitle": "Vil du slette kontoen din?",
+      "dialogDescription": "Kontoen din slettes permanent, du fjernes fra alle husstander, og husstander der du er eneste eier slettes. Dette kan ikke angres.",
+      "confirmLabel": "Skriv inn e-postadressen din «{email}» for å bekrefte",
+      "deleting": "Sletter …",
+      "deleted": "Kontoen er slettet"
+    }
+  }
+}

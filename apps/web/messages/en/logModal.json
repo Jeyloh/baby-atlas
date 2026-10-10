@@ -1,1 +1,120 @@
-{}
+{
+  "save": "Save",
+  "stop": "Stop",
+  "start": "START",
+  "startTimerInstead": "Use timer instead",
+  "manualEntry": "Enter manually",
+  "notesPlaceholder": "Add notes (optional)",
+  "setTime": "Set time",
+  "startTime": "Start time",
+  "endTime": "End time",
+  "time": "Time",
+  "date": "Date",
+  "amount": "Amount",
+  "sleep": {
+    "timerStarted": "Sleep timer started",
+    "recorded": "Sleep recorded",
+    "running": "Sleep in progress",
+    "log": "Log sleep",
+    "add": "Add sleep"
+  },
+  "breast": {
+    "timerStarted": "Breastfeeding timer started",
+    "recorded": "Breastfeeding recorded",
+    "log": "Log breastfeeding",
+    "add": "Add breastfeeding"
+  },
+  "bottle": {
+    "logged": "Bottle feeding logged",
+    "add": "Add bottle"
+  },
+  "diaper": {
+    "logged": "Diaper change logged",
+    "add": "Add diaper",
+    "color": "Color"
+  },
+  "solids": {
+    "logged": "Solid food logged",
+    "add": "Add solid food",
+    "addFood": "Add food",
+    "optionalCustom": "(custom food is optional)",
+    "foodPlaceholder": "Enter foods or pick from below",
+    "addFoodAria": "Add food",
+    "selectedFoods": "Selected foods",
+    "popular": "Most popular foods",
+    "selectedCount": "Selected",
+    "foods": {
+      "avocado": "avocado",
+      "banana": "banana",
+      "apple": "apple",
+      "riceCereal": "rice cereal",
+      "sweetPotato": "sweet potato",
+      "oatmeal": "oatmeal",
+      "spinach": "spinach",
+      "chicken": "chicken",
+      "peas": "peas",
+      "pear": "pear",
+      "yogurt": "yogurt",
+      "carrot": "carrot",
+      "broccoli": "broccoli",
+      "prune": "prune",
+      "greenBean": "green beans",
+      "mango": "mango"
+    }
+  },
+  "pumping": {
+    "timerStarted": "Pumping timer started",
+    "recorded": "Pumping recorded",
+    "running": "Pumping in progress",
+    "add": "Add pumping",
+    "modeTotal": "Total",
+    "modeLeftRight": "Left and right",
+    "total": "Total",
+    "left": "Left",
+    "right": "Right"
+  },
+  "medicine": {
+    "created": "Medicine created",
+    "logged": "Medicine logged",
+    "title": "Medicine",
+    "type": "Medicine:",
+    "selectExisting": "Select existing",
+    "addNew": "+ Add new",
+    "namePlaceholder": "Medicine name",
+    "dosagePlaceholder": "Default dosage (for example 5 ml)",
+    "create": "Create medicine",
+    "none": "No medicines. Add one first.",
+    "defaultDosage": "Default dosage: {dosage}",
+    "amountPlaceholder": "Add amount (optional)",
+    "units": {
+      "ml": "ml",
+      "drops": "drops",
+      "tsp": "tsp"
+    }
+  },
+  "growth": {
+    "recorded": "Growth recorded",
+    "add": "Add growth",
+    "weight": "Weight",
+    "height": "Length",
+    "headCircumference": "Head circumference"
+  },
+  "temperature": {
+    "recorded": "Temperature recorded",
+    "add": "Add temperature",
+    "low": "Low",
+    "normal": "Normal",
+    "elevated": "Slightly elevated",
+    "fever": "Fever",
+    "highFever": "High fever"
+  },
+  "activity": {
+    "timerStarted": "Activity timer started",
+    "recorded": "Activity recorded",
+    "running": "Activity in progress",
+    "log": "Log activity",
+    "add": "Add activity",
+    "type": "Activity type",
+    "select": "Select activity"
+  }
+}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatTimeSince } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 
 interface TimeSinceProps {
   date: Date | string | null;
@@ -20,8 +21,10 @@ export function TimeSince({
   date,
   className,
   refreshInterval = 60000,
-  fallback = "Never",
+  fallback,
 }: TimeSinceProps) {
+  const t = useTranslations("format");
+  const { timeSince } = useFormatters();
   const [, setTick] = useState(0);
 
   // Force re-render on interval to update the time display
@@ -36,8 +39,8 @@ export function TimeSince({
   }, [date, refreshInterval]);
 
   if (!date) {
-    return <span className={className}>{fallback}</span>;
+    return <span className={className}>{fallback ?? t("never")}</span>;
   }
 
-  return <span className={className}>{formatTimeSince(date)}</span>;
+  return <span className={className}>{timeSince(date)}</span>;
 }

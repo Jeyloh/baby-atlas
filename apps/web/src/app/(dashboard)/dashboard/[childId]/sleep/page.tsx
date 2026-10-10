@@ -6,7 +6,9 @@ import { useRealtimeSync } from "@/hooks/use-realtime";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatTime, formatDuration, formatDate, calculateDurationMinutes } from "@baby-atlas/utils";
+import { calculateDurationMinutes } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import Link from "next/link";
 import { ArrowLeft, Moon, Trash2 } from "lucide-react";
 import {
@@ -34,6 +36,9 @@ export default function SleepPage({
 }) {
   const { childId } = use(params);
   const { toast } = useToast();
+  const t = useTranslations("activities");
+  const tEnums = useTranslations("enums");
+  const fmt = useFormatters();
   const utils = trpc.useUtils();
 
   useRealtimeSync(childId);
@@ -56,7 +61,7 @@ export default function SleepPage({
     onSuccess: () => {
       utils.sleep.list.invalidate();
       utils.sleep.summary.invalidate({ childId });
-      toast({ title: "Sleep record deleted" });
+      toast({ title: t("sleep.deleted") });
     },
   });
 
@@ -64,7 +69,7 @@ export default function SleepPage({
     onSuccess: () => {
       utils.sleep.list.invalidate();
       utils.sleep.summary.invalidate({ childId });
-      toast({ title: "Sleep logged" });
+      toast({ title: t("sleep.logged") });
     },
   });
 
@@ -95,24 +100,25 @@ export default function SleepPage({
           <Button asChild variant="ghost" size="icon">
             <Link href={`/dashboard/${childId}`}>
               <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">{t("back")}</span>
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Sleep</h1>
+            <h1 className="text-2xl font-bold">{t("sleep.title")}</h1>
             <p className="text-sm text-muted-foreground">{child?.name}</p>
           </div>
         </div>
         <Dialog open={logOpen} onOpenChange={setLogOpen}>
           <DialogTrigger asChild>
-            <Button>Log Sleep</Button>
+            <Button>{t("sleep.logButton")}</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Log Past Sleep</DialogTitle>
+              <DialogTitle>{t("sleep.dialogTitle")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Sleep Type</Label>
+                <Label>{t("sleep.sleepType")}</Label>
                 <Select
                   value={logData.sleepType}
                   onValueChange={(v) =>
@@ -123,13 +129,13 @@ export default function SleepPage({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="NAP">Nap</SelectItem>
-                    <SelectItem value="NIGHT">Night Sleep</SelectItem>
+                    <SelectItem value="NAP">{tEnums("sleepType.NAP")}</SelectItem>
+                    <SelectItem value="NIGHT">{tEnums("sleepType.NIGHT")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Start Time</Label>
+                <Label>{t("sleep.startTime")}</Label>
                 <Input
                   type="datetime-local"
                   value={logData.startTime}
@@ -139,7 +145,7 @@ export default function SleepPage({
                 />
               </div>
               <div className="space-y-2">
-                <Label>End Time</Label>
+                <Label>{t("sleep.endTime")}</Label>
                 <Input
                   type="datetime-local"
                   value={logData.endTime}
@@ -149,7 +155,7 @@ export default function SleepPage({
                 />
               </div>
               <Button className="w-full" onClick={handleLogSleep}>
-                Log Sleep
+                {t("sleep.logButton")}
               </Button>
             </div>
           </DialogContent>
@@ -159,23 +165,23 @@ export default function SleepPage({
       {summary && (
         <Card>
           <CardHeader>
-            <CardTitle>Today&apos;s Summary</CardTitle>
+            <CardTitle>{t("todaySummary")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <p className="text-2xl font-bold">
-                  {formatDuration(summary.totalMinutes)}
+                  {fmt.duration(summary.totalMinutes)}
                 </p>
-                <p className="text-sm text-muted-foreground">Total Sleep</p>
+                <p className="text-sm text-muted-foreground">{t("sleep.totalSleep")}</p>
               </div>
               <div>
                 <p className="text-2xl font-bold">{summary.napCount}</p>
-                <p className="text-sm text-muted-foreground">Naps</p>
+                <p className="text-sm text-muted-foreground">{t("sleep.naps")}</p>
               </div>
               <div>
                 <p className="text-2xl font-bold">{summary.nightCount}</p>
-                <p className="text-sm text-muted-foreground">Night</p>
+                <p className="text-sm text-muted-foreground">{t("sleep.night")}</p>
               </div>
             </div>
           </CardContent>
@@ -184,14 +190,14 @@ export default function SleepPage({
 
       <Tabs defaultValue="today">
         <TabsList>
-          <TabsTrigger value="today">Today</TabsTrigger>
-          <TabsTrigger value="week">This Week</TabsTrigger>
+          <TabsTrigger value="today">{t("tabToday")}</TabsTrigger>
+          <TabsTrigger value="week">{t("tabWeek")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="today" className="space-y-2">
           {todayRecords?.length === 0 && (
             <p className="text-center text-muted-foreground py-8">
-              No sleep recorded today
+              {t("sleep.emptyToday")}
             </p>
           )}
           {todayRecords?.map((record) => (
@@ -206,7 +212,7 @@ export default function SleepPage({
         <TabsContent value="week" className="space-y-2">
           {weekRecords?.length === 0 && (
             <p className="text-center text-muted-foreground py-8">
-              No sleep recorded this week
+              {t("sleep.emptyWeek")}
             </p>
           )}
           {weekRecords?.map((record) => (
@@ -238,6 +244,9 @@ function SleepRecordCard({
   onDelete: () => void;
   showDate?: boolean;
 }) {
+  const t = useTranslations("activities");
+  const tEnums = useTranslations("enums");
+  const fmt = useFormatters();
   const duration = record.endTime
     ? calculateDurationMinutes(record.startTime, record.endTime)
     : null;
@@ -249,28 +258,31 @@ function SleepRecordCard({
           <Moon className="h-5 w-5 text-indigo-500" />
           <div>
             <p className="font-medium">
-              {record.sleepType === "NAP" ? "Nap" : "Night Sleep"}
+              {record.sleepType === "NAP"
+                ? tEnums("sleepType.NAP")
+                : tEnums("sleepType.NIGHT")}
             </p>
             <p className="text-sm text-muted-foreground">
-              {showDate && `${formatDate(record.startTime)} `}
-              {formatTime(record.startTime)}
-              {record.endTime && ` - ${formatTime(record.endTime)}`}
+              {showDate && `${fmt.date(record.startTime)} `}
+              {fmt.time(record.startTime)}
+              {record.endTime && ` – ${fmt.time(record.endTime)}`}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="font-mono text-lg">
-              {duration !== null ? formatDuration(duration) : "In progress"}
+              {duration !== null ? fmt.duration(duration) : t("sleep.inProgress")}
             </p>
             {record.quality && (
               <p className="text-xs text-muted-foreground">
-                Quality: {record.quality}/5
+                {t("sleep.quality", { quality: record.quality })}
               </p>
             )}
           </div>
           <Button variant="ghost" size="icon" onClick={onDelete}>
             <Trash2 className="h-4 w-4 text-destructive" />
+            <span className="sr-only">{t("delete")}</span>
           </Button>
         </div>
       </CardContent>

@@ -13,14 +13,14 @@ test.describe("Timer Persistence", () => {
     await expect(authenticatedPage).not.toHaveURL(/login/);
 
     // Start a sleep timer
-    const sleepButton = authenticatedPage.getByRole("button", { name: /sleep/i });
+    const sleepButton = authenticatedPage.getByRole("button", { name: /søvn/i });
     await expect(sleepButton).toBeVisible({ timeout: 10000 });
     await sleepButton.click();
-    await authenticatedPage.getByRole("button", { name: /nap/i }).click();
+    await authenticatedPage.getByRole("button", { name: /dupp/i }).click();
 
     // Verify timer is running
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 5000 });
 
     // Refresh the page
@@ -28,7 +28,7 @@ test.describe("Timer Persistence", () => {
 
     // Timer should still be running after refresh
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 5000 });
   });
 
@@ -36,14 +36,14 @@ test.describe("Timer Persistence", () => {
     await authenticatedPage.goto(`/dashboard/${testData.child.id}`);
 
     // Start a timer
-    const sleepButton = authenticatedPage.getByRole("button", { name: /sleep/i });
+    const sleepButton = authenticatedPage.getByRole("button", { name: /søvn/i });
     await expect(sleepButton).toBeVisible({ timeout: 10000 });
     await sleepButton.click();
-    await authenticatedPage.getByRole("button", { name: /nap/i }).click();
+    await authenticatedPage.getByRole("button", { name: /dupp/i }).click();
 
     // Wait for timer to be visible
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 5000 });
 
     // Check localStorage
@@ -64,14 +64,14 @@ test.describe("Timer Persistence", () => {
     await authenticatedPage.goto(`/dashboard/${testData.child.id}`);
 
     // Start a timer
-    const sleepButton = authenticatedPage.getByRole("button", { name: /sleep/i });
+    const sleepButton = authenticatedPage.getByRole("button", { name: /søvn/i });
     await expect(sleepButton).toBeVisible({ timeout: 10000 });
     await sleepButton.click();
-    await authenticatedPage.getByRole("button", { name: /nap/i }).click();
+    await authenticatedPage.getByRole("button", { name: /dupp/i }).click();
 
     // Wait for timer
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 5000 });
 
     // Wait a few seconds
@@ -82,7 +82,7 @@ test.describe("Timer Persistence", () => {
 
     // Timer should still be visible
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 5000 });
 
     // Look for a timer display showing some elapsed time

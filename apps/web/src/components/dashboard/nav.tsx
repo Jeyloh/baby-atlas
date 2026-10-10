@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,6 +23,8 @@ interface DashboardNavProps {
 }
 
 export function DashboardNav({ user }: DashboardNavProps) {
+  const t = useTranslations("nav");
+  const tCommon = useTranslations("common");
   const initials = user.name
     ?.split(" ")
     .map((n) => n[0])
@@ -31,14 +34,22 @@ export function DashboardNav({ user }: DashboardNavProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-2">
       <div className="container flex h-14 items-center justify-between">
-        <Link href="/dashboard" className="flex items-center space-x-2">
+        <Link
+          href="/dashboard"
+          className="flex min-h-12 items-center space-x-2"
+          aria-label={t("home")}
+        >
           <Cherry className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-primary">Baby Atlas</span>
+          <span className="text-xl font-bold text-primary">{tCommon("appName")}</span>
         </Link>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Button
+              variant="ghost"
+              className="relative h-12 w-12 rounded-full md:h-10 md:w-10"
+              aria-label={t("userMenu")}
+            >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user.image ?? undefined} alt={user.name ?? ""} />
                 <AvatarFallback>{initials}</AvatarFallback>
@@ -60,13 +71,13 @@ export function DashboardNav({ user }: DashboardNavProps) {
             <DropdownMenuItem asChild>
               <Link href="/dashboard/settings" className="cursor-pointer">
                 <User className="mr-2 h-4 w-4" />
-                Profile
+                {t("profile")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/dashboard/household/settings" className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
-                Household Settings
+                {t("householdSettings")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -75,7 +86,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
               onClick={() => signOut({ callbackUrl: "/" })}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              {t("signOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

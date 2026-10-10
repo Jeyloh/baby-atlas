@@ -1,1 +1,87 @@
-{}
+{
+  "defaultChildName": "Barnet",
+  "loadingTimeline": "Laster tidslinje …",
+  "loadingWeek": "Laster uken …",
+  "loadingActivities": "Laster aktiviteter …",
+  "noDataDay": "Ingen data for denne dagen",
+  "noDataWeek": "Ingen data for denne uken",
+  "noActivitiesWeek": "Ingen aktiviteter denne uken",
+  "previousWeek": "Forrige uke",
+  "nextWeek": "Neste uke",
+  "stats": {
+    "feedings": "Måltider",
+    "diapers": "Bleier"
+  },
+  "description": {
+    "sleepDone": "{name} sov i {duration}",
+    "sleepOngoing": "{name} sover",
+    "breastDone": "{name} ammet i {duration}",
+    "breastOngoing": "{name} ammer",
+    "bottleWithAmount": "{name} fikk {amount} {content} på flaske",
+    "bottle": "{name} fikk {content} på flaske",
+    "solids": "{name} spiste {foods}",
+    "solidsFallback": "fast føde",
+    "diaperWet": "{name} tisset 💧",
+    "diaperDirty": "{name} bæsjet 💩",
+    "diaperBoth": "{name} tisset og bæsjet 💧💩",
+    "diaperDry": "{name} hadde en tørr bleie",
+    "pumpingAmountDuration": "Pumpet {amount} på {duration}",
+    "pumpingDuration": "Pumpet i {duration}",
+    "pumpingOngoing": "Pumping pågår",
+    "medicine": "{name} fikk {medicine}",
+    "medicineWithAmount": "{name} fikk {medicine} ({amount})",
+    "growth": "Vekst for {name}: {value}",
+    "growthRecorded": "registrert",
+    "temperature": "Kroppstemperatur for {name}: {value}",
+    "activityDone": "{name} holdt på med {activity} i {duration}",
+    "activityOngoing": "{name} holder på med {activity}"
+  },
+  "details": {
+    "fever": "Feber",
+    "sideSplit": "V {left} H {right}"
+  },
+  "edit": {
+    "title": "Rediger aktivitet",
+    "startTime": "Starttid",
+    "endTime": "Sluttid",
+    "time": "Tid",
+    "setTime": "Velg tid",
+    "durationSplit": "Fordeling av tid",
+    "total": "Totalt: {value}",
+    "leftValue": "Venstre: {value}",
+    "rightValue": "Høyre: {value}",
+    "allLeft": "Bare venstre",
+    "allRight": "Bare høyre",
+    "lastBreast": "Siste bryst brukt",
+    "durationSlider": "Fordeling mellom venstre og høyre bryst",
+    "amount": "Mengde",
+    "amountSlider": "Mengde i ml",
+    "color": "Farge",
+    "save": "Lagre",
+    "saving": "Lagrer …",
+    "delete": "Slett",
+    "deleting": "Sletter …",
+    "cancel": "Avbryt"
+  },
+  "deleteDialog": {
+    "title": "Slette aktiviteten?",
+    "message": "Er du sikker på at du vil slette denne aktiviteten? Du kan ikke angre dette."
+  },
+  "toast": {
+    "deleted": {
+      "sleep": "Søvnregistreringen er slettet",
+      "feeding": "Måltidet er slettet",
+      "diaper": "Bleieregistreringen er slettet",
+      "pumping": "Pumpingen er slettet",
+      "medicine": "Medisinregistreringen er slettet",
+      "growth": "Vekstregistreringen er slettet",
+      "temperature": "Temperaturmålingen er slettet",
+      "activity": "Aktiviteten er slettet"
+    },
+    "updated": {
+      "sleep": "Søvnregistreringen er oppdatert",
+      "feeding": "Måltidet er oppdatert",
+      "diaper": "Bleieregistreringen er oppdatert"
+    }
+  }
+}

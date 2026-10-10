@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendarStrip } from "@/components/reports/week-calendar-strip";
@@ -34,6 +35,7 @@ type Activity =
   | { type: "ACTIVITY"; record: ActivityRecord; time: Date };
 
 export function DayView({ childId }: DayViewProps) {
+  const t = useTranslations("reports");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
 
@@ -43,7 +45,7 @@ export function DayView({ childId }: DayViewProps) {
     date: selectedDate,
   });
 
-  const childName = childData?.name ?? "Baby";
+  const childName = childData?.name ?? t("defaultChildName");
 
   const handleEventClick = (
     recordId: string,
@@ -124,7 +126,7 @@ export function DayView({ childId }: DayViewProps) {
           {isLoading ? (
             <div className="h-48 flex items-center justify-center">
               <div className="animate-pulse text-muted-foreground">
-                Loading timeline...
+                {t("loadingTimeline")}
               </div>
             </div>
           ) : data ? (
@@ -143,7 +145,7 @@ export function DayView({ childId }: DayViewProps) {
             />
           ) : (
             <div className="h-48 flex items-center justify-center text-muted-foreground">
-              No data for this day
+              {t("noDataDay")}
             </div>
           )}
         </CardContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DayView } from "@/components/reports/day-view";
 import { WeekView } from "@/components/reports/week-view";
@@ -11,14 +12,15 @@ interface ReportsViewProps {
 }
 
 export function ReportsView({ childId }: ReportsViewProps) {
+  const t = useTranslations("dashboard.reportsTabs");
   const [activeTab, setActiveTab] = useState("day");
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="w-full grid grid-cols-3">
-        <TabsTrigger value="day">Day</TabsTrigger>
-        <TabsTrigger value="week">Week</TabsTrigger>
-        <TabsTrigger value="list">List</TabsTrigger>
+        <TabsTrigger value="day">{t("day")}</TabsTrigger>
+        <TabsTrigger value="week">{t("week")}</TabsTrigger>
+        <TabsTrigger value="list">{t("list")}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="day">

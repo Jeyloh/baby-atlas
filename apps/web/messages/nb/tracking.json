@@ -1,1 +1,75 @@
-{}
+{
+  "quickLog": {
+    "title": "Hurtiglogging",
+    "stopSleep": "Stopp søvn",
+    "stopSide": "Stopp {side}",
+    "stopFeeding": "Stopp amming",
+    "startSleepTitle": "Start søvntimer",
+    "startBreastfeedingTitle": "Start amming",
+    "leftSide": "Venstre side",
+    "rightSide": "Høyre side",
+    "logBottleTitle": "Logg flaske",
+    "contentType": "Innhold",
+    "amount": "Mengde",
+    "logBottle": "Logg flaske",
+    "wet": "Tisse",
+    "dirty": "Bæsj",
+    "toast": {
+      "sleepStarted": "Søvntimer startet",
+      "sleepRecorded": "Søvn registrert",
+      "feedingStarted": "Ammetimer startet",
+      "feedingRecorded": "Amming registrert",
+      "diaperLogged": "Bleieskift registrert",
+      "bottleLogged": "Flaske registrert"
+    }
+  },
+  "activeTimers": {
+    "title": "Aktive timere",
+    "stop": "Stopp",
+    "breastfeeding": "Amming {side}",
+    "pumping": "Pumping",
+    "pumpingSide": "Pumping ({side})",
+    "activity": "Aktivitet",
+    "toast": {
+      "sleepRecorded": "Søvn registrert",
+      "feedingRecorded": "Amming registrert",
+      "pumpingRecorded": "Pumping registrert",
+      "activityRecorded": "Aktivitet registrert"
+    }
+  },
+  "recentActivity": {
+    "title": "Siste aktivitet",
+    "empty": "Ingenting er logget i dag",
+    "inProgress": "Pågår",
+    "breastfeeding": "Amming ({side})"
+  },
+  "dailySummary": {
+    "title": "Oppsummering i dag",
+    "sleep": "Søvn",
+    "feeding": "Mating",
+    "diapers": "Bleier",
+    "noSleep": "Ingen søvn registrert",
+    "noFeedings": "Ingen måltider registrert",
+    "noDiapers": "Ingen bleier registrert",
+    "sleepTotal": "Totalt: {duration} ({count, plural, one {# økt} other {# økter}})",
+    "sleepSplit": "Dupp: {napDuration} ({napCount}) | Natt: {nightDuration} ({nightCount})",
+    "feedingTotal": "Totalt: {count, plural, one {# måltid} other {# måltider}}",
+    "breastPart": "Amming: {count} ({duration})",
+    "bottlePart": "Flaske: {count} ({amount})",
+    "solidsPart": "Fast føde: {count}",
+    "diaperTotal": "Totalt: {count, plural, one {# bleieskift} other {# bleieskift}}",
+    "diaperSplit": "Tisse: {wet} | Bæsj: {dirty}"
+  },
+  "breastSide": {
+    "LEFT": "Venstre",
+    "RIGHT": "Høyre",
+    "lastSide": "Forrige side"
+  },
+  "timeRow": {
+    "setTime": "Velg tidspunkt"
+  },
+  "timer": {
+    "min": "MIN",
+    "sec": "SEK"
+  }
+}

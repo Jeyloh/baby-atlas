@@ -13,7 +13,7 @@ test.describe("Realtime Updates", () => {
     await expect(authenticatedPage).not.toHaveURL(/login/);
 
     // Log a diaper
-    const wetButton = authenticatedPage.getByRole("button", { name: /^wet$/i });
+    const wetButton = authenticatedPage.getByRole("button", { name: /^tisse$/i });
     await expect(wetButton).toBeVisible({ timeout: 10000 });
     await wetButton.click();
 
@@ -31,17 +31,17 @@ test.describe("Realtime Updates", () => {
     await authenticatedPage.goto(`/dashboard/${testData.child.id}`);
 
     // Log a bottle feeding
-    const bottleButton = authenticatedPage.getByRole("button", { name: /^bottle$/i });
+    const bottleButton = authenticatedPage.getByRole("button", { name: /^flaske$/i });
     await expect(bottleButton).toBeVisible({ timeout: 10000 });
     await bottleButton.click();
 
     // Fill in amount
-    const amountInput = authenticatedPage.getByLabel(/amount/i);
+    const amountInput = authenticatedPage.getByLabel(/mengde/i);
     await expect(amountInput).toBeVisible({ timeout: 5000 });
     await amountInput.fill("150");
 
     // Submit
-    await authenticatedPage.getByRole("button", { name: /log bottle/i }).click();
+    await authenticatedPage.getByRole("button", { name: /logg flaske/i }).click();
 
     // Dialog should close
     await expect(amountInput).not.toBeVisible({ timeout: 5000 });
@@ -63,17 +63,17 @@ test.describe("Optimistic Updates", () => {
     const startTime = Date.now();
 
     // Click to start timer
-    const sleepButton = authenticatedPage.getByRole("button", { name: /^sleep$/i });
+    const sleepButton = authenticatedPage.getByRole("button", { name: /^søvn$/i });
     await expect(sleepButton).toBeVisible({ timeout: 10000 });
     await sleepButton.click();
 
-    const napButton = authenticatedPage.getByRole("button", { name: /^nap$/i });
+    const napButton = authenticatedPage.getByRole("button", { name: /^dupp$/i });
     await expect(napButton).toBeVisible({ timeout: 5000 });
     await napButton.click();
 
     // Timer should appear quickly (use first() as there may be multiple stop buttons)
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 3000 });
 
     const elapsed = Date.now() - startTime;
@@ -91,7 +91,7 @@ test.describe("Optimistic Updates", () => {
     const startTime = Date.now();
 
     // Log diaper
-    const wetButton = authenticatedPage.getByRole("button", { name: /^wet$/i });
+    const wetButton = authenticatedPage.getByRole("button", { name: /^tisse$/i });
     await expect(wetButton).toBeVisible({ timeout: 10000 });
     await wetButton.click();
 

@@ -1,1 +1,62 @@
-{}
+{
+  "back": "Tilbake",
+  "delete": "Slett",
+  "notFound": "Fant ikke barnet",
+  "backToDashboard": "Tilbake til oversikten",
+  "todaySummary": "Oppsummering for i dag",
+  "tabToday": "I dag",
+  "tabWeek": "Denne uken",
+  "sleep": {
+    "title": "Søvn",
+    "logButton": "Logg søvn",
+    "dialogTitle": "Logg tidligere søvn",
+    "sleepType": "Type søvn",
+    "startTime": "Starttidspunkt",
+    "endTime": "Sluttidspunkt",
+    "totalSleep": "Total søvn",
+    "naps": "Dupper",
+    "night": "Natt",
+    "emptyToday": "Ingen søvn registrert i dag",
+    "emptyWeek": "Ingen søvn registrert denne uken",
+    "inProgress": "Pågår",
+    "quality": "Kvalitet: {quality}/5",
+    "logged": "Søvn logget",
+    "deleted": "Søvnregistreringen er slettet"
+  },
+  "feeding": {
+    "title": "Mating",
+    "emptyToday": "Ingen matinger registrert i dag",
+    "emptyWeek": "Ingen matinger registrert denne uken",
+    "breastDetail": "Amming ({side}), {duration}",
+    "breastInProgress": "Amming ({side}), pågår",
+    "deleted": "Matingen er slettet"
+  },
+  "diapers": {
+    "title": "Bleier",
+    "logWet": "Logg tissebleie",
+    "logDirty": "Logg bæsjbleie",
+    "logBoth": "Logg tisse og bæsj",
+    "wet": "Tisse",
+    "dirty": "Bæsj",
+    "total": "Totalt",
+    "emptyToday": "Ingen bleier registrert i dag",
+    "emptyWeek": "Ingen bleier registrert denne uken",
+    "logged": "Bleie logget",
+    "deleted": "Bleieregistreringen er slettet"
+  },
+  "log": {
+    "title": "Logg aktivitet",
+    "descriptions": {
+      "sleep": "Logg dupp eller nattesøvn",
+      "breast": "Logg ammeøkt",
+      "bottle": "Logg flaskemåltid",
+      "diaper": "Logg bleieskift",
+      "solids": "Logg fast føde",
+      "pumping": "Logg pumpeøkt",
+      "medicine": "Logg medisindose",
+      "growth": "Logg høyde, vekt og hodeomkrets",
+      "temperature": "Logg kroppstemperatur",
+      "activity": "Logg bad, mageleie og mer"
+    }
+  }
+}

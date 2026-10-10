@@ -3,6 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Button } from "@/components/ui/button";
 import { ChatInterface } from "@/components/chat";
@@ -16,6 +17,8 @@ export default function ChatPage({
 }) {
   const { childId } = use(params);
   const { toast } = useToast();
+  const t = useTranslations("chat");
+  const tCommon = useTranslations("common");
 
   const { data: child, isLoading: childLoading } = trpc.child.get.useQuery({
     id: childId,
@@ -25,7 +28,7 @@ export default function ChatPage({
     childId,
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description: error.message,
         variant: "destructive",
       });
@@ -35,7 +38,7 @@ export default function ChatPage({
   if (childLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{tCommon("loading")}</div>
       </div>
     );
   }
@@ -43,9 +46,9 @@ export default function ChatPage({
   if (!child) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-muted-foreground">Child not found</p>
+        <p className="text-muted-foreground">{t("notFound")}</p>
         <Button asChild>
-          <Link href="/dashboard">Back to Dashboard</Link>
+          <Link href="/dashboard">{t("backToDashboard")}</Link>
         </Button>
       </div>
     );
@@ -59,13 +62,13 @@ export default function ChatPage({
           <Button asChild variant="ghost" size="icon-sm">
             <Link href={`/dashboard/${childId}`}>
               <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Back</span>
+              <span className="sr-only">{tCommon("back")}</span>
             </Link>
           </Button>
           <div>
-            <h1 className="text-lg font-semibold">Chat with Baby Atlas</h1>
+            <h1 className="text-lg font-semibold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground">
-              Tracking for {child.name}
+              {t("trackingFor", { name: child.name })}
             </p>
           </div>
         </div>
@@ -77,7 +80,7 @@ export default function ChatPage({
             className="gap-2"
           >
             <Trash2 className="h-4 w-4" />
-            Clear
+            {t("clear")}
           </Button>
         )}
       </div>

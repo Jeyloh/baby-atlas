@@ -1,1 +1,60 @@
-{}
+{
+  "errorTitle": "Feil",
+  "welcome": "Velkommen til Baby Atlas",
+  "createPrompt": "Opprett en husstand for å begynne å følge med på barnets hverdag",
+  "create": "Opprett husstand",
+  "settings": "Innstillinger",
+  "addFirstChild": "Legg til ditt første barn",
+  "addFirstChildDescription": "Legg til et barn for å begynne å loggføre søvn, mating og bleieskift",
+  "addChild": "Legg til barn",
+  "back": "Tilbake",
+  "backToDashboard": "Tilbake til oversikten",
+  "notFound": "Fant ingen husstand",
+  "new": {
+    "title": "Opprett en husstand",
+    "description": "En husstand lar deg følge med på barna dine og dele tilgang med andre omsorgspersoner.",
+    "nameLabel": "Navn på husstand",
+    "namePlaceholder": "for eksempel Familien Hansen",
+    "creating": "Oppretter …",
+    "created": "Husstanden er opprettet"
+  },
+  "settingsPage": {
+    "title": "Husstandsinnstillinger",
+    "description": "Administrer navnet og innstillingene for husstanden.",
+    "nameLabel": "Navn på husstand",
+    "saving": "Lagrer …",
+    "saveChanges": "Lagre endringer",
+    "updated": "Husstanden er oppdatert"
+  },
+  "members": {
+    "title": "Medlemmer",
+    "count": "{count, plural, one {# medlem} other {# medlemmer}} i denne husstanden",
+    "invite": "Inviter",
+    "inviteTitle": "Inviter medlem",
+    "inviteDescription": "Send en invitasjon til å bli med i husstanden.",
+    "emailLabel": "E-post",
+    "emailPlaceholder": "omsorgsperson@eksempel.no",
+    "roleLabel": "Rolle",
+    "sending": "Sender …",
+    "sendInvite": "Send invitasjon",
+    "inviteSent": "Invitasjonen er sendt",
+    "roleUpdated": "Rollen er oppdatert",
+    "removed": "Medlemmet er fjernet",
+    "removeTitle": "Fjern medlem",
+    "removeAria": "Fjern medlem",
+    "removeConfirm": "Er du sikker på at du vil fjerne {name} fra husstanden?",
+    "thisMember": "dette medlemmet",
+    "removing": "Fjerner …",
+    "remove": "Fjern"
+  },
+  "danger": {
+    "title": "Faresone",
+    "description": "Slett denne husstanden og alle barn, registreringer og medlemskap permanent.",
+    "deleteHousehold": "Slett husstand",
+    "dialogTitle": "Vil du slette {name}?",
+    "dialogDescription": "Husstanden, alle barn og alle registreringer slettes permanent. Alle medlemmer mister tilgangen. Dette kan ikke angres.",
+    "confirmLabel": "Skriv inn «{name}» for å bekrefte",
+    "deleting": "Sletter …",
+    "deleted": "Husstanden er slettet"
+  }
+}

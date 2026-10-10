@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface TimerDisplayProps {
@@ -13,6 +14,7 @@ export function TimerDisplay({
   className,
   size = "default",
 }: TimerDisplayProps) {
+  const t = useTranslations("tracking.timer");
   const totalSeconds = Math.floor(elapsedMs / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
@@ -31,8 +33,8 @@ export function TimerDisplay({
         {formattedMinutes}:{formattedSeconds}
       </div>
       <div className="flex gap-8 text-xs text-muted-foreground mt-1">
-        <span>MIN</span>
-        <span>SEC</span>
+        <span>{t("min")}</span>
+        <span>{t("sec")}</span>
       </div>
     </div>
   );

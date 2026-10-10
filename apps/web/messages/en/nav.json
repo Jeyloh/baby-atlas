@@ -1,1 +1,7 @@
-{}
+{
+  "home": "Go to home",
+  "userMenu": "User menu",
+  "profile": "Profile",
+  "householdSettings": "Household settings",
+  "signOut": "Sign out"
+}

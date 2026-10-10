@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Square } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -19,9 +20,10 @@ export function ChatInput({
   onStop,
   disabled,
   isLoading,
-  placeholder = "Type a message...",
+  placeholder,
   className,
 }: ChatInputProps) {
+  const t = useTranslations("chat");
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -57,7 +59,7 @@ export function ChatInput({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("placeholder")}
           disabled={disabled}
           rows={1}
           className={cn(
@@ -78,7 +80,7 @@ export function ChatInput({
           className="h-12 w-12 shrink-0 rounded-xl"
         >
           <Square className="h-4 w-4" />
-          <span className="sr-only">Stop</span>
+          <span className="sr-only">{t("stop")}</span>
         </Button>
       ) : (
         <Button
@@ -88,7 +90,7 @@ export function ChatInput({
           className="h-12 w-12 shrink-0 rounded-xl"
         >
           <Send className="h-4 w-4" />
-          <span className="sr-only">Send</span>
+          <span className="sr-only">{t("send")}</span>
         </Button>
       )}
     </form>

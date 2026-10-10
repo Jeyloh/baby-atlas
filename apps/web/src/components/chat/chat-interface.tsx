@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { ModelId } from "@/hooks/use-chat";
 
@@ -53,6 +54,7 @@ export function ChatInterface({
   onModelChange,
   className,
 }: ChatInterfaceProps) {
+  const t = useTranslations("chat");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -72,12 +74,10 @@ export function ChatInterface({
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="text-4xl mb-4">👶</div>
             <h3 className="text-lg font-medium text-foreground mb-2">
-              Chat with Baby Atlas
+              {t("title")}
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm">
-              Ask me to log activities, check summaries, or help you track your
-              baby&apos;s day. Try saying &quot;What did the baby do today?&quot; or
-              &quot;Log a wet diaper&quot;.
+              {t("emptyDescription")}
             </p>
           </div>
         ) : (
@@ -94,7 +94,7 @@ export function ChatInterface({
             {isLoading && messages[messages.length - 1]?.role === "user" && (
               <div className="flex gap-3 py-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                  <span className="text-xs">AI</span>
+                  <span className="text-xs">{t("assistantAvatar")}</span>
                 </div>
                 <TypingIndicator />
               </div>
@@ -111,18 +111,18 @@ export function ChatInterface({
           onStop={onStop}
           disabled={disabled}
           isLoading={isLoading}
-          placeholder="Ask Baby Atlas anything..."
+          placeholder={t("placeholder")}
         />
         <div className="flex items-center justify-between">
           {onModelChange && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Model:</span>
+              <span className="text-xs text-muted-foreground">{t("modelLabel")}</span>
               <Select
                 value={model}
                 onValueChange={(value) => onModelChange(value as ModelId)}
                 disabled={isLoading}
               >
-                <SelectTrigger className="w-[140px] h-8 text-xs">
+                <SelectTrigger className="w-[140px] h-12 text-xs md:h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -144,7 +144,7 @@ export function ChatInterface({
               className="text-xs text-muted-foreground hover:text-foreground"
             >
               <RotateCcw className="h-3 w-3 mr-1" />
-              New conversation
+              {t("newConversation")}
             </Button>
           )}
         </div>

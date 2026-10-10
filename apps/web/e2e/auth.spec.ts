@@ -6,7 +6,7 @@ test.describe("Authentication", () => {
 
     // Should see login form with welcome heading
     await expect(
-      page.getByRole("heading", { name: /welcome to baby atlas/i })
+      page.getByRole("heading", { name: /velkommen til baby atlas/i })
     ).toBeVisible();
   });
 
@@ -14,14 +14,14 @@ test.describe("Authentication", () => {
     await page.goto("/login");
 
     // Should have email input field
-    const emailInput = page.getByLabel(/email/i);
+    const emailInput = page.getByLabel(/e-post/i);
     await expect(emailInput).toBeVisible();
   });
 
   test("email input has validation", async ({ page }) => {
     await page.goto("/login");
 
-    const emailInput = page.getByLabel(/email/i);
+    const emailInput = page.getByLabel(/e-post/i);
 
     // Input uses type="email" which provides browser validation
     await expect(emailInput).toHaveAttribute("type", "email");
@@ -41,10 +41,10 @@ test.describe("Authentication", () => {
   test("magic link flow shows confirmation or config error", async ({ page }) => {
     await page.goto("/login");
 
-    const emailInput = page.getByLabel(/email/i);
+    const emailInput = page.getByLabel(/e-post/i);
     await emailInput.fill("test@example.com");
 
-    const submitButton = page.getByRole("button", { name: /send magic link/i });
+    const submitButton = page.getByRole("button", { name: /send innloggingslenke/i });
     await submitButton.click();
 
     // Should either show confirmation or redirect to auth error (if email not configured)
@@ -59,16 +59,16 @@ test.describe("Authentication", () => {
 
     // Should show "Authentication Error" heading
     await expect(
-      page.getByRole("heading", { name: /authentication error/i })
+      page.getByRole("heading", { name: /innloggingsfeil/i })
     ).toBeVisible();
 
     // Should show the configuration error message
     await expect(
-      page.getByText(/problem with the server configuration/i)
+      page.getByText(/problem med serverkonfigurasjonen/i)
     ).toBeVisible();
 
     // Should have a "Try again" link to login
-    await expect(page.getByRole("link", { name: /try again/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /prøv igjen/i })).toBeVisible();
   });
 
   test("login page has Google OAuth option", async ({ page }) => {

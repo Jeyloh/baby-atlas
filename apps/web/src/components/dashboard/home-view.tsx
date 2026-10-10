@@ -1,25 +1,16 @@
 "use client";
 
 import { trpc } from "@/lib/trpc/provider";
-import {
-  ActivityCard,
-  formatSleepDetails,
-  formatNursingDetails,
-  formatBottleDetails,
-  formatDiaperDetails,
-  formatSolidsDetails,
-  formatPumpingDetails,
-  formatMedicineDetails,
-  formatGrowthDetails,
-  formatTemperatureDetails,
-  formatActivityDetails,
-} from "@/components/dashboard/activity-card";
+import { useTranslations } from "next-intl";
+import { ActivityCard, useActivityDetails } from "@/components/dashboard/activity-card";
 
 interface HomeViewProps {
   childId: string;
 }
 
 export function HomeView({ childId }: HomeViewProps) {
+  const t = useTranslations("dashboard.card");
+  const details = useActivityDetails();
   const { data: lastActivities, isLoading } =
     trpc.timeline.getLastActivities.useQuery({ childId });
 
@@ -75,23 +66,23 @@ export function HomeView({ childId }: HomeViewProps) {
           category="sleep"
           childId={childId}
           lastTime={sleepLastTime}
-          details={formatSleepDetails(lastSleep ?? null)}
+          details={details.sleep(lastSleep ?? null)}
           isActive={!!activeSleep}
-          activeLabel="Sleeping"
+          activeLabel={t("sleeping")}
         />
 
         <ActivityCard
           category="nursing"
           childId={childId}
           lastTime={nursingLastTime}
-          details={formatNursingDetails(lastBreastfeeding ?? null)}
+          details={details.nursing(lastBreastfeeding ?? null)}
           isActive={!!activeFeeding}
           activeLabel={
             activeFeeding?.side === "LEFT"
-              ? "Nursing (L)"
+              ? t("nursingLeft")
               : activeFeeding?.side === "RIGHT"
-                ? "Nursing (R)"
-                : "Nursing"
+                ? t("nursingRight")
+                : t("nursing")
           }
         />
 
@@ -99,58 +90,58 @@ export function HomeView({ childId }: HomeViewProps) {
           category="bottle"
           childId={childId}
           lastTime={bottleLastTime}
-          details={formatBottleDetails(lastBottle ?? null)}
+          details={details.bottle(lastBottle ?? null)}
         />
 
         <ActivityCard
           category="solids"
           childId={childId}
           lastTime={solidsLastTime}
-          details={formatSolidsDetails(lastSolids ?? null)}
+          details={details.solids(lastSolids ?? null)}
         />
 
         <ActivityCard
           category="diaper"
           childId={childId}
           lastTime={diaperLastTime}
-          details={formatDiaperDetails(lastDiaper ?? null)}
+          details={details.diaper(lastDiaper ?? null)}
         />
 
         <ActivityCard
           category="pumping"
           childId={childId}
           lastTime={pumpingLastTime}
-          details={formatPumpingDetails(lastPumping ?? null)}
+          details={details.pumping(lastPumping ?? null)}
           isActive={!!activePumping}
-          activeLabel="Pumping"
+          activeLabel={t("pumping")}
         />
 
         <ActivityCard
           category="medicine"
           childId={childId}
           lastTime={medicineLastTime}
-          details={formatMedicineDetails(lastMedicine ?? null)}
+          details={details.medicine(lastMedicine ?? null)}
         />
 
         <ActivityCard
           category="growth"
           childId={childId}
           lastTime={growthLastTime}
-          details={formatGrowthDetails(lastGrowth ?? null)}
+          details={details.growth(lastGrowth ?? null)}
         />
 
         <ActivityCard
           category="temperature"
           childId={childId}
           lastTime={temperatureLastTime}
-          details={formatTemperatureDetails(lastTemperature ?? null)}
+          details={details.temperature(lastTemperature ?? null)}
         />
 
         <ActivityCard
           category="activity"
           childId={childId}
           lastTime={activityLastTime}
-          details={formatActivityDetails(lastActivity ?? null)}
+          details={details.activity(lastActivity ?? null)}
         />
       </div>
     </div>

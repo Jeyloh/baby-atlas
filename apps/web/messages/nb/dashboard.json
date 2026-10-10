@@ -1,1 +1,25 @@
-{}
+{
+  "childSelector": {
+    "addChild": "Legg til barn"
+  },
+  "card": {
+    "noRecords": "Ingen registreringer",
+    "active": "Pågår",
+    "sleeping": "Sover",
+    "nursing": "Ammer",
+    "nursingLeft": "Ammer (V)",
+    "nursingRight": "Ammer (H)",
+    "pumping": "Pumper",
+    "mixedDiaper": "Tisse og bæsj"
+  },
+  "side": {
+    "LEFT": "(V)",
+    "RIGHT": "(H)",
+    "BOTH": "(V+H)"
+  },
+  "reportsTabs": {
+    "day": "Dag",
+    "week": "Uke",
+    "list": "Liste"
+  }
+}

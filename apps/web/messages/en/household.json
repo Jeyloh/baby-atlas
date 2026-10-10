@@ -1,1 +1,60 @@
-{}
+{
+  "errorTitle": "Error",
+  "welcome": "Welcome to Baby Atlas",
+  "createPrompt": "Create a household to start tracking your baby's activities",
+  "create": "Create Household",
+  "settings": "Settings",
+  "addFirstChild": "Add your first child",
+  "addFirstChildDescription": "Add a child to start tracking their sleep, feeding, and diaper changes",
+  "addChild": "Add Child",
+  "back": "Back",
+  "backToDashboard": "Back to Dashboard",
+  "notFound": "No household found",
+  "new": {
+    "title": "Create a Household",
+    "description": "A household lets you track your children and share access with other caregivers.",
+    "nameLabel": "Household Name",
+    "namePlaceholder": "e.g., Smith Family",
+    "creating": "Creating...",
+    "created": "Household created!"
+  },
+  "settingsPage": {
+    "title": "Household Settings",
+    "description": "Manage your household name and preferences.",
+    "nameLabel": "Household Name",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "updated": "Household updated!"
+  },
+  "members": {
+    "title": "Members",
+    "count": "{count, plural, one {# member} other {# members}} in this household",
+    "invite": "Invite",
+    "inviteTitle": "Invite Member",
+    "inviteDescription": "Send an invitation to join your household.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "caregiver@example.com",
+    "roleLabel": "Role",
+    "sending": "Sending...",
+    "sendInvite": "Send Invite",
+    "inviteSent": "Invitation sent!",
+    "roleUpdated": "Role updated!",
+    "removed": "Member removed",
+    "removeTitle": "Remove Member",
+    "removeAria": "Remove member",
+    "removeConfirm": "Are you sure you want to remove {name} from the household?",
+    "thisMember": "this member",
+    "removing": "Removing...",
+    "remove": "Remove"
+  },
+  "danger": {
+    "title": "Danger Zone",
+    "description": "Permanently delete this household and all children, records, and member associations.",
+    "deleteHousehold": "Delete Household",
+    "dialogTitle": "Delete {name}?",
+    "dialogDescription": "This will permanently delete the household, all children, and all tracking records. All members will lose access. This action cannot be undone.",
+    "confirmLabel": "Type \"{name}\" to confirm",
+    "deleting": "Deleting...",
+    "deleted": "Household deleted"
+  }
+}

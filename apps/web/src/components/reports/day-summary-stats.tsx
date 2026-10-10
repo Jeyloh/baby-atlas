@@ -2,9 +2,10 @@
 
 import { trpc } from "@/lib/trpc/provider";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatDuration, mlToOz } from "@baby-atlas/utils";
 import { startOfDay, endOfDay } from "@baby-atlas/utils";
 import { Moon, Baby, Milk, Droplets } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 
 interface DaySummaryStatsProps {
   childId: string;
@@ -12,6 +13,9 @@ interface DaySummaryStatsProps {
 }
 
 export function DaySummaryStats({ childId, date }: DaySummaryStatsProps) {
+  const t = useTranslations("reports");
+  const te = useTranslations("enums");
+  const f = useFormatters();
   const dateRange = {
     start: startOfDay(date),
     end: endOfDay(date),
@@ -68,31 +72,31 @@ export function DaySummaryStats({ childId, date }: DaySummaryStatsProps) {
   const stats = [
     {
       icon: Moon,
-      label: "Sleep",
-      value: formatDuration(Math.round(sleepMinutes)),
+      label: te("trackingType.sleep"),
+      value: f.duration(Math.round(sleepMinutes)),
       color: "text-cyan-500",
     },
     {
       icon: Baby,
-      label: "Nursing",
-      value: formatDuration(Math.round(breastMinutes)),
+      label: te("trackingType.breastfeeding"),
+      value: f.duration(Math.round(breastMinutes)),
       color: "text-orange-400",
     },
     {
       icon: Milk,
-      label: "Bottle",
-      value: totalBottleMl > 0 ? `${Math.round(mlToOz(totalBottleMl))}oz` : "0oz",
+      label: te("trackingType.bottle"),
+      value: f.ml(totalBottleMl),
       color: "text-orange-500",
     },
     {
       icon: Baby,
-      label: "Feedings",
+      label: t("stats.feedings"),
       value: String(totalFeedings),
       color: "text-orange-400",
     },
     {
       icon: Droplets,
-      label: "Diapers",
+      label: t("stats.diapers"),
       value: String(totalDiapers),
       color: "text-yellow-500",
     },
