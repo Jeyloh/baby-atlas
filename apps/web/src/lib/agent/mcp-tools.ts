@@ -1,6 +1,6 @@
 import { tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
-import { registerTools, handleToolCall } from "@finnberry/mcp-server/tools";
-import type { PrismaClient } from "@finnberry/db";
+import { registerTools, handleToolCall } from "@baby-atlas/mcp-server/tools";
+import type { PrismaClient } from "@baby-atlas/db";
 import { z } from "zod";
 
 /**
@@ -67,13 +67,13 @@ function convertInputSchemaToZod(
 }
 
 /**
- * Creates an SDK MCP server with Finnberry tools.
+ * Creates an SDK MCP server with Baby Atlas tools.
  *
  * @param prisma - Prisma client instance
  * @param childId - Child ID to inject into tool calls that require it
  * @returns MCP server configuration for the Claude Agent SDK
  */
-export function createFinnberryMcpServer(
+export function createBabyAtlasMcpServer(
   prisma: PrismaClient,
   childId: string
 ) {
@@ -137,14 +137,14 @@ export function createFinnberryMcpServer(
   });
 
   return createSdkMcpServer({
-    name: "finnberry",
+    name: "baby_atlas",
     version: "1.0.0",
     tools: sdkTools,
   });
 }
 
 /**
- * Generates a system prompt for the Finnberry chat agent.
+ * Generates a system prompt for the Baby Atlas chat agent.
  */
 export function generateSystemPrompt(
   childName: string,
@@ -154,7 +154,7 @@ export function generateSystemPrompt(
     ? formatAge(childBirthDate)
     : "unknown age";
 
-  return `You are Finnberry, a helpful assistant for tracking baby activities.
+  return `You are Baby Atlas, a helpful assistant for tracking baby activities.
 You are helping track activities for ${childName}, who is ${age}.
 
 Available tools allow you to:

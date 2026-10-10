@@ -11,14 +11,14 @@ import {
   GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-import { prisma } from "@finnberry/db";
+import { prisma } from "@baby-atlas/db";
 import { registerTools, handleToolCall } from "./tools/index.js";
 import { registerResources, handleResourceRead } from "./resources/index.js";
 import { registerPrompts, handlePromptGet } from "./prompts/index.js";
 
 const server = new Server(
   {
-    name: "finnberry-mcp",
+    name: "baby-atlas-mcp",
     version: "0.1.0",
   },
   {
@@ -72,7 +72,7 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Finnberry MCP server running on stdio");
+  console.error("Baby Atlas MCP server running on stdio");
 }
 
 main().catch((error) => {

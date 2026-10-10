@@ -1,5 +1,5 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter, createTRPCContext } from "@finnberry/api";
+import { appRouter, createTRPCContext } from "@baby-atlas/api";
 import { auth } from "@/lib/auth";
 
 const handler = async (req: Request) => {

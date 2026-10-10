@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { prisma, type PrismaClient } from "@finnberry/db";
+import { prisma, type PrismaClient } from "@baby-atlas/db";
 
 export type TRPCContext = {
   prisma: PrismaClient;

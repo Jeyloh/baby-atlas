@@ -10,7 +10,7 @@ import {
 } from "./test/helpers";
 import { createCallerFactory, createTRPCRouter, protectedProcedure, householdProcedure } from "./trpc";
 import { z } from "zod";
-import { idSchema } from "@finnberry/schemas";
+import { idSchema } from "@baby-atlas/schemas";
 
 // Create test routers for middleware testing
 const testRouter = createTRPCRouter({

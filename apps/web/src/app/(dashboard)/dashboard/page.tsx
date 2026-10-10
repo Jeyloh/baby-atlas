@@ -35,7 +35,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <Home className="h-16 w-16 text-muted-foreground" />
-        <h2 className="text-2xl font-semibold">Welcome to Finnberry</h2>
+        <h2 className="text-2xl font-semibold">Welcome to Baby Atlas</h2>
         <p className="text-muted-foreground text-center max-w-md">
           Create a household to start tracking your baby&apos;s activities
         </p>

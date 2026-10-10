@@ -5,7 +5,7 @@ import {
   deleteChildSchema,
   getChildSchema,
   listChildrenSchema,
-} from "@finnberry/schemas";
+} from "@baby-atlas/schemas";
 import { createTRPCRouter, householdProcedure } from "../trpc";
 
 export const childRouter = createTRPCRouter({

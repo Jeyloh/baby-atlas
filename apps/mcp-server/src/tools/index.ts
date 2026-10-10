@@ -1,5 +1,5 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
-import type { PrismaClient } from "@finnberry/db";
+import type { PrismaClient } from "@baby-atlas/db";
 import { handleSleepTools } from "./sleep.js";
 import { handleFeedingTools } from "./feeding.js";
 import { handleDiaperTools } from "./diaper.js";

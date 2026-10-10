@@ -7,7 +7,7 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center justify-center text-center space-y-8">
           <h1 className="text-5xl font-bold tracking-tight">
-            Welcome to <span className="text-primary">Finnberry</span>
+            Welcome to <span className="text-primary">Baby Atlas</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
             The simple, beautiful way to track your baby&apos;s sleep, feeding,

@@ -2,7 +2,7 @@
 
 import { trpc } from "@/lib/trpc/provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDuration } from "@finnberry/utils";
+import { formatDuration } from "@baby-atlas/utils";
 import { Moon, Baby, Droplets } from "lucide-react";
 
 interface DailySummaryProps {

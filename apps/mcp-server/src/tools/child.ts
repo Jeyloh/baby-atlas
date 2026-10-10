@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@finnberry/db";
+import type { PrismaClient } from "@baby-atlas/db";
 import { differenceInMonths, differenceInDays } from "date-fns";
 
 export async function handleChildTools(

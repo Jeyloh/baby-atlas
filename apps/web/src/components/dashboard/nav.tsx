@@ -33,7 +33,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
       <div className="container flex h-14 items-center justify-between">
         <Link href="/dashboard" className="flex items-center space-x-2">
           <Cherry className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-primary">Finnberry</span>
+          <span className="text-xl font-bold text-primary">Baby Atlas</span>
         </Link>
 
         <DropdownMenu>

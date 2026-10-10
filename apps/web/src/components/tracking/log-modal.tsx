@@ -31,7 +31,7 @@ import {
   ftInToCm,
   celsiusToFahrenheit,
   fahrenheitToCelsius,
-} from "@finnberry/utils";
+} from "@baby-atlas/utils";
 import {
   Play,
   Square,

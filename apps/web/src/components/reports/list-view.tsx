@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ActivityRow } from "@/components/reports/activity-row";
-import { startOfWeek, addDays, format } from "@finnberry/utils";
+import { startOfWeek, addDays, format } from "@baby-atlas/utils";
 
 interface ListViewProps {
   childId: string;

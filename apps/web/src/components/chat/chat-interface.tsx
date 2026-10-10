@@ -72,7 +72,7 @@ export function ChatInterface({
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="text-4xl mb-4">👶</div>
             <h3 className="text-lg font-medium text-foreground mb-2">
-              Chat with Finnberry
+              Chat with Baby Atlas
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm">
               Ask me to log activities, check summaries, or help you track your
@@ -111,7 +111,7 @@ export function ChatInterface({
           onStop={onStop}
           disabled={disabled}
           isLoading={isLoading}
-          placeholder="Ask Finnberry anything..."
+          placeholder="Ask Baby Atlas anything..."
         />
         <div className="flex items-center justify-between">
           {onModelChange && (

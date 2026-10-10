@@ -1,5 +1,5 @@
-import type { PrismaClient } from "@finnberry/db";
-import { formatWeight, formatHeight } from "@finnberry/utils";
+import type { PrismaClient } from "@baby-atlas/db";
+import { formatWeight, formatHeight } from "@baby-atlas/utils";
 import {
   parseQueryDates,
   sanitizeLimit,

@@ -1,7 +1,7 @@
 import type { Resource } from "@modelcontextprotocol/sdk/types.js";
-import type { PrismaClient } from "@finnberry/db";
+import type { PrismaClient } from "@baby-atlas/db";
 import { differenceInMonths, differenceInDays, startOfDay, endOfDay } from "date-fns";
-import { calculateDurationMinutes, formatDuration } from "@finnberry/utils";
+import { calculateDurationMinutes, formatDuration } from "@baby-atlas/utils";
 
 export async function registerResources(prisma: PrismaClient): Promise<Resource[]> {
   const children = await prisma.child.findMany({
@@ -10,7 +10,7 @@ export async function registerResources(prisma: PrismaClient): Promise<Resource[
 
   const resources: Resource[] = [
     {
-      uri: "finnberry://children",
+      uri: "babyatlas://children",
       name: "All Children",
       description: "List of all children you have access to",
       mimeType: "application/json",
@@ -20,25 +20,25 @@ export async function registerResources(prisma: PrismaClient): Promise<Resource[
   for (const child of children) {
     resources.push(
       {
-        uri: `finnberry://children/${child.id}`,
+        uri: `babyatlas://children/${child.id}`,
         name: `${child.name} - Profile`,
         description: `Profile details for ${child.name}`,
         mimeType: "application/json",
       },
       {
-        uri: `finnberry://children/${child.id}/today`,
+        uri: `babyatlas://children/${child.id}/today`,
         name: `${child.name} - Today's Activity`,
         description: `Today's sleep, feeding, and diaper records for ${child.name}`,
         mimeType: "application/json",
       },
       {
-        uri: `finnberry://children/${child.id}/sleep?period=week`,
+        uri: `babyatlas://children/${child.id}/sleep?period=week`,
         name: `${child.name} - Sleep (Week)`,
         description: `Sleep records for the past week for ${child.name}`,
         mimeType: "application/json",
       },
       {
-        uri: `finnberry://children/${child.id}/feeding?period=week`,
+        uri: `babyatlas://children/${child.id}/feeding?period=week`,
         name: `${child.name} - Feeding (Week)`,
         description: `Feeding records for the past week for ${child.name}`,
         mimeType: "application/json",
@@ -54,13 +54,13 @@ export async function handleResourceRead(
   prisma: PrismaClient
 ): Promise<{ contents: Array<{ uri: string; mimeType: string; text: string }> }> {
   const url = new URL(uri);
-  // For custom protocols like finnberry://, the "host" part becomes hostname
-  // e.g., "finnberry://children/id" -> hostname: "children", pathname: "/id"
+  // For custom protocols like babyatlas://, the "host" part becomes hostname
+  // e.g., "babyatlas://children/id" -> hostname: "children", pathname: "/id"
   // We need to combine them to get the full path
   const fullPath = url.hostname + url.pathname;
   const pathParts = fullPath.split("/").filter(Boolean);
 
-  // finnberry://children
+  // babyatlas://children
   if (pathParts.length === 1 && pathParts[0] === "children") {
     const children = await prisma.child.findMany({
       include: {
@@ -94,7 +94,7 @@ export async function handleResourceRead(
     };
   }
 
-  // finnberry://children/{id}
+  // babyatlas://children/{id}
   if (pathParts.length === 2 && pathParts[0] === "children") {
     const childId = pathParts[1];
     const child = await prisma.child.findUnique({
@@ -134,7 +134,7 @@ export async function handleResourceRead(
     };
   }
 
-  // finnberry://children/{id}/today
+  // babyatlas://children/{id}/today
   if (pathParts.length === 3 && pathParts[0] === "children" && pathParts[2] === "today") {
     const childId = pathParts[1];
     const start = startOfDay(new Date());
@@ -210,7 +210,7 @@ export async function handleResourceRead(
     };
   }
 
-  // finnberry://children/{id}/sleep?period=week
+  // babyatlas://children/{id}/sleep?period=week
   if (pathParts.length === 3 && pathParts[0] === "children" && pathParts[2] === "sleep") {
     const childId = pathParts[1];
     const period = url.searchParams.get("period") || "week";
@@ -254,7 +254,7 @@ export async function handleResourceRead(
     };
   }
 
-  // finnberry://children/{id}/feeding?period=week
+  // babyatlas://children/{id}/feeding?period=week
   if (pathParts.length === 3 && pathParts[0] === "children" && pathParts[2] === "feeding") {
     const childId = pathParts[1];
     const period = url.searchParams.get("period") || "week";

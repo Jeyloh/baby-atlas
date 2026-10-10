@@ -4,13 +4,13 @@ import path from "path";
 export default defineProject({
   resolve: {
     alias: {
-      "@finnberry/utils": path.resolve(__dirname, "../utils/src"),
-      "@finnberry/schemas": path.resolve(__dirname, "../schemas/src"),
-      "@finnberry/db": path.resolve(__dirname, "../db/src"),
+      "@baby-atlas/utils": path.resolve(__dirname, "../utils/src"),
+      "@baby-atlas/schemas": path.resolve(__dirname, "../schemas/src"),
+      "@baby-atlas/db": path.resolve(__dirname, "../db/src"),
     },
   },
   test: {
-    name: "@finnberry/api",
+    name: "@baby-atlas/api",
     include: ["src/**/*.test.ts"],
     setupFiles: ["./src/test/setup.ts"],
   },

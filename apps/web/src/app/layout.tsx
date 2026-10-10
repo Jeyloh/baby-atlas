@@ -6,7 +6,7 @@ import { Providers } from "@/components/providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Finnberry - Baby Tracking Made Simple",
+  title: "Baby Atlas - Baby Tracking Made Simple",
   description: "Track your baby's sleep, feeding, diapers, and more with ease.",
 };
 

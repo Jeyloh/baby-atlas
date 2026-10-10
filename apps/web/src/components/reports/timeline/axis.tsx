@@ -1,6 +1,6 @@
 "use client";
 
-import { getTimelineHourLabels, DAY_START_HOUR } from "@finnberry/utils";
+import { getTimelineHourLabels, DAY_START_HOUR } from "@baby-atlas/utils";
 
 export function TimelineAxis() {
   const labels = getTimelineHourLabels(DAY_START_HOUR);

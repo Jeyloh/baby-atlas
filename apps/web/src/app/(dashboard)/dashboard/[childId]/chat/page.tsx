@@ -63,7 +63,7 @@ export default function ChatPage({
             </Link>
           </Button>
           <div>
-            <h1 className="text-lg font-semibold">Chat with Finnberry</h1>
+            <h1 className="text-lg font-semibold">Chat with Baby Atlas</h1>
             <p className="text-sm text-muted-foreground">
               Tracking for {child.name}
             </p>

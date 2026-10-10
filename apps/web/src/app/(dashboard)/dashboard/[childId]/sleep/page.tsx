@@ -6,7 +6,7 @@ import { useRealtimeSync } from "@/hooks/use-realtime";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatTime, formatDuration, formatDate, calculateDurationMinutes } from "@finnberry/utils";
+import { formatTime, formatDuration, formatDate, calculateDurationMinutes } from "@baby-atlas/utils";
 import Link from "next/link";
 import { ArrowLeft, Moon, Trash2 } from "lucide-react";
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatTimeSince } from "@finnberry/utils";
+import { formatTimeSince } from "@baby-atlas/utils";
 
 interface TimeSinceProps {
   date: Date | string | null;

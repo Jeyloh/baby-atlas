@@ -2,7 +2,7 @@ import { defineProject } from "vitest/config";
 
 export default defineProject({
   test: {
-    name: "@finnberry/schemas",
+    name: "@baby-atlas/schemas",
     include: ["src/**/*.test.ts"],
   },
 });

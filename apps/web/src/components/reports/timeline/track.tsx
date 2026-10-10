@@ -5,7 +5,7 @@ import {
   DAY_START_HOUR,
   getTimelineHourLabels,
   formatDurationPrecise,
-} from "@finnberry/utils";
+} from "@baby-atlas/utils";
 import {
   getActivityBarClasses,
   feedingTypeToCategory,

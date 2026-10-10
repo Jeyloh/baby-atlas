@@ -6,7 +6,7 @@ test.describe("Authentication", () => {
 
     // Should see login form with welcome heading
     await expect(
-      page.getByRole("heading", { name: /welcome to finnberry/i })
+      page.getByRole("heading", { name: /welcome to baby atlas/i })
     ).toBeVisible();
   });
 

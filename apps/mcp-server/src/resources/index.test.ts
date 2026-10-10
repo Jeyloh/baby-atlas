@@ -29,7 +29,7 @@ describe("registerResources", () => {
     const resources = await registerResources(mockPrisma);
 
     expect(resources).toContainEqual({
-      uri: "finnberry://children",
+      uri: "babyatlas://children",
       name: "All Children",
       description: "List of all children you have access to",
       mimeType: "application/json",
@@ -50,13 +50,13 @@ describe("registerResources", () => {
     // Check child profile resources exist
     expect(resources).toContainEqual(
       expect.objectContaining({
-        uri: "finnberry://children/child-1",
+        uri: "babyatlas://children/child-1",
         name: "Emma - Profile",
       })
     );
     expect(resources).toContainEqual(
       expect.objectContaining({
-        uri: "finnberry://children/child-2",
+        uri: "babyatlas://children/child-2",
         name: "Liam - Profile",
       })
     );
@@ -64,7 +64,7 @@ describe("registerResources", () => {
     // Check today's activity resources exist
     expect(resources).toContainEqual(
       expect.objectContaining({
-        uri: "finnberry://children/child-1/today",
+        uri: "babyatlas://children/child-1/today",
         name: "Emma - Today's Activity",
       })
     );
@@ -72,12 +72,12 @@ describe("registerResources", () => {
     // Check sleep and feeding resources exist
     expect(resources).toContainEqual(
       expect.objectContaining({
-        uri: "finnberry://children/child-1/sleep?period=week",
+        uri: "babyatlas://children/child-1/sleep?period=week",
       })
     );
     expect(resources).toContainEqual(
       expect.objectContaining({
-        uri: "finnberry://children/child-1/feeding?period=week",
+        uri: "babyatlas://children/child-1/feeding?period=week",
       })
     );
   });
@@ -96,7 +96,7 @@ describe("handleResourceRead", () => {
     vi.clearAllMocks();
   });
 
-  describe("finnberry://children", () => {
+  describe("babyatlas://children", () => {
     it("returns all children with age calculation", async () => {
       const birthDate = new Date();
       birthDate.setMonth(birthDate.getMonth() - 3);
@@ -112,10 +112,10 @@ describe("handleResourceRead", () => {
         },
       ]);
 
-      const result = await handleResourceRead("finnberry://children", mockPrisma);
+      const result = await handleResourceRead("babyatlas://children", mockPrisma);
 
       expect(result.contents).toHaveLength(1);
-      expect(result.contents[0]!.uri).toBe("finnberry://children");
+      expect(result.contents[0]!.uri).toBe("babyatlas://children");
       expect(result.contents[0]!.mimeType).toBe("application/json");
 
       const data = JSON.parse(result.contents[0]!.text);
@@ -126,7 +126,7 @@ describe("handleResourceRead", () => {
     });
   });
 
-  describe("finnberry://children/{id}", () => {
+  describe("babyatlas://children/{id}", () => {
     it("returns child profile", async () => {
       const birthDate = new Date("2024-01-01");
       mockPrisma.child.findUnique.mockResolvedValue({
@@ -138,7 +138,7 @@ describe("handleResourceRead", () => {
       });
 
       const result = await handleResourceRead(
-        "finnberry://children/child-1",
+        "babyatlas://children/child-1",
         mockPrisma
       );
 
@@ -153,12 +153,12 @@ describe("handleResourceRead", () => {
       mockPrisma.child.findUnique.mockResolvedValue(null);
 
       await expect(
-        handleResourceRead("finnberry://children/non-existent", mockPrisma)
+        handleResourceRead("babyatlas://children/non-existent", mockPrisma)
       ).rejects.toThrow("Child not found");
     });
   });
 
-  describe("finnberry://children/{id}/today", () => {
+  describe("babyatlas://children/{id}/today", () => {
     it("returns today's activity summary", async () => {
       mockPrisma.child.findUnique.mockResolvedValue({ name: "Emma" });
       mockPrisma.sleepRecord.findMany.mockResolvedValue([
@@ -190,7 +190,7 @@ describe("handleResourceRead", () => {
       ]);
 
       const result = await handleResourceRead(
-        "finnberry://children/child-1/today",
+        "babyatlas://children/child-1/today",
         mockPrisma
       );
 
@@ -226,7 +226,7 @@ describe("handleResourceRead", () => {
       mockPrisma.diaperRecord.findMany.mockResolvedValue([]);
 
       const result = await handleResourceRead(
-        "finnberry://children/child-1/today",
+        "babyatlas://children/child-1/today",
         mockPrisma
       );
 
@@ -238,12 +238,12 @@ describe("handleResourceRead", () => {
       mockPrisma.child.findUnique.mockResolvedValue(null);
 
       await expect(
-        handleResourceRead("finnberry://children/non-existent/today", mockPrisma)
+        handleResourceRead("babyatlas://children/non-existent/today", mockPrisma)
       ).rejects.toThrow("Child not found");
     });
   });
 
-  describe("finnberry://children/{id}/sleep", () => {
+  describe("babyatlas://children/{id}/sleep", () => {
     it("returns sleep records for the week by default", async () => {
       mockPrisma.sleepRecord.findMany.mockResolvedValue([
         {
@@ -256,7 +256,7 @@ describe("handleResourceRead", () => {
       ]);
 
       const result = await handleResourceRead(
-        "finnberry://children/child-1/sleep?period=week",
+        "babyatlas://children/child-1/sleep?period=week",
         mockPrisma
       );
 
@@ -278,7 +278,7 @@ describe("handleResourceRead", () => {
       ]);
 
       const result = await handleResourceRead(
-        "finnberry://children/child-1/sleep?period=week",
+        "babyatlas://children/child-1/sleep?period=week",
         mockPrisma
       );
 
@@ -287,7 +287,7 @@ describe("handleResourceRead", () => {
     });
   });
 
-  describe("finnberry://children/{id}/feeding", () => {
+  describe("babyatlas://children/{id}/feeding", () => {
     it("returns feeding records for the week", async () => {
       mockPrisma.feedingRecord.findMany.mockResolvedValue([
         {
@@ -302,7 +302,7 @@ describe("handleResourceRead", () => {
       ]);
 
       const result = await handleResourceRead(
-        "finnberry://children/child-1/feeding?period=week",
+        "babyatlas://children/child-1/feeding?period=week",
         mockPrisma
       );
 
@@ -317,7 +317,7 @@ describe("handleResourceRead", () => {
       mockPrisma.feedingRecord.findMany.mockResolvedValue([]);
 
       const result = await handleResourceRead(
-        "finnberry://children/child-1/feeding?period=month",
+        "babyatlas://children/child-1/feeding?period=month",
         mockPrisma
       );
 
@@ -329,7 +329,7 @@ describe("handleResourceRead", () => {
   describe("unknown resources", () => {
     it("throws error for unknown resource URI", async () => {
       await expect(
-        handleResourceRead("finnberry://unknown/resource", mockPrisma)
+        handleResourceRead("babyatlas://unknown/resource", mockPrisma)
       ).rejects.toThrow("Unknown resource");
     });
   });

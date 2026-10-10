@@ -1,5 +1,5 @@
-import type { PrismaClient } from "@finnberry/db";
-import { getDateRange, calculateDurationMinutes, formatDuration } from "@finnberry/utils";
+import type { PrismaClient } from "@baby-atlas/db";
+import { getDateRange, calculateDurationMinutes, formatDuration } from "@baby-atlas/utils";
 import {
   buildStartResponse,
   buildEndResponse,

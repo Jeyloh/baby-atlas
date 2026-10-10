@@ -155,7 +155,7 @@ export const useTimerStore = create<TimerState>()(
       },
     }),
     {
-      name: "finnberry-timers",
+      name: "baby-atlas-timers",
       storage: createJSONStorage(() => localStorage),
     }
   )

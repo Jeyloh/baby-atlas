@@ -5,8 +5,8 @@ import {
   deleteDiaperSchema,
   getDiaperRecordsSchema,
   diaperSummarySchema,
-} from "@finnberry/schemas";
-import { getDateRange } from "@finnberry/utils";
+} from "@baby-atlas/schemas";
+import { getDateRange } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure } from "../trpc";
 
 export const diaperRouter = createTRPCRouter({

@@ -23,8 +23,8 @@ export function ToolExecution({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatToolName = (name: string) => {
-    // Remove mcp__finnberry__ prefix if present
-    const cleanName = name.replace(/^mcp__finnberry__/, "");
+    // Remove mcp__baby_atlas__ prefix if present
+    const cleanName = name.replace(/^mcp__baby_atlas__/, "");
     // Convert kebab-case to title case
     return cleanName
       .split("-")

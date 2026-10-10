@@ -34,7 +34,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { ArrowLeft, Trash2, UserMinus, UserPlus, Crown, Shield, Eye, Users } from "lucide-react";
-import type { HouseholdRole } from "@finnberry/schemas";
+import type { HouseholdRole } from "@baby-atlas/schemas";
 
 const roleIcons: Record<HouseholdRole, React.ReactNode> = {
   OWNER: <Crown className="h-4 w-4 text-yellow-500" />,

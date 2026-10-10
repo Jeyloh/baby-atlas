@@ -1,4 +1,4 @@
-import { calculateDurationMinutes, formatDuration } from "@finnberry/utils";
+import { calculateDurationMinutes, formatDuration } from "@baby-atlas/utils";
 
 /**
  * Represents a timer-based record with start and optional end time
@@ -73,8 +73,8 @@ export function mapTimerRecordBase(record: TimerRecord): MappedTimerRecord {
 export function mapRecentRecords<T extends TimerRecord, R>(
   records: T[],
   limit: number,
-  extraMapper: (record: T) => Omit<R, keyof MappedTimerRecord>
-): (MappedTimerRecord & Omit<R, keyof MappedTimerRecord>)[] {
+  extraMapper: (record: T) => R
+): (MappedTimerRecord & R)[] {
   return records.slice(0, limit).map((r) => ({
     ...mapTimerRecordBase(r),
     ...extraMapper(r),

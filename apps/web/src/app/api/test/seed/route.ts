@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@finnberry/db";
+import { prisma } from "@baby-atlas/db";
 import { randomBytes } from "crypto";
 import {
   generateAllDemoData,
@@ -199,7 +199,7 @@ async function cleanup({ prefix = "e2e-test" }: { prefix?: string }) {
 }
 
 async function createDemoAccount() {
-  const DEMO_EMAIL = "demo@finnberry.app";
+  const DEMO_EMAIL = "demo@babyatlas.app";
   const DEMO_NAME = "Demo Parent";
   const HOUSEHOLD_NAME = "Demo Family";
   const CHILD_NAME = "Demo Baby";

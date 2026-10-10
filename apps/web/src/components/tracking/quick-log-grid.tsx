@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { mlToOz, ozToMl } from "@finnberry/utils";
+import { mlToOz, ozToMl } from "@baby-atlas/utils";
 import { Moon, Baby, Droplets, Plus, Play, Square } from "lucide-react";
 
 type BottleContentType = "FORMULA" | "BREAST_MILK";

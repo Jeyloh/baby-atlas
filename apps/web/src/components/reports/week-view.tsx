@@ -12,7 +12,7 @@ import {
   normalizeToTimelinePosition,
   getTimelineHourLabels,
   DAY_START_HOUR,
-} from "@finnberry/utils";
+} from "@baby-atlas/utils";
 import {
   getActivityBarClasses,
   feedingTypeToCategory,

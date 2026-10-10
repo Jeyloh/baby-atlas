@@ -25,7 +25,7 @@ import {
   formatDurationPrecise,
   mlToOz,
   ozToMl,
-} from "@finnberry/utils";
+} from "@baby-atlas/utils";
 import { Moon, Baby, Milk, Utensils, Droplets, ChevronRight, Trash2, Cloud, CloudRain, Heart, Pill, Ruler, Thermometer, Star } from "lucide-react";
 
 interface SleepRecord {

@@ -7,7 +7,7 @@ import {
 } from "@/lib/activity-colors";
 import { TimeSince } from "@/components/ui/time-since";
 import { LogModal } from "@/components/tracking/log-modal";
-import { formatDurationPrecise } from "@finnberry/utils";
+import { formatDurationPrecise } from "@baby-atlas/utils";
 import { Moon, Baby, Milk, Utensils, Droplets, HeartPulse, Pill, Ruler, Thermometer, Sparkles } from "lucide-react";
 
 interface ActivityCardProps {

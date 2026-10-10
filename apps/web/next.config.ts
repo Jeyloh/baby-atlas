@@ -2,10 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: [
-    "@finnberry/api",
-    "@finnberry/db",
-    "@finnberry/schemas",
-    "@finnberry/utils",
+    "@baby-atlas/api",
+    "@baby-atlas/db",
+    "@baby-atlas/schemas",
+    "@baby-atlas/utils",
   ],
   typedRoutes: true,
 };

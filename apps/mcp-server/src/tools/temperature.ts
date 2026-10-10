@@ -1,5 +1,5 @@
-import type { PrismaClient } from "@finnberry/db";
-import { getDateRange, formatTime, formatTemperature } from "@finnberry/utils";
+import type { PrismaClient } from "@baby-atlas/db";
+import { getDateRange, formatTime, formatTemperature } from "@baby-atlas/utils";
 import {
   parseQueryDates,
   sanitizeLimit,

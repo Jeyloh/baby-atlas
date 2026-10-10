@@ -48,7 +48,7 @@ test.describe("Timer Persistence", () => {
 
     // Check localStorage
     const timers = await authenticatedPage.evaluate(() => {
-      return localStorage.getItem("finnberry-timers");
+      return localStorage.getItem("baby-atlas-timers");
     });
 
     expect(timers).not.toBeNull();

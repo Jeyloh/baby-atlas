@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { updateUserSchema, deleteUserSchema } from "@finnberry/schemas";
+import { updateUserSchema, deleteUserSchema } from "@baby-atlas/schemas";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({

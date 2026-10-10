@@ -31,10 +31,9 @@ describe("use-toast reducer", () => {
     });
 
     it("limits toasts to TOAST_LIMIT", () => {
-      const state = { toasts: [] };
+      let currentState: ReturnType<typeof reducer> = { toasts: [] };
 
       // Add multiple toasts
-      let currentState = state;
       for (let i = 0; i < 5; i++) {
         currentState = reducer(currentState, {
           type: "ADD_TOAST",

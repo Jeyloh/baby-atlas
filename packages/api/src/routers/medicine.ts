@@ -9,7 +9,7 @@ import {
   updateMedicineRecordSchema,
   deleteMedicineRecordSchema,
   getMedicineRecordsSchema,
-} from "@finnberry/schemas";
+} from "@baby-atlas/schemas";
 import { createTRPCRouter, householdProcedure } from "../trpc";
 
 export const medicineRouter = createTRPCRouter({

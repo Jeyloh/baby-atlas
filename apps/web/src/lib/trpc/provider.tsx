@@ -5,7 +5,7 @@ import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { useState } from "react";
 import SuperJSON from "superjson";
-import type { AppRouter } from "@finnberry/api";
+import type { AppRouter } from "@baby-atlas/api";
 
 export const trpc = createTRPCReact<AppRouter>();
 

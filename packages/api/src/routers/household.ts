@@ -7,7 +7,7 @@ import {
   acceptInviteSchema,
   updateMemberRoleSchema,
   removeMemberSchema,
-} from "@finnberry/schemas";
+} from "@baby-atlas/schemas";
 import { createTRPCRouter, protectedProcedure, householdProcedure } from "../trpc";
 
 export const householdRouter = createTRPCRouter({

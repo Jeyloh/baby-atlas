@@ -5,7 +5,7 @@ import {
   deleteTemperatureSchema,
   getTemperatureRecordsSchema,
   getLatestTemperatureSchema,
-} from "@finnberry/schemas";
+} from "@baby-atlas/schemas";
 import { createTRPCRouter, householdProcedure } from "../trpc";
 
 export const temperatureRouter = createTRPCRouter({

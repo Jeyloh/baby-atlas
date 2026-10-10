@@ -3,14 +3,14 @@ import {
   getDayTimelineSchema,
   getWeekTimelineSchema,
   getListTimelineSchema,
-} from "@finnberry/schemas";
+} from "@baby-atlas/schemas";
 import {
   startOfDay,
   endOfDay,
   addDays,
   addHours,
   format,
-} from "@finnberry/utils";
+} from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure } from "../trpc";
 
 // Day starts at 8am for baby timeline (sleep patterns often cross midnight)

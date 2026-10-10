@@ -2,8 +2,8 @@ import "server-only";
 
 import { headers } from "next/headers";
 import { cache } from "react";
-import { createCallerFactory, createTRPCContext } from "@finnberry/api";
-import { appRouter } from "@finnberry/api";
+import { createCallerFactory, createTRPCContext } from "@baby-atlas/api";
+import { appRouter } from "@baby-atlas/api";
 
 const createContext = cache(async () => {
   const heads = new Headers(await headers());

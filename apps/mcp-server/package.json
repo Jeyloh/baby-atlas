@@ -1,5 +1,5 @@
 {
-  "name": "@finnberry/mcp-server",
+  "name": "@baby-atlas/mcp-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "./tools": "./dist/tools/index.js"
   },
   "bin": {
-    "finnberry-mcp": "./dist/index.js"
+    "baby-atlas-mcp": "./dist/index.js"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -18,9 +18,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@finnberry/db": "workspace:*",
-    "@finnberry/schemas": "workspace:*",
-    "@finnberry/utils": "workspace:*",
+    "@baby-atlas/db": "workspace:*",
+    "@baby-atlas/schemas": "workspace:*",
+    "@baby-atlas/utils": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.4.0",
     "date-fns": "^4.1.0",
     "zod": "^3.24.1"

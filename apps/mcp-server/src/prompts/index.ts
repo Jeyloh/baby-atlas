@@ -1,7 +1,7 @@
 import type { Prompt, GetPromptResult } from "@modelcontextprotocol/sdk/types.js";
-import type { PrismaClient } from "@finnberry/db";
+import type { PrismaClient } from "@baby-atlas/db";
 import { startOfDay, endOfDay, subDays } from "date-fns";
-import { calculateDurationMinutes, formatDuration } from "@finnberry/utils";
+import { calculateDurationMinutes, formatDuration } from "@baby-atlas/utils";
 
 export function registerPrompts(): Prompt[] {
   return [

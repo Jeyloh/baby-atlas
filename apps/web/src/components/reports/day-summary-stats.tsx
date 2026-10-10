@@ -2,8 +2,8 @@
 
 import { trpc } from "@/lib/trpc/provider";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatDuration, mlToOz } from "@finnberry/utils";
-import { startOfDay, endOfDay } from "@finnberry/utils";
+import { formatDuration, mlToOz } from "@baby-atlas/utils";
+import { startOfDay, endOfDay } from "@baby-atlas/utils";
 import { Moon, Baby, Milk, Droplets } from "lucide-react";
 
 interface DaySummaryStatsProps {

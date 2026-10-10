@@ -7,8 +7,8 @@ import {
   deleteActivitySchema,
   getActivityRecordsSchema,
   activitySummarySchema,
-} from "@finnberry/schemas";
-import { getDateRange, calculateDurationMinutes } from "@finnberry/utils";
+} from "@baby-atlas/schemas";
+import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure } from "../trpc";
 
 export const activityRouter = createTRPCRouter({

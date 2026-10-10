@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
-import { prisma } from "@finnberry/db";
+import { prisma } from "@baby-atlas/db";
 import Anthropic from "@anthropic-ai/sdk";
-import { registerTools, handleToolCall } from "@finnberry/mcp-server/tools";
+import { registerTools, handleToolCall } from "@baby-atlas/mcp-server/tools";
 
 export const runtime = "nodejs";
 // Configure based on your Vercel plan: Hobby=10, Pro=60, Enterprise=900
@@ -43,7 +43,7 @@ function generateSystemPrompt(
 ): string {
   const age = childBirthDate ? formatAge(childBirthDate) : "unknown age";
 
-  return `You are Finnberry, a helpful assistant for tracking baby activities.
+  return `You are Baby Atlas, a helpful assistant for tracking baby activities.
 You are helping track activities for ${childName}, who is ${age}.
 
 IMPORTANT: The current child's ID is: ${childId}

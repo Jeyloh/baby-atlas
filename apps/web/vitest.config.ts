@@ -5,7 +5,7 @@ import path from "path";
 export default defineProject({
   plugins: [react()],
   test: {
-    name: "@finnberry/web",
+    name: "@baby-atlas/web",
     include: ["src/**/*.test.{ts,tsx}"],
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],

@@ -1,6 +1,6 @@
-import type { PrismaClient } from "@finnberry/db";
+import type { PrismaClient } from "@baby-atlas/db";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
-import { calculateDurationMinutes, formatDuration, formatTime, formatTemperature, formatWeight, formatHeight } from "@finnberry/utils";
+import { calculateDurationMinutes, formatDuration, formatTime, formatTemperature, formatWeight, formatHeight } from "@baby-atlas/utils";
 
 const ACTIVITY_LABELS: Record<string, string> = {
   TUMMY_TIME: "Tummy Time",

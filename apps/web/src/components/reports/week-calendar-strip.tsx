@@ -9,7 +9,7 @@ import {
   format,
   isToday,
   startOfDay,
-} from "@finnberry/utils";
+} from "@baby-atlas/utils";
 
 interface WeekCalendarStripProps {
   selectedDate: Date;
