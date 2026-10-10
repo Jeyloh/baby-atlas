@@ -1,0 +1,38 @@
+{
+  "title": "Vaksiner",
+  "notFound": "Fant ikke barnet",
+  "errorTitle": "Noe gikk galt",
+  "names": {
+    "rotavirus": "Rotavirusvaksine",
+    "sixInOne": "Seksvalent vaksine (difteri, stivkrampe, kikhoste, polio, Hib, hepatitt B)",
+    "pneumococcal": "Pneumokokkvaksine",
+    "mmr": "MMR-vaksine (meslinger, kusma, røde hunder)"
+  },
+  "groups": {
+    "w6": "6 uker",
+    "m3": "3 måneder",
+    "m5": "5 måneder",
+    "m12": "12 måneder",
+    "m15": "15 måneder"
+  },
+  "progress": "{given} av {total} doser er gitt",
+  "dose": "Dose {dose}",
+  "dueOn": "Anbefalt fra {date}",
+  "givenOn": "Gitt {date}",
+  "status": {
+    "given": "Gitt",
+    "overdue": "Forfalt",
+    "due": "Snart",
+    "upcoming": "Kommer"
+  },
+  "dialog": {
+    "markTitle": "Marker som gitt",
+    "editTitle": "Gitt {date}",
+    "dateLabel": "Dato gitt",
+    "save": "Lagre som gitt",
+    "undo": "Angre",
+    "marked": "Dosen er markert som gitt",
+    "unmarked": "Markeringen er fjernet"
+  },
+  "footer": "Oversikten bygger på Barnevaksinasjonsprogrammet fra FHI. Sjekk alltid med helsestasjonen. Barn i risikogrupper kan få tilbud om flere vaksiner."
+}

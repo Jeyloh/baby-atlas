@@ -1,0 +1,41 @@
+{
+  "title": "Speech and words",
+  "notFound": "Child not found",
+  "errorTitle": "Something went wrong",
+  "quickAdd": {
+    "label": "New word",
+    "placeholder": "What did your child say?",
+    "dateLabel": "First said",
+    "add": "Add",
+    "added": "\"{word}\" added"
+  },
+  "categories": {
+    "WORD": "Word",
+    "SOUND": "Sound",
+    "SIGN": "Sign"
+  },
+  "filterAll": "All",
+  "total": "{count, plural, =0 {No words yet} one {# word} other {# words}}",
+  "totalHint": "Words, sounds and signs combined",
+  "chart": {
+    "title": "Vocabulary over time",
+    "empty": "Add a few words to see the vocabulary grow.",
+    "label": "Vocabulary chart, {count} in total"
+  },
+  "empty": "No words yet. Type the first word above, for example \"mama\" or \"vroom\".",
+  "emptyFiltered": "Nothing in this category yet.",
+  "firstSaid": "First said {date}",
+  "edit": {
+    "title": "Edit word",
+    "word": "Word",
+    "category": "Category",
+    "date": "First said",
+    "notes": "Note",
+    "saved": "Changes saved"
+  },
+  "delete": {
+    "title": "Delete \"{word}\"?",
+    "description": "The word is removed from the list. This cannot be undone.",
+    "deleted": "Word deleted"
+  }
+}

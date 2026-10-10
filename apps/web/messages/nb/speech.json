@@ -1,0 +1,41 @@
+{
+  "title": "Språk og ord",
+  "notFound": "Fant ikke barnet",
+  "errorTitle": "Noe gikk galt",
+  "quickAdd": {
+    "label": "Nytt ord",
+    "placeholder": "Hva sa barnet?",
+    "dateLabel": "Første gang sagt",
+    "add": "Legg til",
+    "added": "«{word}» er lagt til"
+  },
+  "categories": {
+    "WORD": "Ord",
+    "SOUND": "Lyd",
+    "SIGN": "Tegn"
+  },
+  "filterAll": "Alle",
+  "total": "{count, plural, =0 {Ingen ord ennå} one {# ord} other {# ord}}",
+  "totalHint": "Ord, lyder og tegn til sammen",
+  "chart": {
+    "title": "Ordforråd over tid",
+    "empty": "Legg til noen ord, så ser du hvordan ordforrådet vokser.",
+    "label": "Graf over ordforråd, {count} totalt"
+  },
+  "empty": "Ingen ord ennå. Skriv inn det første ordet over, for eksempel «mamma» eller «brum».",
+  "emptyFiltered": "Ingen i denne kategorien ennå.",
+  "firstSaid": "Første gang {date}",
+  "edit": {
+    "title": "Rediger ord",
+    "word": "Ord",
+    "category": "Kategori",
+    "date": "Første gang sagt",
+    "notes": "Notat",
+    "saved": "Endringene er lagret"
+  },
+  "delete": {
+    "title": "Slette «{word}»?",
+    "description": "Ordet fjernes fra ordlisten. Dette kan ikke angres.",
+    "deleted": "Ordet er slettet"
+  }
+}
