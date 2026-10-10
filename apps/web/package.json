@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "cap:sync": "cap sync ios",
+    "cap:open": "cap open ios"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.20",

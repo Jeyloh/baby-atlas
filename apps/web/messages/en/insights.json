@@ -1,0 +1,32 @@
+{
+  "pageTitle": "Insights",
+  "back": "Back",
+  "panel": {
+    "title": "AI insights",
+    "description": "Get a summary and tips based on what you logged in the last 14 days.",
+    "questionLabel": "Want to ask about something specific? (optional)",
+    "questionPlaceholder": "For example: Does {name} sleep enough for their age?",
+    "submit": "Get insights",
+    "loading": "Fetching insights ...",
+    "disclaimer": "Insights do not replace your child health clinic (helsestasjon) or a doctor. If you are worried, contact the clinic, your GP or the out-of-hours service on 116 117.",
+    "errorGeneric": "Sorry, we could not fetch insights right now. Please try again shortly.",
+    "errorRefused": "We could not answer that question. Try asking it a different way.",
+    "errorNotConfigured": "AI insights are not set up yet."
+  },
+  "stats": {
+    "title": "Trends, last 14 days",
+    "description": "Daily averages, based on the days you logged.",
+    "loading": "Fetching statistics ...",
+    "empty": "No data to show yet. Log some sleep, feeds or diapers and the trends will appear here.",
+    "error": "We could not fetch the statistics. Please try again shortly.",
+    "sleepPerDay": "Sleep per day",
+    "napsPerDay": "Naps per day",
+    "feedsPerDay": "Feeds per day",
+    "mlPerBottle": "Average per bottle",
+    "wetPerDay": "Wet diapers per day",
+    "dirtyPerDay": "Dirty diapers per day",
+    "hoursMinutes": "{hours} h {minutes} min",
+    "ml": "{value} ml",
+    "noValue": "-"
+  }
+}

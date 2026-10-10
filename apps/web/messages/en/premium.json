@@ -1,0 +1,13 @@
+{
+  "title": "Baby Atlas Premium",
+  "intro": "Get more out of what you already log.",
+  "features": {
+    "insights": "AI insights: personal tips based on the last 14 days",
+    "chat": "AI chat: ask anything, and log in plain words",
+    "stats": "Advanced statistics: trends for sleep, feeding and diapers"
+  },
+  "loggingFree": "Logging is, and will always be, free.",
+  "upgrade": "Upgrade",
+  "comingSoon": "Payments are coming soon. We will let you know when Premium is ready.",
+  "chatRequired": "AI chat is part of Premium. Logging works as usual."
+}

@@ -21,7 +21,14 @@ export default function ChatPage({
     id: childId,
   });
 
-  const { messages, isLoading, sendMessage, stop, clearMessages } = useChat({
+  const {
+    messages,
+    isLoading,
+    premiumRequired,
+    sendMessage,
+    stop,
+    clearMessages,
+  } = useChat({
     childId,
     onError: (error) => {
       toast({
@@ -88,6 +95,7 @@ export default function ChatPage({
         onSendMessage={sendMessage}
         onStop={stop}
         isLoading={isLoading}
+        premiumRequired={premiumRequired}
         className="flex-1 min-h-0 pt-4"
       />
     </div>

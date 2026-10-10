@@ -2,6 +2,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@baby-atlas/db";
 import Anthropic from "@anthropic-ai/sdk";
 import { registerTools, handleToolCall } from "@baby-atlas/mcp-server/tools";
+import { checkUserSubscription } from "@/lib/subscription";
+import { buildSystemPrompt } from "@/lib/insights/system-prompt";
+import { getRequestLocale } from "@/lib/insights/request-locale";
 
 export const runtime = "nodejs";
 // Configure based on your Vercel plan: Hobby=10, Pro=60, Enterprise=900
@@ -10,9 +13,9 @@ export const maxDuration = 60;
 type ModelId = "haiku" | "sonnet" | "opus";
 
 const MODEL_MAP: Record<ModelId, string> = {
-  haiku: "claude-haiku-4-5-20251001",
-  sonnet: "claude-sonnet-4-5-20250929",
-  opus: "claude-opus-4-5-20251101",
+  haiku: "claude-haiku-5-5",
+  sonnet: "claude-sonnet-5-5",
+  opus: "claude-opus-5-5",
 };
 
 interface ChatRequest {
@@ -140,6 +143,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const { isPremium } = await checkUserSubscription(session.user.id);
+    if (!isPremium) {
+      return new Response(JSON.stringify({ error: "premium_required" }), {
+        status: 402,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     // Check for API key
     if (!process.env.ANTHROPIC_API_KEY) {
       return new Response(
@@ -155,7 +166,10 @@ export async function POST(request: Request) {
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    const systemPrompt = generateSystemPrompt(childId, child.name, child.birthDate);
+    const systemPrompt = buildSystemPrompt(
+      await getRequestLocale(),
+      generateSystemPrompt(childId, child.name, child.birthDate)
+    );
     const tools = convertToolsToAnthropicFormat();
 
     // Tools that need childId injected

@@ -115,6 +115,28 @@ describe("useChat", () => {
     });
   });
 
+  describe("premium gate", () => {
+    it("sets premiumRequired on 402 without calling onError", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 402,
+        json: async () => ({ error: "premium_required" }),
+      });
+      const onError = vi.fn();
+
+      const { result } = renderHook(() =>
+        useChat({ childId: "child-1", onError })
+      );
+
+      await act(async () => {
+        await result.current.sendMessage("Hi");
+      });
+
+      expect(result.current.premiumRequired).toBe(true);
+      expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
   describe("sendMessage", () => {
     it("ignores empty messages", async () => {
       const { result } = renderHook(() =>

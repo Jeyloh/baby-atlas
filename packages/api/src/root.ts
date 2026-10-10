@@ -14,11 +14,13 @@ import { timelineRouter } from "./routers/timeline";
 import { speechRouter } from "./routers/speech";
 import { pottyRouter } from "./routers/potty";
 import { vaccinationRouter } from "./routers/vaccination";
+import { statsRouter } from "./routers/stats";
 
 export const appRouter = createTRPCRouter({
   speech: speechRouter,
   potty: pottyRouter,
   vaccination: vaccinationRouter,
+  stats: statsRouter,
   household: householdRouter,
   child: childRouter,
   sleep: sleepRouter,
