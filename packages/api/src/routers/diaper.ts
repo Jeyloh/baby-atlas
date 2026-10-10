@@ -7,7 +7,7 @@ import {
   diaperSummarySchema,
 } from "@baby-atlas/schemas";
 import { getDateRange } from "@baby-atlas/utils";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const diaperRouter = createTRPCRouter({
   list: householdProcedure
@@ -57,7 +57,7 @@ export const diaperRouter = createTRPCRouter({
       return diaper;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("diaperRecord")
     .input(updateDiaperSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -83,7 +83,7 @@ export const diaperRouter = createTRPCRouter({
       return diaper;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("diaperRecord")
     .input(deleteDiaperSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {

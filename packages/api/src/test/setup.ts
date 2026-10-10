@@ -15,6 +15,24 @@ vi.mock("@baby-atlas/db", () => ({
   prisma: (globalThis as Record<string, unknown>).__prismaMock__,
 }));
 
+// Matches TEST_IDS.childId in helpers.ts (not imported to avoid a cycle)
+const TEST_CHILD_ID = "clq1234567890abcdefghij03";
+
 beforeEach(() => {
   mockReset(prismaMock);
+
+  // By default every record belongs to the test child, so recordProcedure's
+  // ownership lookup passes. Tests override these to cover other cases.
+  const owned = { childId: TEST_CHILD_ID } as never;
+  prismaMock.sleepRecord.findUnique.mockResolvedValue(owned);
+  prismaMock.feedingRecord.findUnique.mockResolvedValue(owned);
+  prismaMock.diaperRecord.findUnique.mockResolvedValue(owned);
+  prismaMock.pumpingRecord.findUnique.mockResolvedValue(owned);
+  prismaMock.growthRecord.findUnique.mockResolvedValue(owned);
+  prismaMock.activityRecord.findUnique.mockResolvedValue(owned);
+  prismaMock.temperatureRecord.findUnique.mockResolvedValue(owned);
+  prismaMock.medicine.findUnique.mockResolvedValue(owned);
+  prismaMock.medicineRecord.findUnique.mockResolvedValue({
+    medicine: { childId: TEST_CHILD_ID },
+  } as never);
 });

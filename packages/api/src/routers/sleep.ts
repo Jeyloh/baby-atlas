@@ -10,7 +10,7 @@ import {
   sleepSummarySchema,
 } from "@baby-atlas/schemas";
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const sleepRouter = createTRPCRouter({
   list: householdProcedure
@@ -82,7 +82,7 @@ export const sleepRouter = createTRPCRouter({
       return sleep;
     }),
 
-  end: householdProcedure
+  end: recordProcedure("sleepRecord")
     .input(endSleepSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -128,7 +128,7 @@ export const sleepRouter = createTRPCRouter({
       return sleep;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("sleepRecord")
     .input(updateSleepSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -152,7 +152,7 @@ export const sleepRouter = createTRPCRouter({
       return sleep;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("sleepRecord")
     .input(deleteSleepSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {

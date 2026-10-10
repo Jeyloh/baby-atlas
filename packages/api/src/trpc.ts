@@ -179,6 +179,9 @@ export async function assertChildAccess(
 }
 
 // Create a procedure that validates household access using input
+// (householdId, childId, or an id that is a child or household id).
+// Fails closed: if no household can be resolved, the call is rejected.
+// For inputs addressed by a record id, use recordProcedure instead.
 // This approach works with tRPC v11's caller factory for testing
 export const householdProcedure = protectedProcedure.use(
   async ({ ctx, next, getRawInput }) => {
@@ -187,22 +190,84 @@ export const householdProcedure = protectedProcedure.use(
 
     const householdId = await resolveHouseholdId(ctx.prisma, input);
 
-    if (householdId) {
-      const membership = await validateHouseholdAccess(
-        ctx.prisma,
-        householdId,
-        ctx.session.user.id
-      );
-
-      return next({
-        ctx: {
-          ...ctx,
-          householdId,
-          memberRole: membership.role,
-        },
-      });
+    if (!householdId) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
     }
 
-    return next({ ctx });
+    const membership = await validateHouseholdAccess(
+      ctx.prisma,
+      householdId,
+      ctx.session.user.id
+    );
+
+    return next({
+      ctx: {
+        ...ctx,
+        householdId,
+        memberRole: membership.role,
+      },
+    });
   }
 );
+
+type Prisma = TRPCContext["prisma"];
+
+// Finds the child that owns a record, so access can be checked through the
+// child's household.
+const recordChildResolvers = {
+  sleepRecord: (p: Prisma, id: string) =>
+    p.sleepRecord.findUnique({ where: { id }, select: { childId: true } }),
+  feedingRecord: (p: Prisma, id: string) =>
+    p.feedingRecord.findUnique({ where: { id }, select: { childId: true } }),
+  diaperRecord: (p: Prisma, id: string) =>
+    p.diaperRecord.findUnique({ where: { id }, select: { childId: true } }),
+  pumpingRecord: (p: Prisma, id: string) =>
+    p.pumpingRecord.findUnique({ where: { id }, select: { childId: true } }),
+  growthRecord: (p: Prisma, id: string) =>
+    p.growthRecord.findUnique({ where: { id }, select: { childId: true } }),
+  activityRecord: (p: Prisma, id: string) =>
+    p.activityRecord.findUnique({ where: { id }, select: { childId: true } }),
+  temperatureRecord: (p: Prisma, id: string) =>
+    p.temperatureRecord.findUnique({ where: { id }, select: { childId: true } }),
+  medicine: (p: Prisma, id: string) =>
+    p.medicine.findUnique({ where: { id }, select: { childId: true } }),
+  medicineRecord: async (p: Prisma, id: string) => {
+    const record = await p.medicineRecord.findUnique({
+      where: { id },
+      select: { medicine: { select: { childId: true } } },
+    });
+    return record ? { childId: record.medicine.childId } : null;
+  },
+} satisfies Record<string, (p: Prisma, id: string) => Promise<{ childId: string } | null>>;
+
+export type RecordModel = keyof typeof recordChildResolvers;
+
+/**
+ * A procedure for inputs addressed by a record id. Looks up the record's
+ * child and validates household membership before the handler runs.
+ * `idKey` names the input field holding the id (default "id").
+ */
+export function recordProcedure(model: RecordModel, idKey = "id") {
+  return protectedProcedure.use(async ({ ctx, next, getRawInput }) => {
+    const input = ((await getRawInput()) ?? {}) as Record<string, unknown>;
+    const id = input[idKey];
+
+    const record =
+      typeof id === "string"
+        ? await recordChildResolvers[model](ctx.prisma, id)
+        : null;
+    if (!record) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
+    }
+
+    const membership = await assertChildAccess(ctx, record.childId);
+
+    return next({
+      ctx: {
+        ...ctx,
+        householdId: membership.householdId,
+        memberRole: membership.role,
+      },
+    });
+  });
+}

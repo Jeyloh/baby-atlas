@@ -13,7 +13,7 @@ import {
   feedingSummarySchema,
 } from "@baby-atlas/schemas";
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const feedingRouter = createTRPCRouter({
   list: householdProcedure
@@ -89,7 +89,7 @@ export const feedingRouter = createTRPCRouter({
       return feeding;
     }),
 
-  endBreastfeeding: householdProcedure
+  endBreastfeeding: recordProcedure("feedingRecord")
     .input(endBreastfeedingSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -113,7 +113,7 @@ export const feedingRouter = createTRPCRouter({
       return feeding;
     }),
 
-  switchBreastfeedingSide: householdProcedure
+  switchBreastfeedingSide: recordProcedure("feedingRecord")
     .input(switchBreastfeedingSideSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -210,7 +210,7 @@ export const feedingRouter = createTRPCRouter({
       return feeding;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("feedingRecord")
     .input(updateFeedingSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -238,7 +238,7 @@ export const feedingRouter = createTRPCRouter({
       return feeding;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("feedingRecord")
     .input(deleteFeedingSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {

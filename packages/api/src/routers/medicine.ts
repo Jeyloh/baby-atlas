@@ -10,7 +10,7 @@ import {
   deleteMedicineRecordSchema,
   getMedicineRecordsSchema,
 } from "@baby-atlas/schemas";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const medicineRouter = createTRPCRouter({
   list: householdProcedure
@@ -27,7 +27,7 @@ export const medicineRouter = createTRPCRouter({
       return medicines;
     }),
 
-  get: householdProcedure
+  get: recordProcedure("medicine")
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const medicine = await ctx.prisma.medicine.findUnique({
@@ -70,7 +70,7 @@ export const medicineRouter = createTRPCRouter({
       return medicine;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("medicine")
     .input(updateMedicineSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -94,7 +94,7 @@ export const medicineRouter = createTRPCRouter({
       return medicine;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("medicine")
     .input(deleteMedicineSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole !== "OWNER" && ctx.memberRole !== "ADMIN") {
@@ -111,7 +111,7 @@ export const medicineRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  logRecord: householdProcedure
+  logRecord: recordProcedure("medicine", "medicineId")
     .input(logMedicineRecordSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -134,7 +134,7 @@ export const medicineRouter = createTRPCRouter({
       return record;
     }),
 
-  updateRecord: householdProcedure
+  updateRecord: recordProcedure("medicineRecord")
     .input(updateMedicineRecordSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -157,7 +157,7 @@ export const medicineRouter = createTRPCRouter({
       return record;
     }),
 
-  deleteRecord: householdProcedure
+  deleteRecord: recordProcedure("medicineRecord")
     .input(deleteMedicineRecordSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -174,7 +174,7 @@ export const medicineRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getRecords: householdProcedure
+  getRecords: recordProcedure("medicine", "medicineId")
     .input(getMedicineRecordsSchema)
     .query(async ({ ctx, input }) => {
       const records = await ctx.prisma.medicineRecord.findMany({

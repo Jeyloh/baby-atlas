@@ -10,7 +10,7 @@ import {
   getActivePumpingSchema,
 } from "@baby-atlas/schemas";
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const pumpingRouter = createTRPCRouter({
   list: householdProcedure
@@ -54,7 +54,7 @@ export const pumpingRouter = createTRPCRouter({
       return pumping;
     }),
 
-  end: householdProcedure
+  end: recordProcedure("pumpingRecord")
     .input(endPumpingSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -100,7 +100,7 @@ export const pumpingRouter = createTRPCRouter({
       return pumping;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("pumpingRecord")
     .input(updatePumpingSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -124,7 +124,7 @@ export const pumpingRouter = createTRPCRouter({
       return pumping;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("pumpingRecord")
     .input(deletePumpingSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {

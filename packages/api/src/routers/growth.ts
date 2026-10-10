@@ -6,7 +6,7 @@ import {
   getGrowthRecordsSchema,
   getLatestGrowthSchema,
 } from "@baby-atlas/schemas";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const growthRouter = createTRPCRouter({
   list: householdProcedure
@@ -63,7 +63,7 @@ export const growthRouter = createTRPCRouter({
       return growth;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("growthRecord")
     .input(updateGrowthSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -87,7 +87,7 @@ export const growthRouter = createTRPCRouter({
       return growth;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("growthRecord")
     .input(deleteGrowthSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {

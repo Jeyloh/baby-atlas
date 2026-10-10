@@ -6,7 +6,7 @@ import {
   getTemperatureRecordsSchema,
   getLatestTemperatureSchema,
 } from "@baby-atlas/schemas";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const temperatureRouter = createTRPCRouter({
   list: householdProcedure
@@ -61,7 +61,7 @@ export const temperatureRouter = createTRPCRouter({
       return temperature;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("temperatureRecord")
     .input(updateTemperatureSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -83,7 +83,7 @@ export const temperatureRouter = createTRPCRouter({
       return temperature;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("temperatureRecord")
     .input(deleteTemperatureSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {

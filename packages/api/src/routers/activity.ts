@@ -9,7 +9,7 @@ import {
   activitySummarySchema,
 } from "@baby-atlas/schemas";
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
-import { createTRPCRouter, householdProcedure } from "../trpc";
+import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 
 export const activityRouter = createTRPCRouter({
   list: householdProcedure
@@ -54,7 +54,7 @@ export const activityRouter = createTRPCRouter({
       return activity;
     }),
 
-  end: householdProcedure
+  end: recordProcedure("activityRecord")
     .input(endActivitySchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -98,7 +98,7 @@ export const activityRouter = createTRPCRouter({
       return activity;
     }),
 
-  update: householdProcedure
+  update: recordProcedure("activityRecord")
     .input(updateActivitySchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
@@ -121,7 +121,7 @@ export const activityRouter = createTRPCRouter({
       return activity;
     }),
 
-  delete: householdProcedure
+  delete: recordProcedure("activityRecord")
     .input(deleteActivitySchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.memberRole === "VIEWER") {
