@@ -1,0 +1,40 @@
+{
+  "title": "Ready for the potty?",
+  "notFound": "Child not found",
+  "errorTitle": "Something went wrong",
+  "intro": "Most children show signs of potty readiness between 18 and 36 months. Every child is different, and there is no right answer. Use this page to note what you see.",
+  "youngNote": "{name} is {months, plural, one {# month} other {# months}} old. That is early, but feel free to note any signs you see along the way.",
+  "signals": {
+    "title": "What have you noticed?",
+    "hint": "Tap the signs you have seen.",
+    "DRY_TWO_HOURS": "Stays dry for two hours or more",
+    "HIDES_TO_POOP": "Hides to poop",
+    "DISCOMFORT_DIRTY_DIAPER": "Dislikes a wet or dirty diaper",
+    "INTEREST_IN_TOILET": "Shows interest in the toilet or potty",
+    "PULLS_PANTS_UP_DOWN": "Pulls pants up and down alone",
+    "ANNOUNCES_NEED": "Says when it is coming"
+  },
+  "notes": "Note (optional)",
+  "log": "Log now",
+  "logSelected": "{count, plural, one {Log # sign now} other {Log # signs now}}",
+  "selectFirst": "Select at least one sign",
+  "logged": "Logged",
+  "summary": {
+    "title": "The last {days} days",
+    "seenCount": "{seen} of {total} signs seen",
+    "seen": "{count, plural, one {Seen # time} other {Seen # times}}",
+    "notSeen": "Not seen yet",
+    "level": {
+      "none": "No signs noted yet. That is perfectly fine. Watch what your child shows interest in.",
+      "few": "You have started to see signs. Keep observing and let your child set the pace.",
+      "some": "Several signs are showing up. Your child may be ready soon, but there is no rush.",
+      "many": "You see many signs. This could be a good time to try the potty."
+    }
+  },
+  "history": {
+    "title": "History",
+    "empty": "No entries yet. Signs you log will show up here.",
+    "delete": "Delete entry",
+    "deleted": "Entry deleted"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "title": "Klar for potte?",
+  "notFound": "Fant ikke barnet",
+  "errorTitle": "Noe gikk galt",
+  "intro": "De fleste barn viser tegn på at de er klare for potte mellom 18 og 36 måneder. Alle barn er forskjellige, og det finnes ingen fasit. Her kan du notere det du ser.",
+  "youngNote": "{name} er {months, plural, one {# måned} other {# måneder}} gammel. Det er tidlig, men du kan gjerne notere tegn du ser underveis.",
+  "signals": {
+    "title": "Hva har du sett nå?",
+    "hint": "Trykk på de tegnene du har lagt merke til.",
+    "DRY_TWO_HOURS": "Er tørr i to timer eller mer",
+    "HIDES_TO_POOP": "Gjemmer seg for å bæsje",
+    "DISCOMFORT_DIRTY_DIAPER": "Misliker våt eller skitten bleie",
+    "INTEREST_IN_TOILET": "Viser interesse for do eller potte",
+    "PULLS_PANTS_UP_DOWN": "Drar buksene opp og ned selv",
+    "ANNOUNCES_NEED": "Sier fra at det kommer"
+  },
+  "notes": "Notat (valgfritt)",
+  "log": "Logg nå",
+  "logSelected": "{count, plural, one {Logg # tegn nå} other {Logg # tegn nå}}",
+  "selectFirst": "Velg minst ett tegn",
+  "logged": "Logget",
+  "summary": {
+    "title": "De siste {days} dagene",
+    "seenCount": "{seen} av {total} tegn er sett",
+    "seen": "{count, plural, one {Sett # gang} other {Sett # ganger}}",
+    "notSeen": "Ikke sett ennå",
+    "level": {
+      "none": "Ingen tegn er notert ennå. Det er helt greit. Legg merke til hva barnet viser interesse for.",
+      "few": "Du har begynt å se tegn. Fortsett å observere, og la barnet bestemme tempoet.",
+      "some": "Flere tegn dukker opp. Barnet kan snart være klart, men ingen skynder seg.",
+      "many": "Du ser mange tegn. Dette kan være et fint tidspunkt å prøve potte."
+    }
+  },
+  "history": {
+    "title": "Historikk",
+    "empty": "Ingen loggføringer ennå. Når du logger tegn, dukker de opp her.",
+    "delete": "Slett loggføringen",
+    "deleted": "Loggføringen er slettet"
+  }
+}

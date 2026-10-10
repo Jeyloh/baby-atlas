@@ -1,0 +1,38 @@
+{
+  "title": "Vaccines",
+  "notFound": "Child not found",
+  "errorTitle": "Something went wrong",
+  "names": {
+    "rotavirus": "Rotavirus vaccine",
+    "sixInOne": "Six-in-one vaccine (diphtheria, tetanus, whooping cough, polio, Hib, hepatitis B)",
+    "pneumococcal": "Pneumococcal vaccine",
+    "mmr": "MMR vaccine (measles, mumps, rubella)"
+  },
+  "groups": {
+    "w6": "6 weeks",
+    "m3": "3 months",
+    "m5": "5 months",
+    "m12": "12 months",
+    "m15": "15 months"
+  },
+  "progress": "{given} of {total} doses given",
+  "dose": "Dose {dose}",
+  "dueOn": "Recommended from {date}",
+  "givenOn": "Given {date}",
+  "status": {
+    "given": "Given",
+    "overdue": "Overdue",
+    "due": "Soon",
+    "upcoming": "Upcoming"
+  },
+  "dialog": {
+    "markTitle": "Mark as given",
+    "editTitle": "Given {date}",
+    "dateLabel": "Date given",
+    "save": "Save as given",
+    "undo": "Undo",
+    "marked": "Dose marked as given",
+    "unmarked": "Mark removed"
+  },
+  "footer": "This overview is based on the Norwegian Childhood Immunisation Programme from FHI. Always check with your child health clinic (helsestasjon). Children in risk groups may be offered more vaccines."
+}
