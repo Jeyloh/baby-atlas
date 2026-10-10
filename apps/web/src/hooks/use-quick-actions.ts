@@ -7,6 +7,7 @@ import { useTimer } from "@/hooks/use-timer";
 import {
   getLeftElapsedMs,
   getRightElapsedMs,
+  useTimerStore,
   type ActiveTimer,
 } from "@/stores/timer-store";
 
@@ -14,6 +15,7 @@ export type QuickActionResult =
   | { kind: "logged"; undo: () => Promise<void> }
   | { kind: "started"; undo: () => Promise<void> }
   | { kind: "stopped"; durationMs: number }
+  | { kind: "switched"; side: "LEFT" | "RIGHT" }
   | { kind: "needsDetails" };
 
 export interface QuickActionState {
@@ -97,6 +99,8 @@ export function useQuickActions(childId: string) {
   const deleteSleep = trpc.sleep.delete.useMutation(opts);
   const startBreast = trpc.feeding.startBreastfeeding.useMutation(opts);
   const endBreast = trpc.feeding.endBreastfeeding.useMutation(opts);
+  const switchBreast = trpc.feeding.switchBreastfeedingSide.useMutation(opts);
+  const switchTimerSide = useTimerStore((s) => s.switchBreastfeedingSide);
   const startPumping = trpc.pumping.start.useMutation(opts);
   const endPumping = trpc.pumping.end.useMutation(opts);
   const deletePumping = trpc.pumping.delete.useMutation(opts);
@@ -187,12 +191,22 @@ export function useQuickActions(childId: string) {
         case "breastLeft":
         case "breastRight": {
           const side = action === "breastLeft" ? "LEFT" : "RIGHT";
-          // Read the local timer before it is cleared: it has per-side totals
           const localTimer =
             feedingTimer.timer?.recordId === runningFeedingId ? feedingTimer.timer : undefined;
+          const runningSide = activeFeeding?.side ?? localTimer?.metadata?.feedingSide;
+
+          // Tapping the other side during a feed switches sides, like the log modal
+          if (runningFeedingId && (runningSide === "LEFT" || runningSide === "RIGHT") && runningSide !== side) {
+            const startedAt = activeFeeding?.startTime ?? new Date(localTimer?.startTime ?? now);
+            const totalSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
+            const durations = breastSideDurations(localTimer, activeFeeding, totalSeconds);
+            if (localTimer) switchTimerSide(localTimer.id, side);
+            await switchBreast.mutateAsync({ id: runningFeedingId, newSide: side, ...durations });
+            return { kind: "switched", side };
+          }
+
           feedingTimer.stop();
           if (runningFeedingId) {
-            // Any running feed is stopped, whichever side button was tapped
             const startedAt = activeFeeding?.startTime ?? new Date(localTimer?.startTime ?? now);
             const totalSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
             await endBreast.mutateAsync({
@@ -239,7 +253,7 @@ export function useQuickActions(childId: string) {
       runningSleepId, runningFeedingId, runningPumpingId,
       sleepTimer, feedingTimer, pumpingTimer,
       logDiaper, deleteDiaper, logBottle, deleteFeeding,
-      startSleep, endSleep, deleteSleep, startBreast, endBreast,
+      startSleep, endSleep, deleteSleep, startBreast, endBreast, switchBreast, switchTimerSide,
       startPumping, endPumping, deletePumping,
     ]
   );

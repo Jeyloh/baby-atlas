@@ -47,7 +47,8 @@ export function QuickActionBar({ childId }: { childId: string }) {
 
   const { duration } = useFormatters();
   const pinned = user?.quickActions ?? [];
-  const formatDuration = (ms: number) => duration(Math.max(1, ms / 60000));
+  const formatDuration = (ms: number) =>
+    ms < 60_000 ? t("lessThanMinute") : duration(ms / 60000);
 
   const handleTap = async (action: QuickAction) => {
     if (busy) return;
@@ -64,6 +65,10 @@ export function QuickActionBar({ childId }: { childId: string }) {
       }
       if (result.kind === "stopped") {
         toast({ title: t("stopped", { action: label, duration: formatDuration(result.durationMs) }) });
+        return;
+      }
+      if (result.kind === "switched") {
+        toast({ title: t("switched", { side: t(`sides.${result.side}`) }) });
         return;
       }
 

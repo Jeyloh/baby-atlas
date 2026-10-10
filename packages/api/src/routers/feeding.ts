@@ -126,14 +126,16 @@ export const feedingRouter = createTRPCRouter({
         });
       }
 
-      const feeding = await ctx.prisma.feedingRecord.update({
-        where: { id: input.id },
-        data: {
-          side: input.newSide,
-          leftDurationSeconds: input.leftDurationSeconds,
-          rightDurationSeconds: input.rightDurationSeconds,
-        },
-      });
+      const feeding = await ctx.prisma.feedingRecord
+        .update({
+          where: { id: input.id, endTime: null },
+          data: {
+            side: input.newSide,
+            leftDurationSeconds: input.leftDurationSeconds,
+            rightDurationSeconds: input.rightDurationSeconds,
+          },
+        })
+        .catch(rethrowIfAlreadyEnded);
 
       return feeding;
     }),
