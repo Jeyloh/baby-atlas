@@ -48,7 +48,7 @@
   "sheet": {
     "newTitle": "Nytt innlegg",
     "editTitle": "Rediger innlegg",
-    "description": "Innlegget deles med alle i husholdningen.",
+    "description": "Innlegget deles med alle i husstanden.",
     "text": "Hva skjedde?",
     "textPlaceholder": "Skriv noen ord om dagen …",
     "date": "Dato",
@@ -70,7 +70,7 @@
   },
   "delete": {
     "title": "Slette innlegget?",
-    "description": "Teksten og bildene slettes for alle i husholdningen. Dette kan ikke angres.",
+    "description": "Teksten og bildene slettes for alle i husstanden. Dette kan ikke angres.",
     "deleted": "Innlegget er slettet"
   },
   "errors": {

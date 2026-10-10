@@ -43,7 +43,7 @@ function TagButton({
       disabled={disabled}
       onClick={() => onToggle(tag)}
       className={cn(
-        "flex min-h-12 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
+        "flex min-h-12 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
         selected ? cn("border-transparent", solid) : "bg-card hover:bg-muted"
       )}
     >
