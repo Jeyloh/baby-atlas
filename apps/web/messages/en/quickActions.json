@@ -1,0 +1,29 @@
+{
+  "title": "Shortcuts",
+  "hint": "Tap to log now. Press and hold for details.",
+  "edit": "Edit shortcuts",
+  "pickerTitle": "Choose shortcuts",
+  "pickerHint": "Choose up to {max} actions to show at the top of the home screen.",
+  "pickerCount": "{count} of {max} selected",
+  "labels": {
+    "diaperWet": "Wet diaper",
+    "diaperDirty": "Dirty diaper",
+    "diaperBoth": "Wet and dirty",
+    "sleep": "Sleep",
+    "breastLeft": "Breastfeed left",
+    "breastRight": "Breastfeed right",
+    "bottle": "Bottle",
+    "pumping": "Pumping"
+  },
+  "stopLabel": "Stop {action}",
+  "running": "Running",
+  "logged": "{action} logged",
+  "started": "{action} started",
+  "stopped": "{action} stopped after {duration}",
+  "bottleNeedsAmount": "Log your first bottle with an amount, then repeat it with one tap.",
+  "durationMinutes": "{minutes} min",
+  "durationHours": "{hours} h {minutes} min",
+  "undo": "Undo",
+  "undone": "Undone",
+  "failed": "Could not save. Try again."
+}

@@ -1,0 +1,29 @@
+{
+  "title": "Snarveier",
+  "hint": "Trykk for å logge nå. Hold inne for detaljer.",
+  "edit": "Endre snarveier",
+  "pickerTitle": "Velg snarveier",
+  "pickerHint": "Velg opptil {max} handlinger som vises øverst på hjemskjermen.",
+  "pickerCount": "{count} av {max} valgt",
+  "labels": {
+    "diaperWet": "Tissebleie",
+    "diaperDirty": "Bæsjbleie",
+    "diaperBoth": "Tiss og bæsj",
+    "sleep": "Søvn",
+    "breastLeft": "Amming venstre",
+    "breastRight": "Amming høyre",
+    "bottle": "Flaske",
+    "pumping": "Pumping"
+  },
+  "stopLabel": "Stopp {action}",
+  "running": "Pågår",
+  "logged": "{action} er logget",
+  "started": "{action} startet",
+  "stopped": "{action} stoppet etter {duration}",
+  "bottleNeedsAmount": "Logg første flaske med mengde, så kan du gjenta den med ett trykk.",
+  "durationMinutes": "{minutes} min",
+  "durationHours": "{hours} t {minutes} min",
+  "undo": "Angre",
+  "undone": "Angret",
+  "failed": "Kunne ikke lagre. Prøv igjen."
+}
