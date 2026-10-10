@@ -1,0 +1,19 @@
+{
+  "appName": "Baby Atlas",
+  "tagline": "A simple overview of your child's first years",
+  "loading": "Loading…",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "back": "Back",
+  "notes": "Notes",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "language": "Language",
+  "languages": {
+    "nb": "Norsk (bokmål)",
+    "en": "English"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "appName": "Baby Atlas",
+  "tagline": "Enkel oversikt over barnets første år",
+  "loading": "Laster …",
+  "save": "Lagre",
+  "cancel": "Avbryt",
+  "delete": "Slett",
+  "edit": "Rediger",
+  "close": "Lukk",
+  "back": "Tilbake",
+  "notes": "Notater",
+  "today": "I dag",
+  "yesterday": "I går",
+  "language": "Språk",
+  "languages": {
+    "nb": "Norsk (bokmål)",
+    "en": "English"
+  }
+}
