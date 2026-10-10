@@ -1,8 +1,14 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { prismaMock } from "../test/setup";
-import { createTestContext, createTestChild, TEST_IDS } from "../test/helpers";
+import {
+  createTestContext,
+  createTestChild,
+  createTestMembership,
+  TEST_IDS,
+} from "../test/helpers";
 import { createCallerFactory } from "../trpc";
 import { sleepRouter } from "./sleep";
+import { childRouter } from "./child";
 import { medicineRouter } from "./medicine";
 import { temperatureRouter } from "./temperature";
 
@@ -56,6 +62,34 @@ describe("record access control", () => {
     await expect(caller.delete({ id: TEST_IDS.sleepId })).rejects.toMatchObject({
       code: "NOT_FOUND",
     });
+  });
+
+  it("rejects own householdId combined with another family's childId", async () => {
+    // Member of own household, but childId belongs to another household
+    prismaMock.householdMember.findUnique.mockResolvedValue(
+      createTestMembership({ role: "OWNER" }) as never
+    );
+    const caller = createCallerFactory(sleepRouter)(createTestContext());
+
+    await expect(
+      caller.list({ childId: otherChildId, householdId: TEST_IDS.householdId } as never)
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(prismaMock.sleepRecord.findMany).not.toHaveBeenCalled();
+  });
+
+  it("rejects own childId combined with another family's child as id", async () => {
+    prismaMock.householdMember.findUnique.mockResolvedValue(
+      createTestMembership({ role: "OWNER" }) as never
+    );
+    prismaMock.child.findUnique.mockImplementation((async (args: { where: { id: string } }) =>
+      args.where.id === TEST_IDS.childId
+        ? createTestChild()
+        : createTestChild({ id: otherChildId, householdId: "clq1234567890abcdefghij98" })) as never);
+    const caller = createCallerFactory(childRouter)(createTestContext());
+
+    await expect(
+      caller.get({ id: otherChildId, childId: TEST_IDS.childId } as never)
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 
   it("fails closed when householdProcedure cannot resolve a household", async () => {

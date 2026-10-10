@@ -73,49 +73,50 @@ export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(enforceUserIsAuthed);
 
-// Helper to extract household ID from various input formats
+/**
+ * Resolves the household from the raw input. The handler may read any of
+ * householdId, childId or id, so every field that is present must resolve,
+ * and all of them must point to the same household. Otherwise a caller could
+ * pass their own householdId to pass the gate and another family's childId
+ * for the handler to act on. Returns undefined when nothing resolves or the
+ * fields disagree.
+ */
 async function resolveHouseholdId(
   prisma: TRPCContext["prisma"],
-  input: { householdId?: string; childId?: string; id?: string }
+  input: { householdId?: unknown; childId?: unknown; id?: unknown }
 ): Promise<string | undefined> {
-  // Direct householdId takes priority
-  if (input.householdId) {
-    return input.householdId;
+  const childHousehold = async (id: string) =>
+    (await prisma.child.findUnique({ where: { id }, select: { householdId: true } }))
+      ?.householdId;
+
+  const resolved: (string | undefined)[] = [];
+
+  if (input.householdId !== undefined) {
+    resolved.push(typeof input.householdId === "string" ? input.householdId : undefined);
   }
 
-  // Check for childId first (explicit child reference)
-  if (input.childId) {
-    const child = await prisma.child.findUnique({
-      where: { id: input.childId },
-      select: { householdId: true },
-    });
-    if (child?.householdId) {
-      return child.householdId;
+  if (input.childId !== undefined) {
+    resolved.push(
+      typeof input.childId === "string" ? await childHousehold(input.childId) : undefined
+    );
+  }
+
+  // 'id' is a child id (child.get) or a household id (household.update)
+  if (input.id !== undefined) {
+    if (typeof input.id !== "string") {
+      resolved.push(undefined);
+    } else {
+      const fromChild = await childHousehold(input.id);
+      const fromHousehold = fromChild
+        ? undefined
+        : (await prisma.household.findUnique({ where: { id: input.id }, select: { id: true } }))?.id;
+      resolved.push(fromChild ?? fromHousehold);
     }
   }
 
-  // For 'id' field, try as child first, then as household
-  if (input.id) {
-    // Try as child ID
-    const child = await prisma.child.findUnique({
-      where: { id: input.id },
-      select: { householdId: true },
-    });
-    if (child?.householdId) {
-      return child.householdId;
-    }
-
-    // Try as household ID directly (for routes like household.update)
-    const household = await prisma.household.findUnique({
-      where: { id: input.id },
-      select: { id: true },
-    });
-    if (household) {
-      return household.id;
-    }
-  }
-
-  return undefined;
+  const [first] = resolved;
+  if (!first || resolved.some((h) => h !== first)) return undefined;
+  return first;
 }
 
 // Helper to get membership and validate access
@@ -186,7 +187,7 @@ export async function assertChildAccess(
 export const householdProcedure = protectedProcedure.use(
   async ({ ctx, next, getRawInput }) => {
     const rawInput = await getRawInput();
-    const input = (rawInput ?? {}) as { householdId?: string; childId?: string; id?: string };
+    const input = (rawInput ?? {}) as { householdId?: unknown; childId?: unknown; id?: unknown };
 
     const householdId = await resolveHouseholdId(ctx.prisma, input);
 
