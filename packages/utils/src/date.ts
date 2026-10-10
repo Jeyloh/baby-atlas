@@ -45,7 +45,7 @@ export function formatDuration(minutes: number): string {
 
 export function formatTime(date: Date | string): string {
   const d = typeof date === "string" ? parseISO(date) : date;
-  return format(d, "h:mm a");
+  return format(d, "HH:mm");
 }
 
 export function formatDate(date: Date | string): string {

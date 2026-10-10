@@ -1,0 +1,29 @@
+{
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "never": "Never",
+  "ongoing": "ongoing",
+  "justNow": "just now",
+  "durationHoursMinutes": "{hours}h {minutes}m",
+  "durationHours": "{hours}h",
+  "durationMinutes": "{minutes}m",
+  "durationSeconds": "{seconds}s",
+  "durationMinutesSeconds": "{minutes}m {seconds}s",
+  "durationHoursMinutesSeconds": "{hours}h {minutes}m {seconds}s",
+  "timeSince": "{value} ago",
+  "daysAgo": "{count, plural, one {# day} other {# days}}",
+  "dateAtTime": "{date} at {time}",
+  "todayAtTime": "Today at {time}",
+  "yesterdayAtTime": "Yesterday at {time}",
+  "timeRange": "{start} – {end}",
+  "timeRangeOngoing": "{start} – ongoing",
+  "bornOn": "Born {date}",
+  "units": {
+    "ml": "{value} ml",
+    "liters": "{value} L",
+    "kg": "{value} kg",
+    "g": "{value} g",
+    "cm": "{value} cm",
+    "celsius": "{value} °C"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "today": "I dag",
+  "yesterday": "I går",
+  "never": "Aldri",
+  "ongoing": "pågår",
+  "justNow": "akkurat nå",
+  "durationHoursMinutes": "{hours} t {minutes} min",
+  "durationHours": "{hours} t",
+  "durationMinutes": "{minutes} min",
+  "durationSeconds": "{seconds} sek",
+  "durationMinutesSeconds": "{minutes} min {seconds} sek",
+  "durationHoursMinutesSeconds": "{hours} t {minutes} min {seconds} sek",
+  "timeSince": "{value} siden",
+  "daysAgo": "{count, plural, one {# dag} other {# dager}}",
+  "dateAtTime": "{date} kl. {time}",
+  "todayAtTime": "I dag kl. {time}",
+  "yesterdayAtTime": "I går kl. {time}",
+  "timeRange": "{start} – {end}",
+  "timeRangeOngoing": "{start} – pågår",
+  "bornOn": "Født {date}",
+  "units": {
+    "ml": "{value} ml",
+    "liters": "{value} l",
+    "kg": "{value} kg",
+    "g": "{value} g",
+    "cm": "{value} cm",
+    "celsius": "{value} °C"
+  }
+}

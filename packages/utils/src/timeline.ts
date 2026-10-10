@@ -73,11 +73,11 @@ export function formatDurationPrecise(
 }
 
 /**
- * Format time in 12-hour format with AM/PM
+ * Format time in 24-hour format (HH:mm)
  */
 export function formatTimeShort(date: Date | string): string {
   const d = typeof date === "string" ? parseISO(date) : date;
-  return format(d, "h:mm a");
+  return format(d, "HH:mm");
 }
 
 /**
@@ -130,10 +130,8 @@ export function getTimelineHourLabels(
   const labels: string[] = [];
   // Show every hour from day start to day start next day (25 labels total)
   for (let i = 0; i <= 24; i++) {
-    let hour = (dayStartHour + i) % 24;
-    const ampm = hour >= 12 ? "pm" : "am";
-    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    labels.push(`${displayHour}${ampm}`);
+    const hour = (dayStartHour + i) % 24;
+    labels.push(String(hour).padStart(2, "0"));
   }
 
   return labels;

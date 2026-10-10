@@ -35,22 +35,22 @@ describe("formatDuration", () => {
 describe("formatTime", () => {
   it("formats Date object", () => {
     const date = new Date("2024-01-15T14:30:00");
-    expect(formatTime(date)).toBe("2:30 PM");
+    expect(formatTime(date)).toBe("14:30");
   });
 
   it("formats ISO string", () => {
     const result = formatTime("2024-01-15T09:15:00");
-    expect(result).toBe("9:15 AM");
+    expect(result).toBe("09:15");
   });
 
   it("formats midnight", () => {
     const date = new Date("2024-01-15T00:00:00");
-    expect(formatTime(date)).toBe("12:00 AM");
+    expect(formatTime(date)).toBe("00:00");
   });
 
   it("formats noon", () => {
     const date = new Date("2024-01-15T12:00:00");
-    expect(formatTime(date)).toBe("12:00 PM");
+    expect(formatTime(date)).toBe("12:00");
   });
 });
 
@@ -96,12 +96,12 @@ describe("formatDateTime", () => {
 
   it("combines date and time", () => {
     const date = new Date("2024-01-15T14:30:00");
-    expect(formatDateTime(date)).toBe("Today at 2:30 PM");
+    expect(formatDateTime(date)).toBe("Today at 14:30");
   });
 
   it("works with older dates", () => {
     const date = new Date("2024-01-10T09:00:00");
-    expect(formatDateTime(date)).toBe("Jan 10 at 9:00 AM");
+    expect(formatDateTime(date)).toBe("Jan 10 at 09:00");
   });
 });
 

@@ -134,27 +134,27 @@ describe("formatDurationPrecise", () => {
 describe("formatTimeShort", () => {
   it("formats morning time", () => {
     const date = new Date("2024-01-15T09:30:00");
-    expect(formatTimeShort(date)).toBe("9:30 AM");
+    expect(formatTimeShort(date)).toBe("09:30");
   });
 
   it("formats afternoon time", () => {
     const date = new Date("2024-01-15T14:30:00");
-    expect(formatTimeShort(date)).toBe("2:30 PM");
+    expect(formatTimeShort(date)).toBe("14:30");
   });
 
   it("formats midnight", () => {
     const date = new Date("2024-01-15T00:00:00");
-    expect(formatTimeShort(date)).toBe("12:00 AM");
+    expect(formatTimeShort(date)).toBe("00:00");
   });
 
   it("formats noon", () => {
     const date = new Date("2024-01-15T12:00:00");
-    expect(formatTimeShort(date)).toBe("12:00 PM");
+    expect(formatTimeShort(date)).toBe("12:00");
   });
 
   it("accepts string dates", () => {
     const dateStr = "2024-01-15T09:30:00";
-    expect(formatTimeShort(dateStr)).toBe("9:30 AM");
+    expect(formatTimeShort(dateStr)).toBe("09:30");
   });
 });
 
@@ -163,20 +163,20 @@ describe("formatTimeRange", () => {
     const start = new Date("2024-01-15T10:00:00");
     const end = new Date("2024-01-15T12:00:00");
 
-    expect(formatTimeRange(start, end)).toBe("10:00 AM - 12:00 PM");
+    expect(formatTimeRange(start, end)).toBe("10:00 - 12:00");
   });
 
   it("formats ongoing activity", () => {
     const start = new Date("2024-01-15T10:00:00");
 
-    expect(formatTimeRange(start, null)).toBe("10:00 AM - ongoing");
+    expect(formatTimeRange(start, null)).toBe("10:00 - ongoing");
   });
 
   it("accepts string dates", () => {
     const start = "2024-01-15T10:00:00";
     const end = "2024-01-15T12:00:00";
 
-    expect(formatTimeRange(start, end)).toBe("10:00 AM - 12:00 PM");
+    expect(formatTimeRange(start, end)).toBe("10:00 - 12:00");
   });
 });
 
@@ -230,27 +230,27 @@ describe("getTimelineHourLabels", () => {
 
   it("starts with day start hour", () => {
     const labels = getTimelineHourLabels();
-    expect(labels[0]).toBe("8am");
+    expect(labels[0]).toBe("08");
   });
 
   it("ends with day start hour next day", () => {
     const labels = getTimelineHourLabels();
-    expect(labels[24]).toBe("8am");
+    expect(labels[24]).toBe("08");
   });
 
   it("includes noon", () => {
     const labels = getTimelineHourLabels();
-    expect(labels[4]).toBe("12pm");
+    expect(labels[4]).toBe("12");
   });
 
   it("includes midnight", () => {
     const labels = getTimelineHourLabels();
-    expect(labels[16]).toBe("12am");
+    expect(labels[16]).toBe("00");
   });
 
   it("accepts custom day start hour", () => {
     const labels = getTimelineHourLabels(6);
-    expect(labels[0]).toBe("6am");
+    expect(labels[0]).toBe("06");
   });
 });
 
