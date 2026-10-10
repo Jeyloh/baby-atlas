@@ -2,8 +2,9 @@
 node_modules
 .pnpm-store
 
-# Agent worktrees
+# Agent worktrees and browser test output
 .claude/worktrees/
+.playwright-mcp/
 
 # Build outputs
 dist
