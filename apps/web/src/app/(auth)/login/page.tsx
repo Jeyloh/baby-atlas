@@ -127,6 +127,12 @@ export default function LoginPage() {
               {isLoading ? t("sending") : t("sendLink")}
             </Button>
           </form>
+          {process.env.NODE_ENV === "development" && (
+            <Button asChild variant="outline" className="w-full">
+              {/* Plain anchor: the route sets a cookie and redirects */}
+              <a href="/api/dev/login">{t("devLogin")}</a>
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>
