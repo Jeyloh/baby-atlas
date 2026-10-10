@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { THEME_COLOR } from "@/lib/pwa/colors";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,8 +13,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${t("appName")} - ${t("tagline")}`,
     description: t("tagline"),
+    appleWebApp: {
+      capable: true,
+      title: "Baby Atlas",
+      statusBarStyle: "default",
+    },
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: THEME_COLOR,
+  viewportFit: "cover",
+};
 
 export default async function RootLayout({
   children,

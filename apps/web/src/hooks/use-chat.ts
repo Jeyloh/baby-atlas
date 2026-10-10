@@ -5,6 +5,13 @@ import type { Message, ToolCall, ContentBlock } from "@/components/chat";
 
 export type ModelId = "haiku" | "sonnet" | "opus";
 
+export class PremiumRequiredError extends Error {
+  constructor() {
+    super("premium_required");
+    this.name = "PremiumRequiredError";
+  }
+}
+
 interface UseChatOptions {
   childId: string;
   onError?: (error: Error) => void;
@@ -14,6 +21,7 @@ interface UseChatReturn {
   messages: Message[];
   isLoading: boolean;
   error: Error | null;
+  premiumRequired: boolean;
   model: ModelId;
   setModel: (model: ModelId) => void;
   sendMessage: (content: string) => Promise<void>;
@@ -67,6 +75,10 @@ export function useChat({ childId, onError }: UseChatOptions): UseChatReturn {
           }),
           signal: abortControllerRef.current.signal,
         });
+
+        if (response.status === 402) {
+          throw new PremiumRequiredError();
+        }
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -226,7 +238,7 @@ export function useChat({ childId, onError }: UseChatOptions): UseChatReturn {
 
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
-        onError?.(error);
+        if (!(error instanceof PremiumRequiredError)) onError?.(error);
 
         // Remove the streaming message if there was an error
         setMessages((prev) =>
@@ -257,6 +269,7 @@ export function useChat({ childId, onError }: UseChatOptions): UseChatReturn {
     messages,
     isLoading,
     error,
+    premiumRequired: error instanceof PremiumRequiredError,
     model,
     setModel,
     sendMessage,

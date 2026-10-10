@@ -1,0 +1,13 @@
+{
+  "title": "Baby Atlas Premium",
+  "intro": "Få mer ut av det du allerede logger.",
+  "features": {
+    "insights": "AI-innsikt: personlige tips basert på de siste 14 dagene",
+    "chat": "AI-chat: spør om alt, og logg med vanlige ord",
+    "stats": "Avansert statistikk: trender for søvn, mating og bleier"
+  },
+  "loggingFree": "Logging er og blir alltid gratis.",
+  "upgrade": "Oppgrader",
+  "comingSoon": "Betaling kommer snart. Du får beskjed når Premium er klar.",
+  "chatRequired": "AI-chat er en del av Premium. Logging fungerer som vanlig."
+}

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ModelId } from "@/hooks/use-chat";
+import { ChatUpgradeNotice } from "@/components/premium/chat-upgrade-notice";
 
 export interface Message {
   id: string;
@@ -25,9 +26,9 @@ export interface Message {
 }
 
 const MODEL_OPTIONS: { value: ModelId; label: string }[] = [
-  { value: "haiku", label: "Haiku 4.5" },
-  { value: "sonnet", label: "Sonnet 4.5" },
-  { value: "opus", label: "Opus 4.5" },
+  { value: "haiku", label: "Haiku 5.5" },
+  { value: "sonnet", label: "Sonnet 5.5" },
+  { value: "opus", label: "Opus 5.5" },
 ];
 
 interface ChatInterfaceProps {
@@ -37,6 +38,7 @@ interface ChatInterfaceProps {
   onClear?: () => void;
   isLoading?: boolean;
   disabled?: boolean;
+  premiumRequired?: boolean;
   model?: ModelId;
   onModelChange?: (model: ModelId) => void;
   className?: string;
@@ -49,6 +51,7 @@ export function ChatInterface({
   onClear,
   isLoading,
   disabled,
+  premiumRequired,
   model = "sonnet",
   onModelChange,
   className,
@@ -103,6 +106,8 @@ export function ChatInterface({
           </div>
         )}
       </div>
+
+      {premiumRequired && <ChatUpgradeNotice />}
 
       {/* Input area */}
       <div className="border-t bg-background p-4 space-y-3">
