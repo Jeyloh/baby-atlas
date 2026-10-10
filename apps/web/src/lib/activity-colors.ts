@@ -1,6 +1,9 @@
 /**
- * Activity color configuration for the dashboard cards and timeline
- * Each activity type has a background color and text color for proper contrast
+ * Activity colors. Each activity has one hue, used three ways:
+ * - tint: calm card surfaces (light tint with ink text, dark tint in dark mode)
+ * - solid: small chips, timeline bars and running-timer states
+ * - icon: a colored glyph on a neutral surface
+ * Full class strings are written out so Tailwind can find them.
  */
 
 export type ActivityCategory =
@@ -20,181 +23,102 @@ export type ActivityCategory =
   | "activity";
 
 export interface ActivityColorConfig {
-  bg: string;
-  bgDark: string;
-  text: string;
-  textDark: string;
-  border: string;
-  borderDark: string;
+  tint: string;
+  solid: string;
   icon: string;
-  iconDark: string;
 }
 
 export const activityColors: Record<ActivityCategory, ActivityColorConfig> = {
   sleep: {
-    bg: "bg-cyan-500",
-    bgDark: "dark:bg-cyan-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-cyan-600",
-    borderDark: "dark:border-cyan-500",
-    icon: "text-cyan-600",
-    iconDark: "dark:text-cyan-400",
+    tint: "bg-indigo-50 text-indigo-950 dark:bg-indigo-400/10 dark:text-indigo-100",
+    solid: "bg-indigo-500 text-white dark:bg-indigo-400 dark:text-indigo-950",
+    icon: "text-indigo-500 dark:text-indigo-300",
   },
   nursing: {
-    bg: "bg-orange-400",
-    bgDark: "dark:bg-orange-500",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-orange-500",
-    borderDark: "dark:border-orange-400",
-    icon: "text-orange-500",
-    iconDark: "dark:text-orange-400",
+    tint: "bg-rose-50 text-rose-950 dark:bg-rose-400/10 dark:text-rose-100",
+    solid: "bg-rose-500 text-white dark:bg-rose-400 dark:text-rose-950",
+    icon: "text-rose-500 dark:text-rose-300",
   },
   bottle: {
-    bg: "bg-orange-500",
-    bgDark: "dark:bg-orange-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-orange-600",
-    borderDark: "dark:border-orange-500",
-    icon: "text-orange-600",
-    iconDark: "dark:text-orange-400",
+    tint: "bg-sky-50 text-sky-950 dark:bg-sky-400/10 dark:text-sky-100",
+    solid: "bg-sky-500 text-white dark:bg-sky-400 dark:text-sky-950",
+    icon: "text-sky-600 dark:text-sky-300",
   },
   solids: {
-    bg: "bg-rose-400",
-    bgDark: "dark:bg-rose-500",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-rose-500",
-    borderDark: "dark:border-rose-400",
-    icon: "text-rose-500",
-    iconDark: "dark:text-rose-400",
+    tint: "bg-emerald-50 text-emerald-950 dark:bg-emerald-400/10 dark:text-emerald-100",
+    solid: "bg-emerald-500 text-white dark:bg-emerald-400 dark:text-emerald-950",
+    icon: "text-emerald-600 dark:text-emerald-300",
   },
   diaper: {
-    bg: "bg-yellow-400",
-    bgDark: "dark:bg-yellow-500",
-    text: "text-yellow-900",
-    textDark: "dark:text-yellow-900",
-    border: "border-yellow-500",
-    borderDark: "dark:border-yellow-400",
-    icon: "text-yellow-600",
-    iconDark: "dark:text-yellow-400",
+    tint: "bg-yellow-50 text-yellow-950 dark:bg-yellow-300/10 dark:text-yellow-100",
+    solid: "bg-yellow-400 text-yellow-950 dark:bg-yellow-300 dark:text-yellow-950",
+    icon: "text-yellow-600 dark:text-yellow-300",
   },
   diaperWet: {
-    bg: "bg-yellow-400",
-    bgDark: "dark:bg-yellow-500",
-    text: "text-yellow-900",
-    textDark: "dark:text-yellow-900",
-    border: "border-yellow-500",
-    borderDark: "dark:border-yellow-400",
-    icon: "text-yellow-600",
-    iconDark: "dark:text-yellow-400",
+    tint: "bg-yellow-50 text-yellow-950 dark:bg-yellow-300/10 dark:text-yellow-100",
+    solid: "bg-yellow-400 text-yellow-950 dark:bg-yellow-300 dark:text-yellow-950",
+    icon: "text-yellow-600 dark:text-yellow-300",
   },
   diaperDirty: {
-    bg: "bg-amber-700",
-    bgDark: "dark:bg-amber-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-amber-800",
-    borderDark: "dark:border-amber-500",
-    icon: "text-amber-700",
-    iconDark: "dark:text-amber-500",
+    tint: "bg-amber-50 text-amber-950 dark:bg-amber-500/10 dark:text-amber-100",
+    solid: "bg-amber-700 text-white dark:bg-amber-500 dark:text-amber-950",
+    icon: "text-amber-700 dark:text-amber-400",
   },
   diaperBoth: {
-    bg: "bg-stone-500",
-    bgDark: "dark:bg-stone-400",
-    text: "text-white",
-    textDark: "dark:text-stone-900",
-    border: "border-stone-600",
-    borderDark: "dark:border-stone-300",
-    icon: "text-stone-600",
-    iconDark: "dark:text-stone-400",
+    tint: "bg-stone-100 text-stone-900 dark:bg-stone-300/10 dark:text-stone-100",
+    solid: "bg-stone-500 text-white dark:bg-stone-300 dark:text-stone-900",
+    icon: "text-stone-500 dark:text-stone-300",
   },
   diaperDry: {
-    bg: "bg-slate-300",
-    bgDark: "dark:bg-slate-500",
-    text: "text-slate-900",
-    textDark: "dark:text-white",
-    border: "border-slate-400",
-    borderDark: "dark:border-slate-400",
-    icon: "text-slate-500",
-    iconDark: "dark:text-slate-400",
+    tint: "bg-slate-100 text-slate-900 dark:bg-slate-300/10 dark:text-slate-100",
+    solid: "bg-slate-400 text-white dark:bg-slate-300 dark:text-slate-900",
+    icon: "text-slate-500 dark:text-slate-300",
   },
   pumping: {
-    bg: "bg-purple-500",
-    bgDark: "dark:bg-purple-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-purple-600",
-    borderDark: "dark:border-purple-500",
-    icon: "text-purple-600",
-    iconDark: "dark:text-purple-400",
+    tint: "bg-violet-50 text-violet-950 dark:bg-violet-400/10 dark:text-violet-100",
+    solid: "bg-violet-500 text-white dark:bg-violet-400 dark:text-violet-950",
+    icon: "text-violet-500 dark:text-violet-300",
   },
   medicine: {
-    bg: "bg-red-500",
-    bgDark: "dark:bg-red-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-red-600",
-    borderDark: "dark:border-red-500",
-    icon: "text-red-600",
-    iconDark: "dark:text-red-400",
+    tint: "bg-red-50 text-red-950 dark:bg-red-400/10 dark:text-red-100",
+    solid: "bg-red-500 text-white dark:bg-red-400 dark:text-red-950",
+    icon: "text-red-500 dark:text-red-300",
   },
   growth: {
-    bg: "bg-green-500",
-    bgDark: "dark:bg-green-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-green-600",
-    borderDark: "dark:border-green-500",
-    icon: "text-green-600",
-    iconDark: "dark:text-green-400",
+    tint: "bg-teal-50 text-teal-950 dark:bg-teal-400/10 dark:text-teal-100",
+    solid: "bg-teal-600 text-white dark:bg-teal-400 dark:text-teal-950",
+    icon: "text-teal-600 dark:text-teal-300",
   },
   temperature: {
-    bg: "bg-rose-500",
-    bgDark: "dark:bg-rose-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-rose-600",
-    borderDark: "dark:border-rose-500",
-    icon: "text-rose-600",
-    iconDark: "dark:text-rose-400",
+    tint: "bg-orange-50 text-orange-950 dark:bg-orange-400/10 dark:text-orange-100",
+    solid: "bg-orange-500 text-white dark:bg-orange-400 dark:text-orange-950",
+    icon: "text-orange-500 dark:text-orange-300",
   },
   activity: {
-    bg: "bg-amber-500",
-    bgDark: "dark:bg-amber-600",
-    text: "text-white",
-    textDark: "dark:text-white",
-    border: "border-amber-600",
-    borderDark: "dark:border-amber-500",
-    icon: "text-amber-600",
-    iconDark: "dark:text-amber-400",
+    tint: "bg-lime-50 text-lime-950 dark:bg-lime-400/10 dark:text-lime-100",
+    solid: "bg-lime-600 text-white dark:bg-lime-400 dark:text-lime-950",
+    icon: "text-lime-600 dark:text-lime-300",
   },
 };
 
-/**
- * Get Tailwind classes for an activity card background
- */
+/** Calm tinted surface for a status card. */
 export function getActivityCardClasses(category: ActivityCategory): string {
-  const colors = activityColors[category];
-  return `${colors.bg} ${colors.bgDark} ${colors.text} ${colors.textDark}`;
+  return activityColors[category].tint;
 }
 
-/**
- * Get Tailwind classes for an activity timeline bar
- */
+/** Solid fill for chips, running timers and timeline bars. */
+export function getActivityChipClasses(category: ActivityCategory): string {
+  return activityColors[category].solid;
+}
+
+/** Solid fill for timeline bars. */
 export function getActivityBarClasses(category: ActivityCategory): string {
-  const colors = activityColors[category];
-  return `${colors.bg} ${colors.bgDark}`;
+  return activityColors[category].solid;
 }
 
-/**
- * Get Tailwind classes for an activity icon
- */
+/** Colored glyph on a neutral surface. */
 export function getActivityIconClasses(category: ActivityCategory): string {
-  const colors = activityColors[category];
-  return `${colors.icon} ${colors.iconDark}`;
+  return activityColors[category].icon;
 }
 
 /**

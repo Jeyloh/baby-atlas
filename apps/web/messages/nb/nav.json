@@ -3,5 +3,7 @@
   "userMenu": "Brukermeny",
   "profile": "Profil",
   "householdSettings": "Husstandsinnstillinger",
-  "signOut": "Logg ut"
+  "signOut": "Logg ut",
+  "theme": "Utseende",
+  "themes": { "light": "Lyst", "dark": "Mørkt", "system": "Som enheten" }
 }

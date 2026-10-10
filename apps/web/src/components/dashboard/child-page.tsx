@@ -45,14 +45,16 @@ export function ChildPage({ childId, title, notFoundLabel, children }: ChildPage
 
   return (
     <div className="mx-auto max-w-2xl space-y-5 pb-8">
-      <header className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="icon-lg" className="h-12 w-12 shrink-0">
+      <header className="flex items-center gap-1">
+        <Button asChild variant="ghost" size="icon-lg" className="-ml-3 h-12 w-12 shrink-0 rounded-full">
           <Link href={`/dashboard/${childId}`} aria-label={t("back")}>
             <ArrowLeft className="!size-5" />
           </Link>
         </Button>
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-semibold leading-tight">{title}</h1>
+          <h1 className="truncate font-display text-2xl font-semibold leading-tight tracking-tight">
+            {title}
+          </h1>
           <p className="truncate text-sm text-muted-foreground">{child.name}</p>
         </div>
       </header>

@@ -17,10 +17,17 @@ export function ReportsView({ childId }: ReportsViewProps) {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <TabsList className="w-full grid grid-cols-3">
-        <TabsTrigger value="day">{t("day")}</TabsTrigger>
-        <TabsTrigger value="week">{t("week")}</TabsTrigger>
-        <TabsTrigger value="list">{t("list")}</TabsTrigger>
+      {/* Secondary navigation: lighter than the main tabs above */}
+      <TabsList className="h-10 gap-1 bg-transparent p-0">
+        {(["day", "week", "list"] as const).map((value) => (
+          <TabsTrigger
+            key={value}
+            value={value}
+            className="h-10 px-4 data-[state=active]:bg-secondary data-[state=active]:shadow-none"
+          >
+            {t(value)}
+          </TabsTrigger>
+        ))}
       </TabsList>
 
       <TabsContent value="day">

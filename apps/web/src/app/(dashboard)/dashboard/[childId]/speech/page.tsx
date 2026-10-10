@@ -6,7 +6,7 @@ import type { SpeechCategory } from "@baby-atlas/schemas";
 import { trpc } from "@/lib/trpc/provider";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChildPage } from "@/components/toddler/child-page";
+import { ChildPage } from "@/components/dashboard/child-page";
 import { SpeechQuickAdd } from "@/components/toddler/speech-quick-add";
 import { SpeechWordList } from "@/components/toddler/speech-word-list";
 import { VocabularyChart } from "@/components/toddler/vocabulary-chart";

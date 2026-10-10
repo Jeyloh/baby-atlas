@@ -8,7 +8,7 @@ import { trpc } from "@/lib/trpc/provider";
 import { useToast } from "@/hooks/use-toast";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useQuickActions, type QuickActionState } from "@/hooks/use-quick-actions";
-import { getActivityCardClasses, type ActivityCategory } from "@/lib/activity-colors";
+import { getActivityChipClasses, type ActivityCategory } from "@/lib/activity-colors";
 import { formatElapsedTime } from "@/stores/timer-store";
 import { useFormatters } from "@/lib/format";
 import { LogModal } from "@/components/tracking/log-modal";
@@ -95,22 +95,24 @@ export function QuickActionBar({ childId }: { childId: string }) {
   };
 
   return (
+    // The one bold surface on the home screen: fjord blue in both themes
     <section
       aria-labelledby="quick-actions-title"
-      className="space-y-3 rounded-2xl border bg-muted/40 p-3"
+      className="space-y-3 rounded-2xl bg-[#2a5b6e] p-3 text-white dark:bg-[#1c4352]"
     >
       <div className="flex items-center justify-between pl-1">
         <div>
-          <h2 id="quick-actions-title" className="text-base font-semibold">
+          <h2 id="quick-actions-title" className="font-display text-lg font-semibold tracking-tight">
             {t("title")}
           </h2>
-          <p className="text-xs text-muted-foreground">{t("hint")}</p>
+          <p className="text-xs text-white/70">{t("hint")}</p>
         </div>
         <Button
           variant="ghost"
           size="icon"
           aria-label={t("edit")}
           onClick={() => setPickerOpen(true)}
+          className="text-white hover:bg-white/10 hover:text-white"
         >
           <Settings2 className="h-5 w-5" />
         </Button>
@@ -174,13 +176,15 @@ function QuickActionButton({
       aria-pressed={state.active}
       // Neutral action buttons, so they read differently from the colored status
       // cards below. A running timer fills the button with its activity color.
-      className={`flex min-h-16 w-full items-center gap-3 rounded-xl border p-2 pr-3 text-left shadow-sm select-none touch-manipulation transition-transform active:scale-[0.97] disabled:opacity-60 [-webkit-touch-callout:none] ${
-        state.active ? getActivityCardClasses(category) : "bg-card hover:bg-muted"
+      className={`flex min-h-16 w-full items-center gap-3 rounded-xl p-2 pr-3 text-left select-none touch-manipulation transition-transform active:scale-[0.97] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white [-webkit-touch-callout:none] ${
+        state.active
+          ? "bg-highlight text-highlight-foreground"
+          : "bg-white text-[#17242b] dark:bg-white/10 dark:text-white"
       }`}
     >
       <span
         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-          state.active ? "bg-white/25" : getActivityCardClasses(category)
+          state.active ? "bg-white/40" : getActivityChipClasses(category)
         }`}
         aria-hidden
       >

@@ -11,7 +11,7 @@
     "addChild": "Legg til barn"
   },
   "card": {
-    "noRecords": "Ingen registreringer",
+    "noRecords": "Ikke logget ennå",
     "active": "Pågår",
     "sleeping": "Sover",
     "nursing": "Ammer",

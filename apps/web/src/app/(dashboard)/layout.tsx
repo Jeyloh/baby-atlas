@@ -16,7 +16,10 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav user={session.user} />
-      <main className="container mx-auto px-4 py-6">{children}</main>
+      {/* One centred column: the app is phone-first and reads best narrow */}
+      <main className="mx-auto max-w-2xl px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-5">
+        {children}
+      </main>
     </div>
   );
 }

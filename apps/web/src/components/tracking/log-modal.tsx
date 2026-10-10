@@ -267,10 +267,10 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
         <button
           onClick={handleStart}
           disabled={isLoading}
-          className="w-32 h-32 rounded-full bg-primary/20 border-2 border-dashed border-primary flex flex-col items-center justify-center gap-2 hover:bg-primary/30 transition-colors disabled:opacity-50"
+          className="w-32 h-32 rounded-full bg-primary text-primary-foreground shadow-[0_8px_24px_-8px_rgba(42,91,110,0.55)] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
         >
-          <Play className="h-8 w-8 text-primary" />
-          <span className="text-primary font-semibold">{t("start")}</span>
+          <Play className="h-8 w-8 fill-current" />
+          <span className="font-semibold">{t("start")}</span>
         </button>
       </div>
 
@@ -1121,10 +1121,10 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
         <button
           onClick={handleStart}
           disabled={isLoading}
-          className="w-32 h-32 rounded-full bg-primary/20 border-2 border-dashed border-primary flex flex-col items-center justify-center gap-2 hover:bg-primary/30 transition-colors disabled:opacity-50"
+          className="w-32 h-32 rounded-full bg-primary text-primary-foreground shadow-[0_8px_24px_-8px_rgba(42,91,110,0.55)] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
         >
-          <Play className="h-8 w-8 text-primary" />
-          <span className="text-primary font-semibold">{t("start")}</span>
+          <Play className="h-8 w-8 fill-current" />
+          <span className="font-semibold">{t("start")}</span>
         </button>
       </div>
 
@@ -1915,10 +1915,10 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
         <button
           onClick={handleStart}
           disabled={isLoading || !selectedType}
-          className="w-28 h-28 rounded-full bg-primary/20 border-2 border-dashed border-primary flex flex-col items-center justify-center gap-2 hover:bg-primary/30 transition-colors disabled:opacity-50"
+          className="w-28 h-28 rounded-full bg-primary text-primary-foreground shadow-[0_8px_24px_-8px_rgba(42,91,110,0.55)] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
         >
-          <Play className="h-6 w-6 text-primary" />
-          <span className="text-primary font-semibold text-sm">{t("start")}</span>
+          <Play className="h-6 w-6 fill-current" />
+          <span className="font-semibold text-sm">{t("start")}</span>
         </button>
       </div>
 

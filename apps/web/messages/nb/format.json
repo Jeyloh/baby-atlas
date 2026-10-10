@@ -18,6 +18,12 @@
   "timeRange": "{start} – {end}",
   "timeRangeOngoing": "{start} – pågår",
   "bornOn": "Født {date}",
+  "age": {
+    "weeks": "{weeks, plural, one {# uke} other {# uker}} gammel",
+    "months": "{months, plural, one {# måned} other {# måneder}} gammel",
+    "years": "{years} år gammel",
+    "yearsMonths": "{years} år og {months, plural, one {# måned} other {# måneder}}"
+  },
   "units": {
     "ml": "{value} ml",
     "liters": "{value} l",

@@ -11,7 +11,7 @@
     "addChild": "Add child"
   },
   "card": {
-    "noRecords": "No records",
+    "noRecords": "Not logged yet",
     "active": "Active",
     "sleeping": "Sleeping",
     "nursing": "Breastfeeding",

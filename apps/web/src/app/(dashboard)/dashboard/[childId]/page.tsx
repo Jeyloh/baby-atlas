@@ -53,17 +53,15 @@ export default function ChildDashboardPage({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-2">
         <ChildSelector
           currentChild={child}
           allChildren={allChildren ?? [child]}
           householdId={child.household?.id ?? ""}
         />
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/dashboard/${childId}/settings`}>
-            <Settings className="mr-2 h-4 w-4" />
-            {t("settings")}
+        <Button asChild variant="ghost" size="icon" className="-mr-2 shrink-0 rounded-full">
+          <Link href={`/dashboard/${childId}/settings`} aria-label={t("settings")}>
+            <Settings className="h-5 w-5" />
           </Link>
         </Button>
       </div>

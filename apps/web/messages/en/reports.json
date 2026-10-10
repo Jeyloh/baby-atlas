@@ -8,9 +8,11 @@
   "noActivitiesWeek": "No activities this week",
   "previousWeek": "Previous week",
   "nextWeek": "Next week",
-  "stats": {
-    "feedings": "Feedings",
-    "diapers": "Diapers"
+  "filters": {
+    "label": "Filter the timeline",
+    "hint": "Tap to show just one activity",
+    "filtered": "{count, plural, one {Showing # activity} other {Showing # activities}}",
+    "showAll": "Show all"
   },
   "description": {
     "sleepDone": "{name} slept for {duration}",

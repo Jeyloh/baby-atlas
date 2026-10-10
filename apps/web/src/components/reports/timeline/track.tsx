@@ -432,7 +432,7 @@ export function TimelineTrack({
   const eventsWithColumns = assignColumns(events);
 
   return (
-    <div className="relative flex" style={{ height: "1500px" }}>
+    <div className="relative flex" style={{ height: "1080px" }}>
       {/* Time axis - vertical on left */}
       <div className="w-12 flex-shrink-0 relative border-r border-border">
         {hourLabels.map((label, i) => (
@@ -526,8 +526,8 @@ function CurrentTimeIndicator({ selectedDate }: { selectedDate?: Date }) {
       className="absolute left-0 right-0 flex items-center z-10 pointer-events-none"
       style={{ top: `${top}%` }}
     >
-      <div className="w-2 h-2 rounded-full bg-red-500" />
-      <div className="flex-1 h-0.5 bg-red-500" />
+      <div className="w-2.5 h-2.5 rounded-full bg-highlight ring-2 ring-card" />
+      <div className="flex-1 h-0.5 bg-highlight" />
     </div>
   );
 }

@@ -69,7 +69,7 @@
     "setTime": "Velg tidspunkt"
   },
   "timer": {
-    "min": "MIN",
-    "sec": "SEK"
+    "minutesSeconds": "minutter og sekunder",
+    "hoursMinutesSeconds": "timer, minutter og sekunder"
   }
 }

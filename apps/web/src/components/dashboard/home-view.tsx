@@ -20,11 +20,11 @@ export function HomeView({ childId }: HomeViewProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
             <div
               key={i}
-              className="h-24 bg-muted animate-pulse rounded-xl"
+              className="h-[76px] bg-muted animate-pulse rounded-lg"
             />
           ))}
         </div>
@@ -66,11 +66,10 @@ export function HomeView({ childId }: HomeViewProps) {
       <QuickActionBar childId={childId} />
 
       <section aria-labelledby="latest-activity-title" className="space-y-2">
-        <h2 id="latest-activity-title" className="text-base font-semibold">
+        <h2 id="latest-activity-title" className="font-display text-lg font-semibold tracking-tight">
           {tModules("latestActivity")}
         </h2>
-        {/* Activity cards grid - 2 cols on mobile, 3 on tablet, 5 on desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <ActivityCard
             category="sleep"
             childId={childId}

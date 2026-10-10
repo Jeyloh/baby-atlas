@@ -3,5 +3,7 @@
   "userMenu": "User menu",
   "profile": "Profile",
   "householdSettings": "Household settings",
-  "signOut": "Sign out"
+  "signOut": "Sign out",
+  "theme": "Appearance",
+  "themes": { "light": "Light", "dark": "Dark", "system": "Match device" }
 }

@@ -8,9 +8,11 @@
   "noActivitiesWeek": "Ingen aktiviteter denne uken",
   "previousWeek": "Forrige uke",
   "nextWeek": "Neste uke",
-  "stats": {
-    "feedings": "Måltider",
-    "diapers": "Bleier"
+  "filters": {
+    "label": "Filtrer tidslinjen",
+    "hint": "Trykk for å vise bare én aktivitet",
+    "filtered": "{count, plural, one {Viser # aktivitet} other {Viser # aktiviteter}}",
+    "showAll": "Vis alt"
   },
   "description": {
     "sleepDone": "{name} sov i {duration}",

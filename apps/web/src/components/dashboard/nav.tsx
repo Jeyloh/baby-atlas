@@ -3,16 +3,21 @@
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Cherry, LogOut, Settings, User } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
+import { LogOut, Settings, User } from "lucide-react";
 
 interface DashboardNavProps {
   user: {
@@ -22,9 +27,12 @@ interface DashboardNavProps {
   };
 }
 
+const THEMES = ["light", "dark", "system"] as const;
+
 export function DashboardNav({ user }: DashboardNavProps) {
   const t = useTranslations("nav");
   const tCommon = useTranslations("common");
+  const { theme, setTheme } = useTheme();
   const initials = user.name
     ?.split(" ")
     .map((n) => n[0])
@@ -32,40 +40,40 @@ export function DashboardNav({ user }: DashboardNavProps) {
     .toUpperCase() || user.email?.[0]?.toUpperCase() || "U";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-2">
-      <div className="container flex h-14 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
         <Link
           href="/dashboard"
-          className="flex min-h-12 items-center space-x-2"
+          className="-ml-1 flex min-h-12 items-center gap-2 rounded-lg px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={t("home")}
         >
-          <Cherry className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-primary">{tCommon("appName")}</span>
+          <BrandMark className="h-7 w-7" />
+          <span className="font-display text-lg font-semibold tracking-tight">
+            {tCommon("appName")}
+          </span>
         </Link>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="relative h-12 w-12 rounded-full md:h-10 md:w-10"
+              className="relative -mr-2 h-12 w-12 rounded-full md:h-10 md:w-10"
               aria-label={t("userMenu")}
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user.image ?? undefined} alt={user.name ?? ""} />
-                <AvatarFallback>{initials}</AvatarFallback>
+                <AvatarFallback className="bg-secondary text-sm font-semibold">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <div className="flex items-center justify-start gap-2 p-2">
-              <div className="flex flex-col space-y-1 leading-none">
-                {user.name && <p className="font-medium">{user.name}</p>}
-                {user.email && (
-                  <p className="w-[200px] truncate text-sm text-muted-foreground">
-                    {user.email}
-                  </p>
-                )}
-              </div>
+          <DropdownMenuContent className="w-60" align="end" forceMount>
+            <div className="flex flex-col gap-0.5 px-2 py-1.5">
+              {user.name && <p className="text-sm font-medium">{user.name}</p>}
+              {user.email && (
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              )}
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -80,6 +88,17 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 {t("householdSettings")}
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+              {t("theme")}
+            </DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+              {THEMES.map((value) => (
+                <DropdownMenuRadioItem key={value} value={value} className="cursor-pointer">
+                  {t(`themes.${value}`)}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer text-destructive focus:text-destructive"

@@ -34,6 +34,23 @@ export function ChildSelector({
   const tFormat = useTranslations("format");
   const { fullDate } = useFormatters();
 
+  // Age the way the helsestasjon talks about it: weeks, then months, then years
+  const formatAge = (birthDate: Date | string) => {
+    const birth = new Date(birthDate);
+    const now = new Date();
+    const days = Math.floor((now.getTime() - birth.getTime()) / 86_400_000);
+    if (days < 8 * 7) return tFormat("age.weeks", { weeks: Math.max(0, Math.floor(days / 7)) });
+    let months =
+      (now.getFullYear() - birth.getUTCFullYear()) * 12 + now.getMonth() - birth.getUTCMonth();
+    if (now.getDate() < birth.getUTCDate()) months -= 1;
+    if (months < 24) return tFormat("age.months", { months });
+    const years = Math.floor(months / 12);
+    const rest = months % 12;
+    return rest === 0
+      ? tFormat("age.years", { years })
+      : tFormat("age.yearsMonths", { years, months: rest });
+  };
+
   const handleChildSelect = (childId: string) => {
     router.push(`/dashboard/${childId}`);
   };
@@ -44,14 +61,14 @@ export function ChildSelector({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-1 hover:bg-muted rounded-lg px-2 py-1 min-h-12 transition-colors -ml-2">
-        <div className="text-left">
-          <h1 className="text-2xl font-bold">{currentChild.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            {tFormat("bornOn", { date: fullDate(currentChild.birthDate) })}
-          </p>
+      <DropdownMenuTrigger className="-ml-2 flex min-h-12 min-w-0 items-center gap-1 rounded-xl px-2 py-1 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <div className="min-w-0 text-left">
+          <h1 className="truncate font-display text-3xl font-semibold leading-tight tracking-tight">
+            {currentChild.name}
+          </h1>
+          <p className="text-sm text-muted-foreground">{formatAge(currentChild.birthDate)}</p>
         </div>
-        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+        <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
         {allChildren.map((child) => (

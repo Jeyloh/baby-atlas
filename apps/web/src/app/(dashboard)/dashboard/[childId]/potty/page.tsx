@@ -3,7 +3,7 @@
 import { use, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
-import { ChildPage, type ToddlerChild } from "@/components/toddler/child-page";
+import { ChildPage, type ToddlerChild } from "@/components/dashboard/child-page";
 import { PottyHistory } from "@/components/toddler/potty-history";
 import { PottyLogForm } from "@/components/toddler/potty-log-form";
 import { ReadinessSummary } from "@/components/toddler/readiness-summary";

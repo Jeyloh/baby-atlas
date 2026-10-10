@@ -18,6 +18,12 @@
   "timeRange": "{start} – {end}",
   "timeRangeOngoing": "{start} – ongoing",
   "bornOn": "Born {date}",
+  "age": {
+    "weeks": "{weeks, plural, one {# week} other {# weeks}} old",
+    "months": "{months, plural, one {# month} other {# months}} old",
+    "years": "{years, plural, one {# year} other {# years}} old",
+    "yearsMonths": "{years, plural, one {# year} other {# years}} and {months, plural, one {# month} other {# months}}"
+  },
   "units": {
     "ml": "{value} ml",
     "liters": "{value} L",

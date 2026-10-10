@@ -69,7 +69,7 @@
     "setTime": "Set time"
   },
   "timer": {
-    "min": "MIN",
-    "sec": "SEC"
+    "minutesSeconds": "minutes and seconds",
+    "hoursMinutesSeconds": "hours, minutes and seconds"
   }
 }

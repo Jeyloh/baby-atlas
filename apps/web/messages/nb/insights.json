@@ -22,11 +22,11 @@
     "sleepPerDay": "Søvn per dag",
     "napsPerDay": "Lurer per dag",
     "feedsPerDay": "Måltider per dag",
-    "mlPerBottle": "Gjennomsnitt per flaske",
+    "mlPerBottle": "Per flaske",
     "wetPerDay": "Våte bleier per dag",
     "dirtyPerDay": "Skitne bleier per dag",
     "hoursMinutes": "{hours} t {minutes} min",
     "ml": "{value} ml",
-    "noValue": "-"
+    "noValue": "Ikke logget"
   }
 }

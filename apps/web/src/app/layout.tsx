@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { THEME_COLOR } from "@/lib/pwa/colors";
 
-const inter = Inter({ subsets: ["latin"] });
+// Figtree for reading, Bricolage Grotesque for names, headings and numbers
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
+const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage" });
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
@@ -35,7 +37,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${figtree.variable} ${bricolage.variable}`}>
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

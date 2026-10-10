@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   getActivityCardClasses,
+  getActivityChipClasses,
   type ActivityCategory,
 } from "@/lib/activity-colors";
 import { TimeSince } from "@/components/ui/time-since";
@@ -79,31 +80,31 @@ export function ActivityCard({
     <>
       <button
         onClick={() => setModalOpen(true)}
-        className={`relative w-full min-h-[100px] p-3 md:p-4 rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] touch-manipulation ${getActivityCardClasses(category)}`}
+        className={`relative flex w-full items-start gap-3 rounded-lg p-3 text-left touch-manipulation transition-colors active:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${getActivityCardClasses(category)}`}
       >
-        {isActive && (
-          <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/20 text-xs">
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            {activeLabel || t("active")}
-          </div>
-        )}
-
-        <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-3">
-          <div className="p-2 rounded-lg bg-white/20 w-fit">
-            <Icon className="h-5 w-5 md:h-6 md:w-6" />
-          </div>
-          <div className="flex-1 text-left">
-            <h3 className="font-semibold text-base md:text-lg">{tEnums(config.labelKey)}</h3>
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getActivityChipClasses(category)}`}
+          aria-hidden
+        >
+          <Icon className="h-[18px] w-[18px]" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold leading-tight">{tEnums(config.labelKey)}</span>
+          {isActive ? (
+            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-highlight px-2 py-0.5 text-xs font-medium text-highlight-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" aria-hidden />
+              {activeLabel || t("active")}
+            </span>
+          ) : (
             <TimeSince
               date={lastTime}
-              className="text-xs md:text-sm opacity-90"
+              className="mt-0.5 block text-xs opacity-75"
               fallback={t("noRecords")}
             />
-            {details && (
-              <p className="text-xs md:text-sm mt-1 opacity-80">{details}</p>
-            )}
-          </div>
-        </div>
+          )}
+          {details && !isActive && (            <span className="mt-0.5 block truncate text-xs opacity-75">{details}</span>
+          )}
+        </span>
       </button>
 
       <LogModal

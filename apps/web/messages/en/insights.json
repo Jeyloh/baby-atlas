@@ -22,11 +22,11 @@
     "sleepPerDay": "Sleep per day",
     "napsPerDay": "Naps per day",
     "feedsPerDay": "Feeds per day",
-    "mlPerBottle": "Average per bottle",
+    "mlPerBottle": "Per bottle",
     "wetPerDay": "Wet diapers per day",
     "dirtyPerDay": "Dirty diapers per day",
     "hoursMinutes": "{hours} h {minutes} min",
     "ml": "{value} ml",
-    "noValue": "-"
+    "noValue": "Not logged"
   }
 }

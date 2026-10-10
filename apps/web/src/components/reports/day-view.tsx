@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendarStrip } from "@/components/reports/week-calendar-strip";
-import { DaySummaryStats } from "@/components/reports/day-summary-stats";
+import { DayFilterChips } from "@/components/reports/day-filter-chips";
+import { summarizeDay, filterDay, type DayFilter } from "@/components/reports/day-filters";
 import {
   TimelineTrack,
   type RecordType,
@@ -38,6 +39,15 @@ export function DayView({ childId }: DayViewProps) {
   const t = useTranslations("reports");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [filters, setFilters] = useState<ReadonlySet<DayFilter>>(new Set());
+
+  const toggleFilter = (filter: DayFilter) =>
+    setFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(filter)) next.delete(filter);
+      else next.add(filter);
+      return next;
+    });
 
   const { data: childData } = trpc.child.get.useQuery({ id: childId });
   const { data, isLoading } = trpc.timeline.getDay.useQuery({
@@ -119,10 +129,17 @@ export function DayView({ childId }: DayViewProps) {
         onDateSelect={setSelectedDate}
       />
 
-      <DaySummaryStats childId={childId} date={selectedDate} />
+      {data && (
+        <DayFilterChips
+          items={summarizeDay(data)}
+          selected={filters}
+          onToggle={toggleFilter}
+          onClear={() => setFilters(new Set())}
+        />
+      )}
 
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           {isLoading ? (
             <div className="h-48 flex items-center justify-center">
               <div className="animate-pulse text-muted-foreground">
@@ -131,14 +148,7 @@ export function DayView({ childId }: DayViewProps) {
             </div>
           ) : data ? (
             <TimelineTrack
-              sleepRecords={data.sleepRecords}
-              feedingRecords={data.feedingRecords}
-              diaperRecords={data.diaperRecords}
-              pumpingRecords={data.pumpingRecords}
-              medicineRecords={data.medicineRecords}
-              growthRecords={data.growthRecords}
-              temperatureRecords={data.temperatureRecords}
-              activityRecords={data.activityRecords}
+              {...filterDay(data, filters)}
               dayStart={data.dayStart}
               selectedDate={selectedDate}
               onEventClick={handleEventClick}
