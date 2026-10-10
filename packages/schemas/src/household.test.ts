@@ -66,10 +66,12 @@ describe("updateHouseholdSchema", () => {
 });
 
 describe("inviteMemberSchema", () => {
-  it("requires householdId and email", () => {
-    expect(() =>
-      inviteMemberSchema.parse({ householdId: validId })
-    ).toThrow();
+  it("requires householdId but not email (share links)", () => {
+    expect(() => inviteMemberSchema.parse({})).toThrow();
+    expect(inviteMemberSchema.parse({ householdId: validId })).toMatchObject({
+      householdId: validId,
+      role: "CAREGIVER",
+    });
   });
 
   it("validates email format", () => {
@@ -104,9 +106,13 @@ describe("acceptInviteSchema", () => {
     expect(() => acceptInviteSchema.parse({})).toThrow();
   });
 
-  it("accepts valid token", () => {
-    const result = acceptInviteSchema.parse({ token: "some-token-string" });
-    expect(result.token).toBe("some-token-string");
+  it("accepts a token of realistic length", () => {
+    const token = "Qm9vZ2llV29vZ2llQm9vZ2llV29vZ2ll";
+    expect(acceptInviteSchema.parse({ token }).token).toBe(token);
+  });
+
+  it("rejects tokens too short to be real", () => {
+    expect(() => acceptInviteSchema.parse({ token: "short" })).toThrow();
   });
 });
 

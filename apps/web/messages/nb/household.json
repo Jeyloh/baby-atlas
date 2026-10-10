@@ -26,6 +26,32 @@
     "saveChanges": "Lagre endringer",
     "updated": "Husstanden er oppdatert"
   },
+  "invites": {
+    "invite": "Inviter en omsorgsperson",
+    "title": "Inviter til husstanden",
+    "description": "Lag en lenke og send den med SMS eller Messenger. Den kan brukes én gang og varer i 7 dager.",
+    "roleLabel": "Hva skal de kunne gjøre?",
+    "roleHelp": {
+      "CAREGIVER": "Logge og se alt for barna",
+      "ADMIN": "Som omsorgsperson, og kan invitere og fjerne andre",
+      "VIEWER": "Bare se, ikke logge"
+    },
+    "create": "Lag invitasjonslenke",
+    "creating": "Lager lenke …",
+    "copy": "Kopier",
+    "copied": "Kopiert",
+    "share": "Del",
+    "done": "Ferdig",
+    "linkHelp": "Den som åpner lenken, logger inn og blir med i husstanden.",
+    "shareTitle": "Invitasjon til Baby Atlas",
+    "shareText": "Bli med i {household} på Baby Atlas, så kan vi følge med sammen.",
+    "pending": "Ventende invitasjoner",
+    "anyoneWithLink": "Alle med lenken",
+    "expires": "utløper {date}",
+    "revoke": "Trekk tilbake invitasjonen",
+    "revoked": "Invitasjonen er trukket tilbake",
+    "failed": "Kunne ikke lage invitasjon"
+  },
   "members": {
     "title": "Medlemmer",
     "count": "{count, plural, one {# medlem} other {# medlemmer}} i denne husstanden",

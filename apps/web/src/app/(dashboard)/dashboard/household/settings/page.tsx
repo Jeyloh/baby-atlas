@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { InviteSection } from "@/components/household/invite-section";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
@@ -54,15 +55,24 @@ export default function HouseholdSettingsPage() {
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
+  // ?householdId=... picks the household (a user can belong to several);
+  // ?invite=1 opens the invite sheet straight away
+  const [query, setQuery] = useState<{ householdId: string | null; invite: boolean }>({
+    householdId: null,
+    invite: false,
+  });
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setQuery({ householdId: params.get("householdId"), invite: params.get("invite") === "1" });
+  }, []);
+
   const { data: households, isLoading } = trpc.household.list.useQuery();
-  const household = households?.[0]; // Use first household
+  const household =
+    households?.find((h) => h.id === query.householdId) ?? households?.[0];
 
   const [name, setName] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmName, setConfirmName] = useState("");
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<HouseholdRole>("CAREGIVER");
   const [removeMemberDialogOpen, setRemoveMemberDialogOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<{
     id: string;
@@ -99,16 +109,6 @@ export default function HouseholdSettingsPage() {
     onError: (error) => showError(error.message),
   });
 
-  const inviteMember = trpc.household.invite.useMutation({
-    onSuccess: () => {
-      toast({ title: t("members.inviteSent") });
-      setInviteDialogOpen(false);
-      setInviteEmail("");
-      setInviteRole("CAREGIVER");
-    },
-    onError: (error) => showError(error.message),
-  });
-
   const updateMemberRole = trpc.household.updateMemberRole.useMutation({
     onSuccess: () => {
       toast({ title: t("members.roleUpdated") });
@@ -140,17 +140,6 @@ export default function HouseholdSettingsPage() {
   const handleDelete = () => {
     if (household && confirmName === household.name) {
       deleteHousehold.mutate({ id: household.id });
-    }
-  };
-
-  const handleInvite = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (household && inviteEmail.trim()) {
-      inviteMember.mutate({
-        householdId: household.id,
-        email: inviteEmail.trim(),
-        role: inviteRole,
-      });
     }
   };
 
@@ -239,80 +228,20 @@ export default function HouseholdSettingsPage() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>{t("members.title")}</CardTitle>
-            <CardDescription>
-              {t("members.count", { count: household.members.length })}
-            </CardDescription>
-          </div>
-          {canManageMembers && (
-            <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  {t("members.invite")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <form onSubmit={handleInvite}>
-                  <DialogHeader>
-                    <DialogTitle>{t("members.inviteTitle")}</DialogTitle>
-                    <DialogDescription>
-                      {t("members.inviteDescription")}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="inviteEmail">{t("members.emailLabel")}</Label>
-                      <Input
-                        id="inviteEmail"
-                        type="email"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                        placeholder={t("members.emailPlaceholder")}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="inviteRole">{t("members.roleLabel")}</Label>
-                      <Select
-                        value={inviteRole}
-                        onValueChange={(v) => setInviteRole(v as HouseholdRole)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {assignableRoles.map((role) => (
-                            <SelectItem key={role} value={role}>
-                              {tRole(role)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setInviteDialogOpen(false)}
-                    >
-                      {tCommon("cancel")}
-                    </Button>
-                    <Button type="submit" disabled={inviteMember.isPending}>
-                      {inviteMember.isPending
-                        ? t("members.sending")
-                        : t("members.sendInvite")}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          )}
+        <CardHeader>
+          <CardTitle>{t("members.title")}</CardTitle>
+          <CardDescription>
+            {t("members.count", { count: household.members.length })}
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-5">
+          {canManageMembers && (
+            <InviteSection
+              householdId={household.id}
+              householdName={household.name}
+              autoOpen={query.invite}
+            />
+          )}
           <div className="space-y-4">
             {household.members.map((member) => (
               <div

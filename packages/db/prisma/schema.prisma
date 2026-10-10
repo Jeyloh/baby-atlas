@@ -55,9 +55,10 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  accounts          Account[]
-  sessions          Session[]
+  accounts             Account[]
+  sessions             Session[]
   householdMemberships HouseholdMember[]
+  sentInvites          HouseholdInvite[]
 
   @@map("users")
 }
@@ -111,15 +112,19 @@ model HouseholdMember {
 }
 
 model HouseholdInvite {
-  id          String   @id @default(cuid())
-  householdId String   @map("household_id")
-  email       String
+  id          String        @id @default(cuid())
+  householdId String        @map("household_id")
+  // Optional: when set, only this email can accept. Share links leave it empty.
+  email       String?
   role        HouseholdRole @default(CAREGIVER)
-  token       String   @unique @default(cuid())
-  expiresAt   DateTime @map("expires_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  // Random secret generated in code (cuids are not unguessable)
+  token       String        @unique
+  invitedById String?       @map("invited_by_id")
+  expiresAt   DateTime      @map("expires_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
 
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  invitedBy User?     @relation(fields: [invitedById], references: [id], onDelete: SetNull)
 
   @@map("household_invites")
 }
@@ -140,18 +145,18 @@ model Child {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  household           Household           @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  sleepRecords        SleepRecord[]
-  feedingRecords      FeedingRecord[]
-  diaperRecords       DiaperRecord[]
-  pumpingRecords      PumpingRecord[]
-  growthRecords       GrowthRecord[]
-  activityRecords     ActivityRecord[]
-  temperatureRecords  TemperatureRecord[]
-  medicines           Medicine[]
-  speechWords         SpeechWord[]
-  pottyReadinessLogs  PottyReadinessLog[]
-  vaccinationRecords  VaccinationRecord[]
+  household          Household           @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  sleepRecords       SleepRecord[]
+  feedingRecords     FeedingRecord[]
+  diaperRecords      DiaperRecord[]
+  pumpingRecords     PumpingRecord[]
+  growthRecords      GrowthRecord[]
+  activityRecords    ActivityRecord[]
+  temperatureRecords TemperatureRecord[]
+  medicines          Medicine[]
+  speechWords        SpeechWord[]
+  pottyReadinessLogs PottyReadinessLog[]
+  vaccinationRecords VaccinationRecord[]
 
   @@map("children")
 }
@@ -171,7 +176,7 @@ model SleepRecord {
   startTime DateTime  @map("start_time")
   endTime   DateTime? @map("end_time")
   sleepType SleepType @default(NAP) @map("sleep_type")
-  quality   Int?      // 1-5 rating
+  quality   Int? // 1-5 rating
   notes     String?
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -204,27 +209,27 @@ enum BottleContentType {
 }
 
 model FeedingRecord {
-  id          String       @id @default(cuid())
-  childId     String       @map("child_id")
-  feedingType FeedingType  @map("feeding_type")
-  startTime   DateTime     @map("start_time")
-  endTime     DateTime?    @map("end_time")
+  id          String      @id @default(cuid())
+  childId     String      @map("child_id")
+  feedingType FeedingType @map("feeding_type")
+  startTime   DateTime    @map("start_time")
+  endTime     DateTime?   @map("end_time")
 
   // Breastfeeding specific
   side                 BreastSide?
-  leftDurationSeconds  Int?  @map("left_duration_seconds")
-  rightDurationSeconds Int?  @map("right_duration_seconds")
+  leftDurationSeconds  Int?        @map("left_duration_seconds")
+  rightDurationSeconds Int?        @map("right_duration_seconds")
 
   // Bottle specific
-  amountMl          Int?              @map("amount_ml")
+  amountMl          Int?               @map("amount_ml")
   bottleContentType BottleContentType? @map("bottle_content_type")
 
   // Solids specific
-  foodItems   String[]     @map("food_items")
+  foodItems String[] @map("food_items")
 
-  notes       String?
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
 
@@ -278,17 +283,17 @@ enum DiaperAmount {
 }
 
 model DiaperRecord {
-  id          String            @id @default(cuid())
-  childId     String            @map("child_id")
+  id          String             @id @default(cuid())
+  childId     String             @map("child_id")
   time        DateTime
-  diaperType  DiaperType        @map("diaper_type")
+  diaperType  DiaperType         @map("diaper_type")
   color       DiaperColor?
   consistency DiaperConsistency?
   size        DiaperSize?
   amount      DiaperAmount?
   notes       String?
-  createdAt   DateTime          @default(now()) @map("created_at")
-  updatedAt   DateTime          @updatedAt @map("updated_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
 
   child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
 
@@ -301,15 +306,15 @@ model DiaperRecord {
 // ============================================================================
 
 model PumpingRecord {
-  id        String     @id @default(cuid())
-  childId   String     @map("child_id")
-  startTime DateTime   @map("start_time")
-  endTime   DateTime?  @map("end_time")
-  amountMl  Int?       @map("amount_ml")
+  id        String      @id @default(cuid())
+  childId   String      @map("child_id")
+  startTime DateTime    @map("start_time")
+  endTime   DateTime?   @map("end_time")
+  amountMl  Int?        @map("amount_ml")
   side      BreastSide?
   notes     String?
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
   child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
 

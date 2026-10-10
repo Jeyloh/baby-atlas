@@ -11,7 +11,7 @@ import { ChatInterface } from "@/components/chat";
 import { useChat } from "@/hooks/use-chat";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Settings, Home, BarChart3, MessageCircle } from "lucide-react";
+import { Settings, Home, BarChart3, MessageCircle, UserPlus } from "lucide-react";
 
 export default function ChildDashboardPage({
   params,
@@ -59,11 +59,21 @@ export default function ChildDashboardPage({
           allChildren={allChildren ?? [child]}
           householdId={child.household?.id ?? ""}
         />
-        <Button asChild variant="ghost" size="icon" className="-mr-2 shrink-0 rounded-full">
-          <Link href={`/dashboard/${childId}/settings`} aria-label={t("settings")}>
-            <Settings className="h-5 w-5" />
-          </Link>
-        </Button>
+        <div className="-mr-2 flex shrink-0">
+          <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Link
+              href={`/dashboard/household/settings?householdId=${child.household?.id ?? ""}&invite=1`}
+              aria-label={t("inviteCaregiver")}
+            >
+              <UserPlus className="h-5 w-5" />
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Link href={`/dashboard/${childId}/settings`} aria-label={t("settings")}>
+              <Settings className="h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Main tabs */}

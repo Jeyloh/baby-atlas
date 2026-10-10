@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import type { QuickAction } from "@baby-atlas/schemas";
 import { trpc } from "@/lib/trpc/provider";
 import { useTimer } from "@/hooks/use-timer";
+import { sharedFreshness } from "@/lib/shared-freshness";
 import {
   getLeftElapsedMs,
   getRightElapsedMs,
@@ -75,7 +76,7 @@ export function sleepTypeFor(date: Date): "NAP" | "NIGHT" {
  */
 export function useQuickActions(childId: string) {
   const utils = trpc.useUtils();
-  const { data: last } = trpc.timeline.getLastActivities.useQuery({ childId });
+  const { data: last } = trpc.timeline.getLastActivities.useQuery({ childId }, sharedFreshness);
 
   const sleepTimer = useTimer(childId, "sleep");
   const feedingTimer = useTimer(childId, "feeding");

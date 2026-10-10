@@ -26,6 +26,32 @@
     "saveChanges": "Save Changes",
     "updated": "Household updated!"
   },
+  "invites": {
+    "invite": "Invite a caregiver",
+    "title": "Invite to the household",
+    "description": "Create a link and send it by text or Messenger. It works once and lasts 7 days.",
+    "roleLabel": "What should they be able to do?",
+    "roleHelp": {
+      "CAREGIVER": "Log and see everything for the children",
+      "ADMIN": "Like a caregiver, and can invite and remove others",
+      "VIEWER": "Only look, not log"
+    },
+    "create": "Create invite link",
+    "creating": "Creating link…",
+    "copy": "Copy",
+    "copied": "Copied",
+    "share": "Share",
+    "done": "Done",
+    "linkHelp": "Whoever opens the link signs in and joins the household.",
+    "shareTitle": "Invite to Baby Atlas",
+    "shareText": "Join {household} on Baby Atlas so we can keep track together.",
+    "pending": "Pending invites",
+    "anyoneWithLink": "Anyone with the link",
+    "expires": "expires {date}",
+    "revoke": "Revoke invite",
+    "revoked": "Invite revoked",
+    "failed": "Could not create invite"
+  },
   "members": {
     "title": "Members",
     "count": "{count, plural, one {# member} other {# members}} in this household",

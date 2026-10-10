@@ -200,6 +200,26 @@ describe("householdRouter", () => {
       );
     });
 
+    it("creates a share-link invite with a random token and no email", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.householdInvite.create.mockResolvedValue(createTestInvite({ email: null }) as never);
+
+      await caller.invite({ householdId, role: "CAREGIVER" });
+
+      const data = prismaMock.householdInvite.create.mock.calls[0]![0].data;
+      expect(data.email).toBeUndefined();
+      expect(data.token).toMatch(/^[A-Za-z0-9_-]{32}$/);
+      expect(data.invitedById).toBe(TEST_IDS.userId);
+      expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    it("rejects inviting someone as owner", async () => {
+      const caller = createCaller(createTestContext());
+      await expect(caller.invite({ householdId, role: "OWNER" })).rejects.toMatchObject({
+        code: "BAD_REQUEST",
+      });
+    });
+
     it("creates an invite for new user", async () => {
       const ctx = createTestContext();
       const caller = createCaller(ctx);
@@ -249,7 +269,88 @@ describe("householdRouter", () => {
     });
   });
 
+  describe("invite management", () => {
+    it("lets caregivers neither list nor revoke invites", async () => {
+      prismaMock.householdMember.findUnique.mockResolvedValue(
+        createTestMembership({ role: "CAREGIVER" }) as never
+      );
+      const caller = createCaller(createTestContext());
+
+      await expect(caller.listInvites({ householdId })).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(
+        caller.revokeInvite({ householdId, inviteId: TEST_IDS.inviteId })
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    });
+
+    it("revokes only within the caller's household", async () => {
+      prismaMock.householdMember.findUnique.mockResolvedValue(
+        createTestMembership({ role: "OWNER" }) as never
+      );
+      const caller = createCaller(createTestContext());
+
+      await caller.revokeInvite({ householdId, inviteId: TEST_IDS.inviteId });
+
+      expect(prismaMock.householdInvite.deleteMany).toHaveBeenCalledWith({
+        where: { id: TEST_IDS.inviteId, householdId },
+      });
+    });
+
+    it("summarises an invite without exposing the token or email", async () => {
+      prismaMock.householdInvite.findUnique.mockResolvedValue({
+        role: "CAREGIVER",
+        email: "partner@example.com",
+        expiresAt: new Date(Date.now() + 60_000),
+        householdId,
+        household: { name: "Familien" },
+        invitedBy: { name: "Kari" },
+      } as never);
+      const caller = createCaller(createTestContext({ session: null }));
+
+      const result = await caller.getInvite({ token: "tok_" + "b".repeat(28) });
+
+      expect(result).toEqual({
+        householdName: "Familien",
+        invitedByName: "Kari",
+        role: "CAREGIVER",
+        expired: false,
+        restrictedToEmail: true,
+        alreadyMember: false,
+      });
+    });
+  });
+
   describe("acceptInvite", () => {
+    const VALID_TOKEN = "tok_" + "a".repeat(28);
+
+    it("accepts a link invite without an email for any signed-in user", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.householdInvite.findUnique.mockResolvedValue(
+        createTestInvite({ email: null }) as never
+      );
+      prismaMock.householdMember.findUnique.mockResolvedValue(null);
+      prismaMock.$transaction.mockResolvedValue([{}, {}] as never);
+      prismaMock.child.findFirst.mockResolvedValue({ id: TEST_IDS.childId } as never);
+
+      const result = await caller.acceptInvite({ token: VALID_TOKEN });
+
+      expect(result).toMatchObject({ success: true, childId: TEST_IDS.childId });
+    });
+
+    it("keeps the existing role when the user is already a member", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.householdInvite.findUnique.mockResolvedValue(
+        createTestInvite({ email: null, role: "VIEWER" }) as never
+      );
+      prismaMock.householdMember.findUnique.mockResolvedValue(
+        createTestMembership({ role: "OWNER" }) as never
+      );
+      prismaMock.$transaction.mockResolvedValue([{}] as never);
+
+      await caller.acceptInvite({ token: VALID_TOKEN });
+
+      expect(prismaMock.householdMember.create).not.toHaveBeenCalled();
+    });
+
     it("accepts valid invite and creates membership", async () => {
       const ctx = createTestContext({
         session: createTestUser({ user: { id: TEST_IDS.userId, email: "invite@example.com" } }),
@@ -261,7 +362,7 @@ describe("householdRouter", () => {
       );
       prismaMock.$transaction.mockResolvedValue([{}, {}] as never);
 
-      const result = await caller.acceptInvite({ token: "test-token-123" });
+      const result = await caller.acceptInvite({ token: VALID_TOKEN });
 
       expect(result.success).toBe(true);
       expect(result.householdId).toBe(TEST_IDS.householdId);
@@ -274,7 +375,7 @@ describe("householdRouter", () => {
       prismaMock.householdInvite.findUnique.mockResolvedValue(null);
 
       await expect(
-        caller.acceptInvite({ token: "invalid" })
+        caller.acceptInvite({ token: "x".repeat(32) })
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
     });
 
@@ -289,7 +390,7 @@ describe("householdRouter", () => {
       );
 
       await expect(
-        caller.acceptInvite({ token: "test-token" })
+        caller.acceptInvite({ token: VALID_TOKEN })
       ).rejects.toMatchObject({ code: "BAD_REQUEST" });
     });
 
@@ -304,7 +405,7 @@ describe("householdRouter", () => {
       );
 
       await expect(
-        caller.acceptInvite({ token: "test-token" })
+        caller.acceptInvite({ token: VALID_TOKEN })
       ).rejects.toMatchObject({ code: "FORBIDDEN" });
     });
   });

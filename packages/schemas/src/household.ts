@@ -15,15 +15,31 @@ export const updateHouseholdSchema = z.object({
 });
 export type UpdateHouseholdInput = z.infer<typeof updateHouseholdSchema>;
 
+// Email is optional: without it, anyone with the link can accept (once)
 export const inviteMemberSchema = z.object({
   householdId: idSchema,
-  email: z.string().email(),
+  email: z.string().email().optional(),
   role: householdRoleSchema.default("CAREGIVER"),
 });
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
 
+export const inviteTokenSchema = z.string().min(20).max(100);
+
 export const acceptInviteSchema = z.object({
-  token: z.string(),
+  token: inviteTokenSchema,
+});
+
+export const getInviteSchema = z.object({
+  token: inviteTokenSchema,
+});
+
+export const listInvitesSchema = z.object({
+  householdId: idSchema,
+});
+
+export const revokeInviteSchema = z.object({
+  householdId: idSchema,
+  inviteId: idSchema,
 });
 export type AcceptInviteInput = z.infer<typeof acceptInviteSchema>;
 

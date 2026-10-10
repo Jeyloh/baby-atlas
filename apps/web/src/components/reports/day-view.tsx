@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
+import { sharedFreshness } from "@/lib/shared-freshness";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendarStrip } from "@/components/reports/week-calendar-strip";
 import { DayFilterChips } from "@/components/reports/day-filter-chips";
@@ -50,10 +51,10 @@ export function DayView({ childId }: DayViewProps) {
     });
 
   const { data: childData } = trpc.child.get.useQuery({ id: childId });
-  const { data, isLoading } = trpc.timeline.getDay.useQuery({
-    childId,
-    date: selectedDate,
-  });
+  const { data, isLoading } = trpc.timeline.getDay.useQuery(
+    { childId, date: selectedDate },
+    sharedFreshness
+  );
 
   const childName = childData?.name ?? t("defaultChildName");
 

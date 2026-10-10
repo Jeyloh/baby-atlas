@@ -1,0 +1,16 @@
+{
+  "loading": "Loading the invite…",
+  "title": "You're invited to {household}",
+  "titleFrom": "{name} invited you to {household}",
+  "body": "As a {role} you can follow and log for the children in the household, together with the others.",
+  "join": "Join",
+  "joining": "Joining…",
+  "joined": "You've joined {household}",
+  "signInToJoin": "Sign in to join",
+  "emailRestricted": "This invite only works for the email address it was sent to.",
+  "alreadyMember": "You're already a member. Go to the app",
+  "invalidTitle": "This invite doesn't work",
+  "invalidBody": "The link has been used, has expired or was revoked. Ask for a new invite.",
+  "toApp": "Go to the app",
+  "failed": "Could not join"
+}

@@ -9,8 +9,10 @@ import { prisma } from "@baby-atlas/db";
  * Returns 404 outside `next dev` or when DEV_LOGIN_EMAIL is not set.
  */
 export async function GET(request: Request) {
-  const email = process.env.DEV_LOGIN_EMAIL;
-  if (process.env.NODE_ENV !== "development" || !email) {
+  // ?as=someone@example.com signs in as another local user, to test sharing
+  const as = new URL(request.url).searchParams.get("as");
+  const email = as ?? process.env.DEV_LOGIN_EMAIL;
+  if (process.env.NODE_ENV !== "development" || !process.env.DEV_LOGIN_EMAIL || !email) {
     return new NextResponse(null, { status: 404 });
   }
 
@@ -24,7 +26,9 @@ export async function GET(request: Request) {
   const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   await prisma.session.create({ data: { sessionToken, userId: user.id, expires } });
 
-  const response = NextResponse.redirect(new URL("/dashboard", request.url));
+  const requested = new URL(request.url).searchParams.get("callbackUrl");
+  const target = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/dashboard";
+  const response = NextResponse.redirect(new URL(target, request.url));
   // Plain http on localhost, so NextAuth uses the unprefixed cookie name
   response.cookies.set("authjs.session-token", sessionToken, {
     httpOnly: true,

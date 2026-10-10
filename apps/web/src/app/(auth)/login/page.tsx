@@ -9,22 +9,29 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+// Only same-site paths, so a crafted link cannot send people to another site
+function safeCallbackUrl(value: string | null): string {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
+}
+
 export default function LoginPage() {
   const t = useTranslations("auth.login");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [providers, setProviders] = useState<Awaited<ReturnType<typeof getProviders>>>(null);
+  const [callbackUrl, setCallbackUrl] = useState("/dashboard");
 
   useEffect(() => {
     getProviders().then((providers) => setProviders(providers));
+    setCallbackUrl(safeCallbackUrl(new URLSearchParams(window.location.search).get("callbackUrl")));
   }, []);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signIn("nodemailer", { email, callbackUrl: "/dashboard" });
+      await signIn("nodemailer", { email, callbackUrl });
       setEmailSent(true);
     } catch {
       setIsLoading(false);
@@ -32,7 +39,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl });
   };
 
   if (emailSent) {
@@ -130,7 +137,9 @@ export default function LoginPage() {
           {process.env.NODE_ENV === "development" && (
             <Button asChild variant="outline" className="w-full">
               {/* Plain anchor: the route sets a cookie and redirects */}
-              <a href="/api/dev/login">{t("devLogin")}</a>
+              <a href={`/api/dev/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}>
+                {t("devLogin")}
+              </a>
             </Button>
           )}
         </CardContent>

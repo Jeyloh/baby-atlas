@@ -8,6 +8,7 @@ import enums from "./enums.json";
 import format from "./format.json";
 import household from "./household.json";
 import insights from "./insights.json";
+import invite from "./invite.json";
 import logModal from "./logModal.json";
 import nav from "./nav.json";
 import potty from "./potty.json";
@@ -31,6 +32,7 @@ const messages = {
   format,
   household,
   insights,
+  invite,
   logModal,
   nav,
   potty,

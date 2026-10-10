@@ -1,0 +1,16 @@
+{
+  "loading": "Henter invitasjonen …",
+  "title": "Du er invitert til {household}",
+  "titleFrom": "{name} har invitert deg til {household}",
+  "body": "Som {role} kan du følge med på og logge for barna i husstanden, sammen med de andre.",
+  "join": "Bli med",
+  "joining": "Blir med …",
+  "joined": "Du er nå med i {household}",
+  "signInToJoin": "Logg inn for å bli med",
+  "emailRestricted": "Invitasjonen gjelder bare for e-postadressen den ble sendt til.",
+  "alreadyMember": "Du er allerede med. Gå til appen",
+  "invalidTitle": "Invitasjonen virker ikke",
+  "invalidBody": "Lenken er brukt, utløpt eller trukket tilbake. Be om en ny invitasjon.",
+  "toApp": "Gå til appen",
+  "failed": "Kunne ikke bli med"
+}

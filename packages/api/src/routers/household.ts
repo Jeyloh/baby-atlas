@@ -5,10 +5,35 @@ import {
   updateHouseholdSchema,
   inviteMemberSchema,
   acceptInviteSchema,
+  getInviteSchema,
+  listInvitesSchema,
+  revokeInviteSchema,
   updateMemberRoleSchema,
   removeMemberSchema,
 } from "@baby-atlas/schemas";
-import { createTRPCRouter, protectedProcedure, householdProcedure } from "../trpc";
+import { randomBytes } from "crypto";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+  householdProcedure,
+} from "../trpc";
+
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+// 24 random bytes, URL safe: the link itself is the credential
+function newInviteToken(): string {
+  return randomBytes(24).toString("base64url");
+}
+
+function assertCanManage(role: string | undefined) {
+  if (role !== "OWNER" && role !== "ADMIN") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Only owners and admins can manage invites",
+    });
+  }
+}
 
 export const householdRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -134,39 +159,100 @@ export const householdRouter = createTRPCRouter({
         });
       }
 
-      const existingUser = await ctx.prisma.user.findUnique({
-        where: { email: input.email },
-      });
+      if (input.role === "OWNER") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot invite an owner" });
+      }
 
-      if (existingUser) {
-        const existingMember = await ctx.prisma.householdMember.findUnique({
-          where: {
-            householdId_userId: {
-              householdId: input.householdId,
-              userId: existingUser.id,
+      const email = input.email?.toLowerCase();
+      if (email) {
+        const existingUser = await ctx.prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+          const existingMember = await ctx.prisma.householdMember.findUnique({
+            where: {
+              householdId_userId: {
+                householdId: input.householdId,
+                userId: existingUser.id,
+              },
             },
-          },
-        });
-
-        if (existingMember) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "User is already a member of this household",
           });
+
+          if (existingMember) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "User is already a member of this household",
+            });
+          }
         }
       }
 
       const invite = await ctx.prisma.householdInvite.create({
         data: {
           householdId: input.householdId,
-          email: input.email,
+          email,
           role: input.role,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          token: newInviteToken(),
+          invitedById: ctx.session.user.id,
+          expiresAt: new Date(Date.now() + INVITE_TTL_MS),
         },
       });
 
       return invite;
     }),
+
+  listInvites: householdProcedure
+    .input(listInvitesSchema)
+    .query(async ({ ctx, input }) => {
+      assertCanManage(ctx.memberRole);
+      return ctx.prisma.householdInvite.findMany({
+        where: { householdId: input.householdId, expiresAt: { gt: new Date() } },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, email: true, role: true, token: true, expiresAt: true, createdAt: true },
+      });
+    }),
+
+  revokeInvite: householdProcedure
+    .input(revokeInviteSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertCanManage(ctx.memberRole);
+      // Scoped by household so an id from another household cannot be revoked
+      await ctx.prisma.householdInvite.deleteMany({
+        where: { id: input.inviteId, householdId: input.householdId },
+      });
+      return { success: true };
+    }),
+
+  // Public so the invite page can say who invited you before you sign in.
+  // Holding the secret token is what grants access to this summary.
+  getInvite: publicProcedure.input(getInviteSchema).query(async ({ ctx, input }) => {
+    const invite = await ctx.prisma.householdInvite.findUnique({
+      where: { token: input.token },
+      select: {
+        role: true,
+        email: true,
+        expiresAt: true,
+        householdId: true,
+        household: { select: { name: true } },
+        invitedBy: { select: { name: true } },
+      },
+    });
+    if (!invite) throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+
+    const userId = ctx.session?.user.id;
+    const alreadyMember = userId
+      ? !!(await ctx.prisma.householdMember.findUnique({
+          where: { householdId_userId: { householdId: invite.householdId, userId } },
+        }))
+      : false;
+
+    return {
+      householdName: invite.household.name,
+      invitedByName: invite.invitedBy?.name ?? null,
+      role: invite.role,
+      expired: invite.expiresAt < new Date(),
+      restrictedToEmail: invite.email !== null,
+      alreadyMember,
+    };
+  }),
 
   acceptInvite: protectedProcedure
     .input(acceptInviteSchema)
@@ -189,27 +275,42 @@ export const householdRouter = createTRPCRouter({
         });
       }
 
-      if (invite.email !== ctx.session.user.email) {
+      if (invite.email && invite.email !== ctx.session.user.email?.toLowerCase()) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "This invite is for a different email address",
         });
       }
 
+      const existing = await ctx.prisma.householdMember.findUnique({
+        where: {
+          householdId_userId: { householdId: invite.householdId, userId: ctx.session.user.id },
+        },
+      });
+
+      // Accepting twice (or as an existing member) keeps the current role
       await ctx.prisma.$transaction([
-        ctx.prisma.householdMember.create({
-          data: {
-            householdId: invite.householdId,
-            userId: ctx.session.user.id,
-            role: invite.role,
-          },
-        }),
-        ctx.prisma.householdInvite.delete({
-          where: { id: invite.id },
-        }),
+        ...(existing
+          ? []
+          : [
+              ctx.prisma.householdMember.create({
+                data: {
+                  householdId: invite.householdId,
+                  userId: ctx.session.user.id,
+                  role: invite.role,
+                },
+              }),
+            ]),
+        ctx.prisma.householdInvite.delete({ where: { id: invite.id } }),
       ]);
 
-      return { success: true, householdId: invite.householdId };
+      const firstChild = await ctx.prisma.child.findFirst({
+        where: { householdId: invite.householdId },
+        orderBy: { createdAt: "asc" },
+        select: { id: true },
+      });
+
+      return { success: true, householdId: invite.householdId, childId: firstChild?.id ?? null };
     }),
 
   updateMemberRole: householdProcedure
