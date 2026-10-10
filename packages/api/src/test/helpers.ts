@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import type { TRPCContext } from "../trpc";
 import { prismaMock } from "./setup";
 
@@ -34,10 +35,12 @@ export function createTestUser(overrides?: Partial<TRPCContext["session"]>) {
 export function createTestContext(
   options: {
     session?: TRPCContext["session"];
+    storage?: TRPCContext["storage"];
   } = {}
 ): TRPCContext {
   return {
     prisma: prismaMock as unknown as TRPCContext["prisma"],
+    storage: options.storage ?? { delete: vi.fn().mockResolvedValue(undefined) },
     session: options.session ?? createTestUser(),
     headers: new Headers(),
   };
@@ -46,6 +49,7 @@ export function createTestContext(
 export function createUnauthenticatedContext(): TRPCContext {
   return {
     prisma: prismaMock as unknown as TRPCContext["prisma"],
+    storage: { delete: vi.fn().mockResolvedValue(undefined) },
     session: null,
     headers: new Headers(),
   };

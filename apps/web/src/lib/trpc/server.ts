@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { cache } from "react";
 import { createCallerFactory, createTRPCContext } from "@baby-atlas/api";
 import { appRouter } from "@baby-atlas/api";
+import { getStorage } from "@/lib/storage";
 
 const createContext = cache(async () => {
   const heads = new Headers(await headers());
@@ -11,6 +12,7 @@ const createContext = cache(async () => {
 
   return createTRPCContext({
     headers: heads,
+    storage: getStorage(),
   });
 });
 

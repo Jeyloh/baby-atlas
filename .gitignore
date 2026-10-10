@@ -40,6 +40,9 @@ coverage
 packages/db/prisma/*.db
 packages/db/prisma/*.db-journal
 
+# Journal photos stored by the local storage driver
+apps/web/.uploads/
+
 # Next.js
 *.tsbuildinfo
 next-env.d.ts

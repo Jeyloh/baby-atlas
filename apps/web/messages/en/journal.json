@@ -1,0 +1,87 @@
+{
+  "title": "Journal",
+  "notFound": "Child not found",
+  "newEntry": "New entry",
+  "loadError": "Could not load the journal",
+  "retry": "Try again",
+  "loadMore": "Show more entries",
+  "tags": {
+    "SICKNESS": "Sickness",
+    "MILESTONE": "Milestone",
+    "FIRST_TIME": "First time",
+    "CLINIC": "Clinic and doctor",
+    "FUNNY": "Funny",
+    "EVERYDAY": "Everyday"
+  },
+  "filters": {
+    "label": "Filter the journal",
+    "hint": "Tap a tag to filter",
+    "filtered": "{count, plural, one {Showing # tag} other {Showing # tags}}",
+    "showAll": "Show all"
+  },
+  "empty": {
+    "title": "Write the first entry",
+    "description": "A small moment, a first word or an ordinary Tuesday. You will be glad of it in a few years.",
+    "descriptionViewer": "Nobody has written anything here yet. Entries from the family will show up here.",
+    "filtered": "No entries with these tags"
+  },
+  "entry": {
+    "by": "By {name}",
+    "unknownAuthor": "Unknown author",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "menu": "Entry options",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "photos": {
+    "open": "Open photo {index} of {count}",
+    "alt": "Photo {index} of {count} from the entry"
+  },
+  "viewer": {
+    "title": "Photos from the entry",
+    "previous": "Previous photo",
+    "next": "Next photo",
+    "close": "Close photo viewer",
+    "position": "{index} of {count}"
+  },
+  "sheet": {
+    "newTitle": "New entry",
+    "editTitle": "Edit entry",
+    "description": "The entry is shared with everyone in the household.",
+    "text": "What happened?",
+    "textPlaceholder": "Write a few words about the day …",
+    "date": "Date",
+    "tags": "Tags",
+    "tagsHint": "Pick at least one",
+    "photos": "Photos",
+    "photosCount": "{count} of {max}",
+    "addFromLibrary": "Choose photos",
+    "takePhoto": "Take photo",
+    "pasteHint": "On a computer you can also paste photos",
+    "removePhoto": "Remove photo {index}",
+    "retryPhoto": "Retry uploading photo {index}",
+    "uploading": "Uploading",
+    "save": "Save",
+    "saving": "Saving …",
+    "created": "Entry saved",
+    "updated": "Entry updated",
+    "photosFailed": "{count, plural, one {Entry saved, but # photo was not uploaded} other {Entry saved, but # photos were not uploaded}}"
+  },
+  "delete": {
+    "title": "Delete the entry?",
+    "description": "The text and photos are deleted for everyone in the household. This cannot be undone.",
+    "deleted": "Entry deleted"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "unsupported_type": "This file type is not supported. Use JPEG, PNG, WebP or HEIC.",
+    "too_large": "The photo is too large",
+    "too_many_photos": "An entry can have up to {max} photos",
+    "heic_unsupported": "This browser cannot read HEIC photos. Try a JPEG photo.",
+    "unreadable_image": "Could not read the photo",
+    "forbidden": "You are not allowed to change this entry",
+    "network": "No network connection",
+    "generic": "The photo was not uploaded"
+  }
+}

@@ -59,6 +59,7 @@ model User {
   sessions             Session[]
   householdMemberships HouseholdMember[]
   sentInvites          HouseholdInvite[]
+  journalEntries       JournalEntry[]
 
   @@map("users")
 }
@@ -157,6 +158,7 @@ model Child {
   speechWords        SpeechWord[]
   pottyReadinessLogs PottyReadinessLog[]
   vaccinationRecords VaccinationRecord[]
+  journalEntries     JournalEntry[]
 
   @@map("children")
 }
@@ -503,4 +505,52 @@ model VaccinationRecord {
 
   @@unique([childId, vaccineKey])
   @@map("vaccination_records")
+}
+
+// ============================================================================
+// Journal (shared per child, photos live in private storage, never public)
+// ============================================================================
+
+enum JournalTag {
+  SICKNESS
+  MILESTONE
+  FIRST_TIME
+  CLINIC
+  FUNNY
+  EVERYDAY
+}
+
+model JournalEntry {
+  id        String       @id @default(cuid())
+  childId   String       @map("child_id")
+  authorId  String?      @map("author_id")
+  date      DateTime     @db.Date
+  text      String
+  tags      JournalTag[]
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  child  Child          @relation(fields: [childId], references: [id], onDelete: Cascade)
+  author User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  photos JournalPhoto[]
+
+  @@index([childId, date])
+  @@map("journal_entries")
+}
+
+model JournalPhoto {
+  id         String   @id @default(cuid())
+  entryId    String   @map("entry_id")
+  storageKey String   @map("storage_key")
+  mimeType   String   @map("mime_type")
+  width      Int
+  height     Int
+  sizeBytes  Int      @map("size_bytes")
+  position   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  entry JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@index([entryId, position])
+  @@map("journal_photos")
 }

@@ -32,6 +32,10 @@ beforeEach(() => {
   prismaMock.activityRecord.findUnique.mockResolvedValue(owned);
   prismaMock.temperatureRecord.findUnique.mockResolvedValue(owned);
   prismaMock.medicine.findUnique.mockResolvedValue(owned);
+  prismaMock.journalEntry.findUnique.mockResolvedValue(owned);
+  prismaMock.journalPhoto.findUnique.mockResolvedValue({
+    entry: { childId: TEST_CHILD_ID },
+  } as never);
   prismaMock.medicineRecord.findUnique.mockResolvedValue({
     medicine: { childId: TEST_CHILD_ID },
   } as never);

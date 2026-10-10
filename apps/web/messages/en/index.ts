@@ -10,6 +10,7 @@ import format from "./format.json";
 import household from "./household.json";
 import insights from "./insights.json";
 import invite from "./invite.json";
+import journal from "./journal.json";
 import logModal from "./logModal.json";
 import nav from "./nav.json";
 import potty from "./potty.json";
@@ -35,6 +36,7 @@ const messages: typeof nb = {
   household,
   insights,
   invite,
+  journal,
   logModal,
   nav,
   potty,

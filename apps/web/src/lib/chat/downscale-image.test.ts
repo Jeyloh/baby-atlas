@@ -73,6 +73,17 @@ describe("downscaleImage", () => {
     expect(close).toHaveBeenCalled();
   });
 
+  it("takes the edge, size limit and quality as options", async () => {
+    const file = new File(["x"], "photo.jpg", { type: "image/jpeg" });
+    await downscaleImage(file, { maxEdge: 2048, maxBytes: 2000, quality: 0.8 });
+
+    expect(canvas).toMatchObject({ width: 2048, height: 1536 });
+    expect(toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.8);
+
+    blobSize = 2001;
+    await expect(downscaleImage(file, { maxBytes: 2000 })).rejects.toBeInstanceOf(ImageTooLargeError);
+  });
+
   it("rejects when the encoded image is still over the size limit", async () => {
     blobSize = MAX_IMAGE_BYTES + 1;
     const file = new File(["x"], "big.png", { type: "image/png" });

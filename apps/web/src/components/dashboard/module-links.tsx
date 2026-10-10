@@ -3,9 +3,14 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { useTranslations } from "next-intl";
-import { ChevronRight, MessageSquareText, Sparkles, Syringe, Toilet, type LucideIcon } from "lucide-react";
+import { BookHeart, ChevronRight, MessageSquareText, Sparkles, Syringe, Toilet, type LucideIcon } from "lucide-react";
 
-const MODULES: { path: string; key: "speech" | "potty" | "vaccines" | "insights"; icon: LucideIcon }[] = [
+const MODULES: {
+  path: string;
+  key: "journal" | "speech" | "potty" | "vaccines" | "insights";
+  icon: LucideIcon;
+}[] = [
+  { path: "journal", key: "journal", icon: BookHeart },
   { path: "vaccines", key: "vaccines", icon: Syringe },
   { path: "speech", key: "speech", icon: MessageSquareText },
   { path: "potty", key: "potty", icon: Toilet },

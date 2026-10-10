@@ -3,8 +3,14 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 import { prisma, type PrismaClient } from "@baby-atlas/db";
 
+/** The part of the photo storage the API needs: removing stored files. */
+export interface StoredFileRemover {
+  delete(key: string): Promise<void>;
+}
+
 export type TRPCContext = {
   prisma: PrismaClient;
+  storage: StoredFileRemover;
   session: {
     user: {
       id: string;
@@ -19,9 +25,11 @@ export type TRPCContext = {
 export const createTRPCContext = async (opts: {
   headers: Headers;
   session?: TRPCContext["session"];
+  storage: StoredFileRemover;
 }): Promise<TRPCContext> => {
   return {
     prisma,
+    storage: opts.storage,
     session: opts.session ?? null,
     headers: opts.headers,
   };
@@ -232,6 +240,15 @@ const recordChildResolvers = {
     p.temperatureRecord.findUnique({ where: { id }, select: { childId: true } }),
   medicine: (p: Prisma, id: string) =>
     p.medicine.findUnique({ where: { id }, select: { childId: true } }),
+  journalEntry: (p: Prisma, id: string) =>
+    p.journalEntry.findUnique({ where: { id }, select: { childId: true } }),
+  journalPhoto: async (p: Prisma, id: string) => {
+    const photo = await p.journalPhoto.findUnique({
+      where: { id },
+      select: { entry: { select: { childId: true } } },
+    });
+    return photo ? { childId: photo.entry.childId } : null;
+  },
   medicineRecord: async (p: Prisma, id: string) => {
     const record = await p.medicineRecord.findUnique({
       where: { id },

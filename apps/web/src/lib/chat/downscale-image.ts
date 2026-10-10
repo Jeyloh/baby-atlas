@@ -24,20 +24,36 @@ export function fitWithin(
   };
 }
 
-function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("image_encode_failed"))),
       "image/jpeg",
-      JPEG_QUALITY
+      quality
     );
   });
 }
 
-export async function downscaleImage(file: File): Promise<File> {
+export interface DownscaleOptions {
+  /** Longest edge in pixels. Defaults to the chat limit. */
+  maxEdge?: number;
+  /** Largest encoded size in bytes. Defaults to the chat limit. */
+  maxBytes?: number;
+  quality?: number;
+}
+
+/**
+ * Draws the image onto a canvas at most `maxEdge` px on the long edge and
+ * encodes it as JPEG. The EXIF orientation is applied to the pixels, and the
+ * canvas drops all metadata.
+ */
+export async function downscaleImage(
+  file: File,
+  { maxEdge = MAX_IMAGE_EDGE, maxBytes = MAX_IMAGE_BYTES, quality = JPEG_QUALITY }: DownscaleOptions = {}
+): Promise<File> {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   try {
-    const { width, height } = fitWithin(bitmap.width, bitmap.height);
+    const { width, height } = fitWithin(bitmap.width, bitmap.height, maxEdge);
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -47,8 +63,8 @@ export async function downscaleImage(file: File): Promise<File> {
     context.fillRect(0, 0, width, height);
     context.drawImage(bitmap, 0, 0, width, height);
 
-    const blob = await canvasToBlob(canvas);
-    if (blob.size > MAX_IMAGE_BYTES) throw new ImageTooLargeError();
+    const blob = await canvasToBlob(canvas, quality);
+    if (blob.size > maxBytes) throw new ImageTooLargeError();
 
     const name = file.name.replace(/\.[^./\\]+$/, "") || "image";
     return new File([blob], `${name}.jpg`, { type: "image/jpeg" });

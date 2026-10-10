@@ -229,6 +229,15 @@ The chat page and the dashboard Chat tab both render `Chat` (`apps/web/src/compo
 - History is trimmed to 20 messages and images older than the last 2 user turns become a placeholder (`lib/chat/conversation.ts`), on both client and server
 - UI components live in `components/assistant-ui/` (thread, composer, attachment, markdown, tool call row, model picker)
 
+### Journal
+
+A shared journal per child (`/dashboard/[childId]/journal`): text, up to 6 photos, a date that can be back-dated, and one or more tags (`JournalTag`). Everyone in the household reads it. Owners and admins edit and delete every entry, caregivers only their own, viewers none (`canEditJournalEntry` in `@baby-atlas/utils`).
+- tRPC `journal` router (`packages/api/src/routers/journal.ts`): `list` (cursor pagination, `tags` filter matches any selected tag, never returns storage keys), `create`, `update`, `delete`, `deletePhoto`, `reorderPhotos`. `journalEntry` and `journalPhoto` are in `recordProcedure`'s resolvers. Deleting removes the stored files through `ctx.storage` (a failure is logged, not thrown).
+- Photos are private family data and never have public URLs. Upload: `POST /api/journal/photos` (multipart `entryId` + `file`, one photo per request). It needs a session and edit rights on the entry, checks magic bytes (jpeg, png, webp, heic/heif), allows at most 6 photos per entry, then `sharp` auto-rotates, strips all metadata including GPS, resizes to 2048 px and writes WebP plus a 400 px thumbnail. Serve: `GET /api/journal/photos/[photoId]?size=thumb|full` checks household membership and answers 404 (not 403) for anything the user may not see.
+- sharp's prebuilt libvips reads AVIF but not HEVC, so a raw HEIC upload answers 415 `heic_unsupported`. The client converts through a canvas first (`downscaleImage` in `lib/chat/downscale-image.ts`, shared with chat), which works where the browser can decode HEIC (Safari and iOS).
+- Storage (`apps/web/src/lib/storage/`): `put(key, bytes, mimeType)`, `get(key)` returning a stream plus mimeType, `delete(key)`. Keys are `journal/{childId}/{entryId}/{photoId}.webp` and `...{photoId}.thumb.webp`. `STORAGE_DRIVER=local` (default in development) writes to `apps/web/.uploads/` (git-ignored, `STORAGE_LOCAL_DIR` overrides). `STORAGE_DRIVER=supabase` uses the private bucket `journal` through `SUPABASE_SERVICE_ROLE_KEY`, server side only. Production must use `supabase`. Vercel limits a request body to 4.5 MB, so the client downscales before upload.
+- UI in `components/journal/`; tag colours in `lib/journal-tags.ts`.
+
 ### Timeline Views
 
 Reports section has three views, all showing all 8 activity types:
@@ -344,7 +353,9 @@ GOOGLE_CLIENT_ID=        # For Google OAuth
 GOOGLE_CLIENT_SECRET=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=  # Server-side Supabase access
+SUPABASE_SERVICE_ROLE_KEY=  # Server-side Supabase access (also the journal photo bucket)
+STORAGE_DRIVER=          # "local" (default in dev, apps/web/.uploads) or "supabase" (private bucket "journal")
+STORAGE_LOCAL_DIR=       # Optional: replaces apps/web/.uploads for the local driver
 EMAIL_SERVER=            # SMTP connection string for magic links
 EMAIL_FROM=              # Sender email address
 ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
@@ -398,6 +409,8 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 | `ANTHROPIC_API_KEY` | Anthropic API key for AI chat and insights |
 | `PREMIUM_EMAILS` | Comma-separated emails treated as premium (until payments exist) |
 | `CAP_SERVER_URL` | URL the iOS shell loads (Capacitor) |
+| `STORAGE_DRIVER` | Set to `supabase` in production for journal photos (the local driver has no writable disk on Vercel) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Needed when `STORAGE_DRIVER=supabase`. Server only |
 
 ### API Timeout Configuration
 

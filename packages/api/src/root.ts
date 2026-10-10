@@ -15,8 +15,10 @@ import { speechRouter } from "./routers/speech";
 import { pottyRouter } from "./routers/potty";
 import { vaccinationRouter } from "./routers/vaccination";
 import { statsRouter } from "./routers/stats";
+import { journalRouter } from "./routers/journal";
 
 export const appRouter = createTRPCRouter({
+  journal: journalRouter,
   speech: speechRouter,
   potty: pottyRouter,
   vaccination: vaccinationRouter,

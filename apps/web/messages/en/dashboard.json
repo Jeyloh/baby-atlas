@@ -2,6 +2,7 @@
   "modules": {
     "title": "Development and health",
     "latestActivity": "Latest activity",
+    "journal": { "title": "Journal", "description": "Text and photos from everyday life, shared with the family" },
     "vaccines": { "title": "Vaccines", "description": "The Norwegian programme with due dates" },
     "speech": { "title": "Words and speech", "description": "Words, sounds and signs your child uses" },
     "potty": { "title": "Ready for the potty?", "description": "Readiness signs, 18 to 36 months" },

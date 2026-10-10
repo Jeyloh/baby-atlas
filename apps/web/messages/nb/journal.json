@@ -1,0 +1,87 @@
+{
+  "title": "Dagbok",
+  "notFound": "Fant ikke barnet",
+  "newEntry": "Nytt innlegg",
+  "loadError": "Kunne ikke laste dagboken",
+  "retry": "Prøv igjen",
+  "loadMore": "Vis flere innlegg",
+  "tags": {
+    "SICKNESS": "Sykdom",
+    "MILESTONE": "Milepæl",
+    "FIRST_TIME": "Første gang",
+    "CLINIC": "Helsestasjon og lege",
+    "FUNNY": "Morsomt",
+    "EVERYDAY": "Hverdag"
+  },
+  "filters": {
+    "label": "Filtrer dagboken",
+    "hint": "Trykk på en merkelapp for å filtrere",
+    "filtered": "{count, plural, one {Viser # merkelapp} other {Viser # merkelapper}}",
+    "showAll": "Vis alt"
+  },
+  "empty": {
+    "title": "Skriv det første innlegget",
+    "description": "Et lite øyeblikk, et første ord eller en vanlig tirsdag. Du er glad for det om noen år.",
+    "descriptionViewer": "Ingen har skrevet noe her ennå. Innlegg fra familien dukker opp her.",
+    "filtered": "Ingen innlegg med disse merkelappene"
+  },
+  "entry": {
+    "by": "Av {name}",
+    "unknownAuthor": "Ukjent forfatter",
+    "showMore": "Vis mer",
+    "showLess": "Vis mindre",
+    "menu": "Valg for innlegget",
+    "edit": "Rediger",
+    "delete": "Slett"
+  },
+  "photos": {
+    "open": "Åpne bilde {index} av {count}",
+    "alt": "Bilde {index} av {count} fra innlegget"
+  },
+  "viewer": {
+    "title": "Bilder fra innlegget",
+    "previous": "Forrige bilde",
+    "next": "Neste bilde",
+    "close": "Lukk bildevisning",
+    "position": "{index} av {count}"
+  },
+  "sheet": {
+    "newTitle": "Nytt innlegg",
+    "editTitle": "Rediger innlegg",
+    "description": "Innlegget deles med alle i husholdningen.",
+    "text": "Hva skjedde?",
+    "textPlaceholder": "Skriv noen ord om dagen …",
+    "date": "Dato",
+    "tags": "Merkelapper",
+    "tagsHint": "Velg minst én",
+    "photos": "Bilder",
+    "photosCount": "{count} av {max}",
+    "addFromLibrary": "Velg bilder",
+    "takePhoto": "Ta bilde",
+    "pasteHint": "På datamaskin kan du også lime inn bilder",
+    "removePhoto": "Fjern bilde {index}",
+    "retryPhoto": "Prøv å laste opp bilde {index} på nytt",
+    "uploading": "Laster opp",
+    "save": "Lagre",
+    "saving": "Lagrer …",
+    "created": "Innlegget er lagret",
+    "updated": "Innlegget er oppdatert",
+    "photosFailed": "{count, plural, one {Innlegget er lagret, men # bilde ble ikke lastet opp} other {Innlegget er lagret, men # bilder ble ikke lastet opp}}"
+  },
+  "delete": {
+    "title": "Slette innlegget?",
+    "description": "Teksten og bildene slettes for alle i husholdningen. Dette kan ikke angres.",
+    "deleted": "Innlegget er slettet"
+  },
+  "errors": {
+    "title": "Noe gikk galt",
+    "unsupported_type": "Filtypen støttes ikke. Bruk JPEG, PNG, WebP eller HEIC.",
+    "too_large": "Bildet er for stort",
+    "too_many_photos": "Et innlegg kan ha opptil {max} bilder",
+    "heic_unsupported": "Denne nettleseren kan ikke lese HEIC-bilder. Prøv et JPEG-bilde.",
+    "unreadable_image": "Kunne ikke lese bildet",
+    "forbidden": "Du har ikke tilgang til å endre dette innlegget",
+    "network": "Ingen nettforbindelse",
+    "generic": "Bildet ble ikke lastet opp"
+  }
+}
