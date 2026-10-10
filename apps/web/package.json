@@ -15,7 +15,6 @@
     "cap:open": "cap open ios"
   },
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^0.2.20",
     "@anthropic-ai/sdk": "^0.71.2",
     "@auth/prisma-adapter": "^2.7.4",
     "@baby-atlas/api": "workspace:*",

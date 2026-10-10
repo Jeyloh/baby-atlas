@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@baby-atlas/db";
 import Anthropic from "@anthropic-ai/sdk";
 import { registerTools, handleToolCall } from "@baby-atlas/mcp-server/tools";
+import { scopeToolCall, UNSCOPED_TOOLS } from "@/lib/agent/scope-tool-call";
 import { checkUserSubscription } from "@/lib/subscription";
 import { buildSystemPrompt } from "@/lib/insights/system-prompt";
 import { getRequestLocale } from "@/lib/insights/request-locale";
@@ -30,7 +31,7 @@ interface ChatRequest {
 
 // Convert MCP tool definitions to Anthropic tool format
 function convertToolsToAnthropicFormat(): Anthropic.Tool[] {
-  const mcpTools = registerTools();
+  const mcpTools = registerTools().filter((tool) => !UNSCOPED_TOOLS.has(tool.name));
   return mcpTools.map((tool) => ({
     name: tool.name,
     description: tool.description ?? "",
@@ -172,34 +173,6 @@ export async function POST(request: Request) {
     );
     const tools = convertToolsToAnthropicFormat();
 
-    // Tools that need childId injected
-    const toolsRequiringChildId = [
-      "start-sleep",
-      "log-sleep",
-      "get-sleep-summary",
-      "log-breastfeeding",
-      "log-bottle",
-      "log-solids",
-      "get-feeding-summary",
-      "log-diaper",
-      "get-diaper-summary",
-      "start-pumping",
-      "log-pumping",
-      "get-pumping-summary",
-      "create-medicine",
-      "list-medicines",
-      "log-growth",
-      "get-growth-records",
-      "get-latest-growth",
-      "log-temperature",
-      "get-temperature-records",
-      "get-latest-temperature",
-      "start-activity",
-      "log-activity",
-      "get-activity-summary",
-      "get-daily-summary",
-    ];
-
     // Build messages array
     const messages: Anthropic.MessageParam[] = [
       ...conversationHistory.map((msg) => ({
@@ -277,14 +250,7 @@ export async function POST(request: Request) {
               const toolResults: Anthropic.ToolResultBlockParam[] = [];
 
               for (const toolUse of toolUseBlocks) {
-                // Inject childId if needed
-                const toolInput = { ...(toolUse.input as Record<string, unknown>) };
-                if (
-                  toolsRequiringChildId.includes(toolUse.name) &&
-                  !toolInput.childId
-                ) {
-                  toolInput.childId = childId;
-                }
+                const toolInput = toolUse.input as Record<string, unknown>;
 
                 // Send tool execution start
                 const toolStartData = JSON.stringify({
@@ -296,10 +262,10 @@ export async function POST(request: Request) {
                 controller.enqueue(encoder.encode(`data: ${toolStartData}\n\n`));
 
                 try {
-                  // Execute the tool
+                  // Execute the tool, scoped to the verified child
                   const result = await handleToolCall(
                     toolUse.name,
-                    toolInput,
+                    await scopeToolCall(prisma, toolUse.name, toolInput, childId),
                     prisma
                   );
 
