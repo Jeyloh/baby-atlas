@@ -95,8 +95,11 @@ export function QuickActionBar({ childId }: { childId: string }) {
   };
 
   return (
-    <section aria-labelledby="quick-actions-title" className="space-y-2">
-      <div className="flex items-center justify-between">
+    <section
+      aria-labelledby="quick-actions-title"
+      className="space-y-3 rounded-2xl border bg-muted/40 p-3"
+    >
+      <div className="flex items-center justify-between pl-1">
         <div>
           <h2 id="quick-actions-title" className="text-base font-semibold">
             {t("title")}
@@ -113,7 +116,7 @@ export function QuickActionBar({ childId }: { childId: string }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {pinned.map((action) => (
           <QuickActionButton
             key={action}
@@ -169,16 +172,29 @@ function QuickActionButton({
       disabled={busy}
       aria-label={state.active ? t("stopLabel", { action: label }) : label}
       aria-pressed={state.active}
-      className={`relative min-h-[88px] w-full rounded-xl p-3 text-left select-none touch-manipulation transition-transform active:scale-[0.97] disabled:opacity-60 [-webkit-touch-callout:none] ${getActivityCardClasses(category)} ${state.active ? "ring-4 ring-white/70" : ""}`}
+      // Neutral action buttons, so they read differently from the colored status
+      // cards below. A running timer fills the button with its activity color.
+      className={`flex min-h-16 w-full items-center gap-3 rounded-xl border p-2 pr-3 text-left shadow-sm select-none touch-manipulation transition-transform active:scale-[0.97] disabled:opacity-60 [-webkit-touch-callout:none] ${
+        state.active ? getActivityCardClasses(category) : "bg-card hover:bg-muted"
+      }`}
     >
-      <Icon className="h-6 w-6" aria-hidden />
-      <span className="mt-2 block text-sm font-semibold leading-tight">{label}</span>
-      {state.active && (
-        <span className="mt-1 flex items-center gap-1.5 text-xs font-medium tabular-nums">
-          <span className="h-2 w-2 rounded-full bg-white animate-pulse" aria-hidden />
-          {elapsed ?? t("running")}
-        </span>
-      )}
+      <span
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+          state.active ? "bg-white/25" : getActivityCardClasses(category)
+        }`}
+        aria-hidden
+      >
+        <Icon className="h-5 w-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold leading-tight">{label}</span>
+        {state.active && (
+          <span className="mt-0.5 flex items-center gap-1.5 text-xs font-medium tabular-nums">
+            <span className="h-2 w-2 rounded-full bg-current animate-pulse" aria-hidden />
+            {elapsed ?? t("running")}
+          </span>
+        )}
+      </span>
     </button>
   );
 }
