@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,15 +44,13 @@ const roleIcons: Record<HouseholdRole, React.ReactNode> = {
   VIEWER: <Eye className="h-4 w-4 text-gray-500" />,
 };
 
-const roleLabels: Record<HouseholdRole, string> = {
-  OWNER: "Owner",
-  ADMIN: "Admin",
-  CAREGIVER: "Caregiver",
-  VIEWER: "Viewer",
-};
+const assignableRoles = ["ADMIN", "CAREGIVER", "VIEWER"] as const;
 
 export default function HouseholdSettingsPage() {
   const router = useRouter();
+  const t = useTranslations("household");
+  const tCommon = useTranslations("common");
+  const tRole = useTranslations("enums.householdRole");
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -77,78 +76,55 @@ export default function HouseholdSettingsPage() {
     hasInitialized[1](true);
   }
 
+  const showError = (message: string) =>
+    toast({
+      title: t("errorTitle"),
+      description: message,
+      variant: "destructive",
+    });
+
   const updateHousehold = trpc.household.update.useMutation({
     onSuccess: () => {
-      toast({ title: "Household updated!" });
+      toast({ title: t("settingsPage.updated") });
       utils.household.list.invalidate();
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: (error) => showError(error.message),
   });
 
   const deleteHousehold = trpc.household.delete.useMutation({
     onSuccess: () => {
-      toast({ title: "Household deleted" });
+      toast({ title: t("danger.deleted") });
       router.push("/dashboard");
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: (error) => showError(error.message),
   });
 
   const inviteMember = trpc.household.invite.useMutation({
     onSuccess: () => {
-      toast({ title: "Invitation sent!" });
+      toast({ title: t("members.inviteSent") });
       setInviteDialogOpen(false);
       setInviteEmail("");
       setInviteRole("CAREGIVER");
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: (error) => showError(error.message),
   });
 
   const updateMemberRole = trpc.household.updateMemberRole.useMutation({
     onSuccess: () => {
-      toast({ title: "Role updated!" });
+      toast({ title: t("members.roleUpdated") });
       utils.household.list.invalidate();
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: (error) => showError(error.message),
   });
 
   const removeMember = trpc.household.removeMember.useMutation({
     onSuccess: () => {
-      toast({ title: "Member removed" });
+      toast({ title: t("members.removed") });
       utils.household.list.invalidate();
       setRemoveMemberDialogOpen(false);
       setMemberToRemove(null);
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: (error) => showError(error.message),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -200,7 +176,7 @@ export default function HouseholdSettingsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{tCommon("loading")}</div>
       </div>
     );
   }
@@ -208,9 +184,9 @@ export default function HouseholdSettingsPage() {
   if (!household) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-muted-foreground">No household found</p>
+        <p className="text-muted-foreground">{t("notFound")}</p>
         <Button asChild>
-          <Link href="/dashboard/household/new">Create Household</Link>
+          <Link href="/dashboard/household/new">{t("create")}</Link>
         </Button>
       </div>
     );
@@ -225,21 +201,19 @@ export default function HouseholdSettingsPage() {
       <Button asChild variant="ghost" size="sm">
         <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          {t("backToDashboard")}
         </Link>
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle>Household Settings</CardTitle>
-          <CardDescription>
-            Manage your household name and preferences.
-          </CardDescription>
+          <CardTitle>{t("settingsPage.title")}</CardTitle>
+          <CardDescription>{t("settingsPage.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Household Name</Label>
+              <Label htmlFor="name">{t("settingsPage.nameLabel")}</Label>
               <Input
                 id="name"
                 value={name}
@@ -255,7 +229,9 @@ export default function HouseholdSettingsPage() {
                 className="w-full"
                 disabled={updateHousehold.isPending}
               >
-                {updateHousehold.isPending ? "Saving..." : "Save Changes"}
+                {updateHousehold.isPending
+                  ? t("settingsPage.saving")
+                  : t("settingsPage.saveChanges")}
               </Button>
             )}
           </form>
@@ -265,10 +241,9 @@ export default function HouseholdSettingsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Members</CardTitle>
+            <CardTitle>{t("members.title")}</CardTitle>
             <CardDescription>
-              {household.members.length} member
-              {household.members.length !== 1 ? "s" : ""} in this household
+              {t("members.count", { count: household.members.length })}
             </CardDescription>
           </div>
           {canManageMembers && (
@@ -276,31 +251,31 @@ export default function HouseholdSettingsPage() {
               <DialogTrigger asChild>
                 <Button size="sm">
                   <UserPlus className="mr-2 h-4 w-4" />
-                  Invite
+                  {t("members.invite")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <form onSubmit={handleInvite}>
                   <DialogHeader>
-                    <DialogTitle>Invite Member</DialogTitle>
+                    <DialogTitle>{t("members.inviteTitle")}</DialogTitle>
                     <DialogDescription>
-                      Send an invitation to join your household.
+                      {t("members.inviteDescription")}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="inviteEmail">Email</Label>
+                      <Label htmlFor="inviteEmail">{t("members.emailLabel")}</Label>
                       <Input
                         id="inviteEmail"
                         type="email"
                         value={inviteEmail}
                         onChange={(e) => setInviteEmail(e.target.value)}
-                        placeholder="caregiver@example.com"
+                        placeholder={t("members.emailPlaceholder")}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="inviteRole">Role</Label>
+                      <Label htmlFor="inviteRole">{t("members.roleLabel")}</Label>
                       <Select
                         value={inviteRole}
                         onValueChange={(v) => setInviteRole(v as HouseholdRole)}
@@ -309,9 +284,11 @@ export default function HouseholdSettingsPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
-                          <SelectItem value="CAREGIVER">Caregiver</SelectItem>
-                          <SelectItem value="VIEWER">Viewer</SelectItem>
+                          {assignableRoles.map((role) => (
+                            <SelectItem key={role} value={role}>
+                              {tRole(role)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -322,10 +299,12 @@ export default function HouseholdSettingsPage() {
                       variant="outline"
                       onClick={() => setInviteDialogOpen(false)}
                     >
-                      Cancel
+                      {tCommon("cancel")}
                     </Button>
                     <Button type="submit" disabled={inviteMember.isPending}>
-                      {inviteMember.isPending ? "Sending..." : "Send Invite"}
+                      {inviteMember.isPending
+                        ? t("members.sending")
+                        : t("members.sendInvite")}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -371,25 +350,28 @@ export default function HouseholdSettingsPage() {
                         handleRoleChange(member.user.id, v as HouseholdRole)
                       }
                     >
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-40" aria-label={t("members.roleLabel")}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ADMIN">Admin</SelectItem>
-                        <SelectItem value="CAREGIVER">Caregiver</SelectItem>
-                        <SelectItem value="VIEWER">Viewer</SelectItem>
+                        {assignableRoles.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {tRole(role)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
                   {member.role === "OWNER" && (
                     <span className="text-sm text-muted-foreground px-3">
-                      {roleLabels[member.role]}
+                      {tRole("OWNER")}
                     </span>
                   )}
                   {canManageMembers && member.role !== "OWNER" && (
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={t("members.removeAria")}
                       onClick={() => {
                         setMemberToRemove({
                           id: member.user.id,
@@ -414,10 +396,11 @@ export default function HouseholdSettingsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove Member</DialogTitle>
+            <DialogTitle>{t("members.removeTitle")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove {memberToRemove?.name || "this member"} from the
-              household?
+              {t("members.removeConfirm", {
+                name: memberToRemove?.name || t("members.thisMember"),
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -425,14 +408,14 @@ export default function HouseholdSettingsPage() {
               variant="outline"
               onClick={() => setRemoveMemberDialogOpen(false)}
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleRemoveMember}
               disabled={removeMember.isPending}
             >
-              {removeMember.isPending ? "Removing..." : "Remove"}
+              {removeMember.isPending ? t("members.removing") : t("members.remove")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -443,11 +426,8 @@ export default function HouseholdSettingsPage() {
           <Separator />
           <Card className="border-destructive">
             <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-              <CardDescription>
-                Permanently delete this household and all children, records, and
-                member associations.
-              </CardDescription>
+              <CardTitle className="text-destructive">{t("danger.title")}</CardTitle>
+              <CardDescription>{t("danger.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <Dialog
@@ -457,21 +437,21 @@ export default function HouseholdSettingsPage() {
                 <DialogTrigger asChild>
                   <Button variant="destructive" className="w-full">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Household
+                    {t("danger.deleteHousehold")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Delete {household.name}?</DialogTitle>
+                    <DialogTitle>
+                      {t("danger.dialogTitle", { name: household.name })}
+                    </DialogTitle>
                     <DialogDescription>
-                      This will permanently delete the household, all children,
-                      and all tracking records. All members will lose access.
-                      This action cannot be undone.
+                      {t("danger.dialogDescription")}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-2">
                     <Label htmlFor="confirmHouseholdName">
-                      Type &quot;{household.name}&quot; to confirm
+                      {t("danger.confirmLabel", { name: household.name })}
                     </Label>
                     <Input
                       id="confirmHouseholdName"
@@ -485,7 +465,7 @@ export default function HouseholdSettingsPage() {
                       variant="outline"
                       onClick={() => setDeleteDialogOpen(false)}
                     >
-                      Cancel
+                      {tCommon("cancel")}
                     </Button>
                     <Button
                       variant="destructive"
@@ -495,7 +475,9 @@ export default function HouseholdSettingsPage() {
                         deleteHousehold.isPending
                       }
                     >
-                      {deleteHousehold.isPending ? "Deleting..." : "Delete"}
+                      {deleteHousehold.isPending
+                        ? t("danger.deleting")
+                        : tCommon("delete")}
                     </Button>
                   </DialogFooter>
                 </DialogContent>

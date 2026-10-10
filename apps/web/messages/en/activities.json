@@ -1,0 +1,62 @@
+{
+  "back": "Back",
+  "delete": "Delete",
+  "notFound": "Child not found",
+  "backToDashboard": "Back to dashboard",
+  "todaySummary": "Today's summary",
+  "tabToday": "Today",
+  "tabWeek": "This week",
+  "sleep": {
+    "title": "Sleep",
+    "logButton": "Log sleep",
+    "dialogTitle": "Log past sleep",
+    "sleepType": "Sleep type",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "totalSleep": "Total sleep",
+    "naps": "Naps",
+    "night": "Night",
+    "emptyToday": "No sleep recorded today",
+    "emptyWeek": "No sleep recorded this week",
+    "inProgress": "In progress",
+    "quality": "Quality: {quality}/5",
+    "logged": "Sleep logged",
+    "deleted": "Sleep record deleted"
+  },
+  "feeding": {
+    "title": "Feeding",
+    "emptyToday": "No feedings recorded today",
+    "emptyWeek": "No feedings recorded this week",
+    "breastDetail": "{side} side, {duration}",
+    "breastInProgress": "{side} side, in progress",
+    "deleted": "Feeding record deleted"
+  },
+  "diapers": {
+    "title": "Diapers",
+    "logWet": "Log wet diaper",
+    "logDirty": "Log dirty diaper",
+    "logBoth": "Log wet and dirty",
+    "wet": "Wet",
+    "dirty": "Dirty",
+    "total": "Total",
+    "emptyToday": "No diapers recorded today",
+    "emptyWeek": "No diapers recorded this week",
+    "logged": "Diaper logged",
+    "deleted": "Diaper record deleted"
+  },
+  "log": {
+    "title": "Log activity",
+    "descriptions": {
+      "sleep": "Log nap or night sleep",
+      "breast": "Log breastfeeding session",
+      "bottle": "Log bottle feeding",
+      "diaper": "Log diaper change",
+      "solids": "Log solid food",
+      "pumping": "Log pumping session",
+      "medicine": "Log medicine dose",
+      "growth": "Log height, weight and head",
+      "temperature": "Log body temperature",
+      "activity": "Log bath, tummy time and more"
+    }
+  }
+}

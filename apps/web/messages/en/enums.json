@@ -1,0 +1,92 @@
+{
+  "feedingType": {
+    "BREAST": "Breastfeeding",
+    "BOTTLE": "Bottle",
+    "SOLIDS": "Solid food"
+  },
+  "breastSide": {
+    "LEFT": "Left",
+    "RIGHT": "Right",
+    "BOTH": "Both"
+  },
+  "bottleContent": {
+    "FORMULA": "Formula",
+    "BREAST_MILK": "Breast milk"
+  },
+  "sleepType": {
+    "NAP": "Nap",
+    "NIGHT": "Night sleep"
+  },
+  "diaperType": {
+    "WET": "Wet diaper",
+    "DIRTY": "Dirty diaper",
+    "BOTH": "Wet and dirty",
+    "DRY": "Dry diaper"
+  },
+  "diaperColor": {
+    "YELLOW": "Yellow",
+    "GREEN": "Green",
+    "BROWN": "Brown",
+    "BLACK": "Black",
+    "RED": "Red",
+    "WHITE": "White",
+    "OTHER": "Other"
+  },
+  "diaperConsistency": {
+    "WATERY": "Watery",
+    "LOOSE": "Loose",
+    "SOFT": "Soft",
+    "FORMED": "Formed",
+    "HARD": "Hard"
+  },
+  "diaperSize": {
+    "NEWBORN": "Newborn",
+    "SIZE_1": "Size 1",
+    "SIZE_2": "Size 2",
+    "SIZE_3": "Size 3",
+    "SIZE_4": "Size 4",
+    "SIZE_5": "Size 5",
+    "SIZE_6": "Size 6"
+  },
+  "diaperAmount": {
+    "SMALL": "Small",
+    "MEDIUM": "Medium",
+    "LARGE": "Large"
+  },
+  "activityType": {
+    "TUMMY_TIME": "Tummy time",
+    "BATH": "Bath",
+    "OUTDOOR_PLAY": "Outdoor play",
+    "INDOOR_PLAY": "Indoor play",
+    "SCREEN_TIME": "Screen time",
+    "SKIN_TO_SKIN": "Skin to skin",
+    "STORYTIME": "Storytime",
+    "TEETH_BRUSHING": "Teeth brushing",
+    "OTHER": "Other"
+  },
+  "trackingType": {
+    "sleep": "Sleep",
+    "feeding": "Feeding",
+    "breastfeeding": "Breastfeeding",
+    "bottle": "Bottle",
+    "solids": "Solid food",
+    "diaper": "Diaper",
+    "pumping": "Pumping",
+    "growth": "Growth",
+    "temperature": "Temperature",
+    "temperatureShort": "Temperature",
+    "medicine": "Medicine",
+    "activity": "Activity"
+  },
+  "householdRole": {
+    "OWNER": "Owner",
+    "ADMIN": "Admin",
+    "CAREGIVER": "Caregiver",
+    "VIEWER": "Viewer"
+  },
+  "gender": {
+    "MALE": "Boy",
+    "FEMALE": "Girl",
+    "OTHER": "Other"
+  }
+}

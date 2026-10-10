@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useLocale, useTranslations } from "next-intl";
+import { setLocale } from "@/i18n/actions";
+import { locales, type Locale } from "@/i18n/config";
 import { trpc } from "@/lib/trpc/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +34,10 @@ import { ArrowLeft, LogOut, Trash2 } from "lucide-react";
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const currentLocale = useLocale();
+  const [isSwitchingLocale, startLocaleTransition] = useTransition();
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -47,14 +54,22 @@ export default function ProfileSettingsPage() {
     hasInitialized[1](true);
   }
 
+  const handleLocaleChange = (next: Locale) => {
+    if (next === currentLocale) return;
+    startLocaleTransition(async () => {
+      await setLocale(next);
+      router.refresh();
+    });
+  };
+
   const updateUser = trpc.user.update.useMutation({
     onSuccess: () => {
-      toast({ title: "Profile updated!" });
+      toast({ title: t("profile.updated") });
       utils.user.get.invalidate();
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description: error.message,
         variant: "destructive",
       });
@@ -63,12 +78,12 @@ export default function ProfileSettingsPage() {
 
   const deleteUser = trpc.user.delete.useMutation({
     onSuccess: () => {
-      toast({ title: "Account deleted" });
+      toast({ title: t("profile.danger.deleted") });
       signOut({ callbackUrl: "/" });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description: error.message,
         variant: "destructive",
       });
@@ -93,7 +108,7 @@ export default function ProfileSettingsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{tCommon("loading")}</div>
       </div>
     );
   }
@@ -101,9 +116,9 @@ export default function ProfileSettingsPage() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-muted-foreground">User not found</p>
+        <p className="text-muted-foreground">{t("profile.notFound")}</p>
         <Button asChild>
-          <Link href="/dashboard">Back to Dashboard</Link>
+          <Link href="/dashboard">{t("profile.backToDashboard")}</Link>
         </Button>
       </div>
     );
@@ -114,7 +129,7 @@ export default function ProfileSettingsPage() {
       <Button asChild variant="ghost" size="sm">
         <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          {t("profile.backToDashboard")}
         </Link>
       </Button>
 
@@ -128,7 +143,7 @@ export default function ProfileSettingsPage() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle>Profile Settings</CardTitle>
+              <CardTitle>{t("profile.title")}</CardTitle>
               <CardDescription>{user.email}</CardDescription>
             </div>
           </div>
@@ -136,20 +151,20 @@ export default function ProfileSettingsPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Display Name</Label>
+              <Label htmlFor="name">{t("profile.displayName")}</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
+                placeholder={t("profile.namePlaceholder")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("profile.email")}</Label>
               <Input id="email" value={user.email || ""} disabled />
               <p className="text-xs text-muted-foreground">
-                Email cannot be changed
+                {t("profile.emailLocked")}
               </p>
             </div>
 
@@ -158,7 +173,7 @@ export default function ProfileSettingsPage() {
               className="w-full"
               disabled={updateUser.isPending}
             >
-              {updateUser.isPending ? "Saving..." : "Save Changes"}
+              {updateUser.isPending ? t("profile.saving") : t("profile.saveChanges")}
             </Button>
           </form>
         </CardContent>
@@ -166,8 +181,37 @@ export default function ProfileSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Session</CardTitle>
-          <CardDescription>Manage your current session.</CardDescription>
+          <CardTitle>{t("profile.language.title")}</CardTitle>
+          <CardDescription>{t("profile.language.description")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div
+            role="radiogroup"
+            aria-label={t("profile.language.label")}
+            className="grid grid-cols-2 gap-2"
+          >
+            {locales.map((locale) => (
+              <Button
+                key={locale}
+                type="button"
+                role="radio"
+                aria-checked={locale === currentLocale}
+                variant={locale === currentLocale ? "default" : "outline"}
+                className="min-h-12"
+                disabled={isSwitchingLocale}
+                onClick={() => handleLocaleChange(locale)}
+              >
+                {tCommon(`languages.${locale}`)}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("profile.session.title")}</CardTitle>
+          <CardDescription>{t("profile.session.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button
@@ -176,7 +220,7 @@ export default function ProfileSettingsPage() {
             onClick={handleSignOut}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
+            {t("profile.session.signOut")}
           </Button>
         </CardContent>
       </Card>
@@ -185,31 +229,27 @@ export default function ProfileSettingsPage() {
 
       <Card className="border-destructive">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
-            Permanently delete your account and all associated data.
-          </CardDescription>
+          <CardTitle className="text-destructive">{t("profile.danger.title")}</CardTitle>
+          <CardDescription>{t("profile.danger.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="destructive" className="w-full">
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete Account
+                {t("profile.danger.deleteAccount")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Delete your account?</DialogTitle>
+                <DialogTitle>{t("profile.danger.dialogTitle")}</DialogTitle>
                 <DialogDescription>
-                  This will permanently delete your account, remove you from all
-                  households, and delete any households where you are the sole
-                  owner. This action cannot be undone.
+                  {t("profile.danger.dialogDescription")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2">
                 <Label htmlFor="confirmEmail">
-                  Type your email &quot;{user.email}&quot; to confirm
+                  {t("profile.danger.confirmLabel", { email: user.email ?? "" })}
                 </Label>
                 <Input
                   id="confirmEmail"
@@ -224,14 +264,16 @@ export default function ProfileSettingsPage() {
                   variant="outline"
                   onClick={() => setDeleteDialogOpen(false)}
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={handleDelete}
                   disabled={confirmEmail !== user.email || deleteUser.isPending}
                 >
-                  {deleteUser.isPending ? "Deleting..." : "Delete Account"}
+                  {deleteUser.isPending
+                    ? t("profile.danger.deleting")
+                    : t("profile.danger.deleteAccount")}
                 </Button>
               </DialogFooter>
             </DialogContent>

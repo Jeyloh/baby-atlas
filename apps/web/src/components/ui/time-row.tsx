@@ -1,16 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 
 function formatTimeForInput(date: Date): string {
   return date.toISOString().slice(0, 16);
-}
-
-function formatTimeDisplay(date: Date): string {
-  const today = new Date();
-  const isToday = date.toDateString() === today.toDateString();
-  const timeStr = date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  return isToday ? `Today, ${timeStr}` : date.toLocaleDateString([], { month: "short", day: "numeric" }) + `, ${timeStr}`;
 }
 
 interface TimeRowProps {
@@ -24,8 +19,10 @@ export function TimeRow({
   label,
   value,
   onChange,
-  placeholder = "Set time"
+  placeholder,
 }: TimeRowProps) {
+  const t = useTranslations("tracking.timeRow");
+  const { dateTime } = useFormatters();
   const [editing, setEditing] = useState(false);
 
   return (
@@ -34,7 +31,7 @@ export function TimeRow({
       {editing ? (
         <input
           type="datetime-local"
-          className="bg-transparent border-none text-right text-primary focus:outline-none"
+          className="min-h-12 bg-transparent border-none text-right text-primary focus:outline-none"
           value={value ? formatTimeForInput(value) : ""}
           onChange={(e) => {
             onChange(e.target.value ? new Date(e.target.value) : null);
@@ -45,9 +42,9 @@ export function TimeRow({
       ) : (
         <button
           onClick={() => setEditing(true)}
-          className="text-primary hover:underline"
+          className="min-h-12 text-primary hover:underline"
         >
-          {value ? formatTimeDisplay(value) : placeholder}
+          {value ? dateTime(value) : (placeholder ?? t("setTime"))}
         </button>
       )}
     </div>

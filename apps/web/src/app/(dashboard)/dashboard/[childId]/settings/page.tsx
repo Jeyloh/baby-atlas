@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,8 @@ import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { ArrowLeft, Trash2 } from "lucide-react";
 
+const genders = ["MALE", "FEMALE", "OTHER"] as const;
+
 export default function ChildSettingsPage({
   params,
 }: {
@@ -40,6 +43,9 @@ export default function ChildSettingsPage({
 }) {
   const { childId } = use(params);
   const router = useRouter();
+  const t = useTranslations("child");
+  const tCommon = useTranslations("common");
+  const tGender = useTranslations("enums.gender");
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -62,12 +68,12 @@ export default function ChildSettingsPage({
 
   const updateChild = trpc.child.update.useMutation({
     onSuccess: () => {
-      toast({ title: "Child updated!" });
+      toast({ title: t("settingsPage.updated") });
       utils.child.get.invalidate({ id: childId });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description: error.message,
         variant: "destructive",
       });
@@ -76,12 +82,12 @@ export default function ChildSettingsPage({
 
   const deleteChild = trpc.child.delete.useMutation({
     onSuccess: () => {
-      toast({ title: "Child deleted" });
+      toast({ title: t("danger.deleted") });
       router.push("/dashboard");
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description: error.message,
         variant: "destructive",
       });
@@ -95,7 +101,7 @@ export default function ChildSettingsPage({
         id: childId,
         name: name.trim(),
         birthDate: new Date(birthDate),
-        gender: gender ? (gender as "MALE" | "FEMALE" | "OTHER") : null,
+        gender: gender ? (gender as (typeof genders)[number]) : null,
       });
     }
   };
@@ -109,7 +115,7 @@ export default function ChildSettingsPage({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{tCommon("loading")}</div>
       </div>
     );
   }
@@ -117,9 +123,9 @@ export default function ChildSettingsPage({
   if (!child) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-muted-foreground">Child not found</p>
+        <p className="text-muted-foreground">{t("notFound")}</p>
         <Button asChild>
-          <Link href="/dashboard">Back to Dashboard</Link>
+          <Link href="/dashboard">{t("backToDashboard")}</Link>
         </Button>
       </div>
     );
@@ -130,21 +136,21 @@ export default function ChildSettingsPage({
       <Button asChild variant="ghost" size="sm">
         <Link href={`/dashboard/${childId}`}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to {child.name}
+          {t("settingsPage.backTo", { name: child.name })}
         </Link>
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle>Child Settings</CardTitle>
+          <CardTitle>{t("settingsPage.title")}</CardTitle>
           <CardDescription>
-            Update {child.name}&apos;s information.
+            {t("settingsPage.description", { name: child.name })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("form.nameLabel")}</Label>
               <Input
                 id="name"
                 value={name}
@@ -154,7 +160,7 @@ export default function ChildSettingsPage({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthDate">Birth Date</Label>
+              <Label htmlFor="birthDate">{t("form.birthDateLabel")}</Label>
               <Input
                 id="birthDate"
                 type="date"
@@ -165,15 +171,17 @@ export default function ChildSettingsPage({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gender">Gender (Optional)</Label>
+              <Label htmlFor="gender">{t("form.genderLabel")}</Label>
               <Select value={gender} onValueChange={setGender}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
+                  <SelectValue placeholder={t("form.genderPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MALE">Male</SelectItem>
-                  <SelectItem value="FEMALE">Female</SelectItem>
-                  <SelectItem value="OTHER">Other</SelectItem>
+                  {genders.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {tGender(g)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -183,7 +191,9 @@ export default function ChildSettingsPage({
               className="w-full"
               disabled={updateChild.isPending}
             >
-              {updateChild.isPending ? "Saving..." : "Save Changes"}
+              {updateChild.isPending
+                ? t("settingsPage.saving")
+                : t("settingsPage.saveChanges")}
             </Button>
           </form>
         </CardContent>
@@ -191,30 +201,27 @@ export default function ChildSettingsPage({
 
       <Card className="border-destructive">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
-            Permanently delete this child and all associated records.
-          </CardDescription>
+          <CardTitle className="text-destructive">{t("danger.title")}</CardTitle>
+          <CardDescription>{t("danger.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="destructive" className="w-full">
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete Child
+                {t("danger.deleteChild")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Delete {child.name}?</DialogTitle>
+                <DialogTitle>{t("danger.dialogTitle", { name: child.name })}</DialogTitle>
                 <DialogDescription>
-                  This will permanently delete all sleep, feeding, diaper, and
-                  other records for {child.name}. This action cannot be undone.
+                  {t("danger.dialogDescription", { name: child.name })}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2">
                 <Label htmlFor="confirmName">
-                  Type &quot;{child.name}&quot; to confirm
+                  {t("danger.confirmLabel", { name: child.name })}
                 </Label>
                 <Input
                   id="confirmName"
@@ -228,7 +235,7 @@ export default function ChildSettingsPage({
                   variant="outline"
                   onClick={() => setDeleteDialogOpen(false)}
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </Button>
                 <Button
                   variant="destructive"
@@ -237,7 +244,7 @@ export default function ChildSettingsPage({
                     confirmName !== child.name || deleteChild.isPending
                   }
                 >
-                  {deleteChild.isPending ? "Deleting..." : "Delete"}
+                  {deleteChild.isPending ? t("danger.deleting") : tCommon("delete")}
                 </Button>
               </DialogFooter>
             </DialogContent>

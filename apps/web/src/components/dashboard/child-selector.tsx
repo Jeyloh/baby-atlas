@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import { ChevronDown, Plus, Check } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +30,9 @@ export function ChildSelector({
   householdId,
 }: ChildSelectorProps) {
   const router = useRouter();
+  const t = useTranslations("dashboard.childSelector");
+  const tFormat = useTranslations("format");
+  const { fullDate } = useFormatters();
 
   const handleChildSelect = (childId: string) => {
     router.push(`/dashboard/${childId}`);
@@ -39,11 +44,11 @@ export function ChildSelector({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-1 hover:bg-muted rounded-lg px-2 py-1 transition-colors -ml-2">
+      <DropdownMenuTrigger className="flex items-center gap-1 hover:bg-muted rounded-lg px-2 py-1 min-h-12 transition-colors -ml-2">
         <div className="text-left">
           <h1 className="text-2xl font-bold">{currentChild.name}</h1>
           <p className="text-sm text-muted-foreground">
-            Born {new Date(currentChild.birthDate).toLocaleDateString()}
+            {tFormat("bornOn", { date: fullDate(currentChild.birthDate) })}
           </p>
         </div>
         <ChevronDown className="h-5 w-5 text-muted-foreground" />
@@ -58,7 +63,7 @@ export function ChildSelector({
             <div>
               <p className="font-medium">{child.name}</p>
               <p className="text-xs text-muted-foreground">
-                Born {new Date(child.birthDate).toLocaleDateString()}
+                {tFormat("bornOn", { date: fullDate(child.birthDate) })}
               </p>
             </div>
             {child.id === currentChild.id && (
@@ -72,7 +77,7 @@ export function ChildSelector({
           className="cursor-pointer"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add Child
+          {t("addChild")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

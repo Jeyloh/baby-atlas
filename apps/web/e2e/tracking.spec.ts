@@ -13,12 +13,12 @@ test.describe("Sleep Tracking", () => {
     await expect(authenticatedPage).not.toHaveURL(/login/);
 
     // Find and click sleep button
-    const sleepButton = authenticatedPage.getByRole("button", { name: /^sleep$/i });
+    const sleepButton = authenticatedPage.getByRole("button", { name: /^søvn$/i });
     await expect(sleepButton).toBeVisible({ timeout: 10000 });
     await sleepButton.click();
 
     // Should open dialog to choose nap or night
-    const napButton = authenticatedPage.getByRole("button", { name: /^nap$/i });
+    const napButton = authenticatedPage.getByRole("button", { name: /^dupp$/i });
     await expect(napButton).toBeVisible({ timeout: 5000 });
 
     // Click nap
@@ -26,7 +26,7 @@ test.describe("Sleep Tracking", () => {
 
     // Timer should be running - look for stop button (use first() as there may be multiple stop buttons)
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 5000 });
   });
 
@@ -34,16 +34,16 @@ test.describe("Sleep Tracking", () => {
     await authenticatedPage.goto(`/dashboard/${testData.child.id}`);
 
     // Start sleep first
-    const sleepButton = authenticatedPage.getByRole("button", { name: /^sleep$/i });
+    const sleepButton = authenticatedPage.getByRole("button", { name: /^søvn$/i });
     await expect(sleepButton).toBeVisible({ timeout: 10000 });
     await sleepButton.click();
 
-    const napButton = authenticatedPage.getByRole("button", { name: /^nap$/i });
+    const napButton = authenticatedPage.getByRole("button", { name: /^dupp$/i });
     await expect(napButton).toBeVisible({ timeout: 5000 });
     await napButton.click();
 
     // Wait for stop button (use first() as there may be multiple stop buttons)
-    const stopButton = authenticatedPage.getByRole("button", { name: /stop/i }).first();
+    const stopButton = authenticatedPage.getByRole("button", { name: /stopp/i }).first();
     await expect(stopButton).toBeVisible({ timeout: 5000 });
 
     // Stop the timer
@@ -51,7 +51,7 @@ test.describe("Sleep Tracking", () => {
 
     // Timer should stop - sleep button should be back
     await expect(
-      authenticatedPage.getByRole("button", { name: /^sleep$/i })
+      authenticatedPage.getByRole("button", { name: /^søvn$/i })
     ).toBeVisible({ timeout: 5000 });
   });
 });
@@ -68,12 +68,12 @@ test.describe("Feeding Tracking", () => {
     await expect(authenticatedPage).not.toHaveURL(/login/);
 
     // Find and click breast button
-    const breastButton = authenticatedPage.getByRole("button", { name: /^breast$/i });
+    const breastButton = authenticatedPage.getByRole("button", { name: /^amming$/i });
     await expect(breastButton).toBeVisible({ timeout: 10000 });
     await breastButton.click();
 
     // Should open dialog to choose side
-    const leftButton = authenticatedPage.getByRole("button", { name: /left side/i });
+    const leftButton = authenticatedPage.getByRole("button", { name: /venstre side/i });
     await expect(leftButton).toBeVisible({ timeout: 5000 });
 
     // Click left side
@@ -81,7 +81,7 @@ test.describe("Feeding Tracking", () => {
 
     // Timer should be running - look for stop button (use first() as there may be multiple stop buttons)
     await expect(
-      authenticatedPage.getByRole("button", { name: /stop/i }).first()
+      authenticatedPage.getByRole("button", { name: /stopp/i }).first()
     ).toBeVisible({ timeout: 5000 });
   });
 
@@ -89,19 +89,19 @@ test.describe("Feeding Tracking", () => {
     await authenticatedPage.goto(`/dashboard/${testData.child.id}`);
 
     // Find and click bottle button
-    const bottleButton = authenticatedPage.getByRole("button", { name: /^bottle$/i });
+    const bottleButton = authenticatedPage.getByRole("button", { name: /^flaske$/i });
     await expect(bottleButton).toBeVisible({ timeout: 10000 });
     await bottleButton.click();
 
     // Should open dialog with amount input
-    const amountInput = authenticatedPage.getByLabel(/amount/i);
+    const amountInput = authenticatedPage.getByLabel(/mengde/i);
     await expect(amountInput).toBeVisible({ timeout: 5000 });
 
     // Enter amount
     await amountInput.fill("150");
 
     // Submit
-    const submitButton = authenticatedPage.getByRole("button", { name: /log bottle/i });
+    const submitButton = authenticatedPage.getByRole("button", { name: /logg flaske/i });
     await submitButton.click();
 
     // Dialog should close
@@ -121,7 +121,7 @@ test.describe("Diaper Tracking", () => {
     await expect(authenticatedPage).not.toHaveURL(/login/);
 
     // Find and click wet button
-    const wetButton = authenticatedPage.getByRole("button", { name: /^wet$/i });
+    const wetButton = authenticatedPage.getByRole("button", { name: /^tisse$/i });
     await expect(wetButton).toBeVisible({ timeout: 10000 });
     await wetButton.click();
 
@@ -136,7 +136,7 @@ test.describe("Diaper Tracking", () => {
     await authenticatedPage.goto(`/dashboard/${testData.child.id}`);
 
     // Find and click dirty button
-    const dirtyButton = authenticatedPage.getByRole("button", { name: /^dirty$/i });
+    const dirtyButton = authenticatedPage.getByRole("button", { name: /^bæsj$/i });
     await expect(dirtyButton).toBeVisible({ timeout: 10000 });
     await dirtyButton.click();
 

@@ -1,0 +1,25 @@
+{
+  "childSelector": {
+    "addChild": "Add child"
+  },
+  "card": {
+    "noRecords": "No records",
+    "active": "Active",
+    "sleeping": "Sleeping",
+    "nursing": "Breastfeeding",
+    "nursingLeft": "Breastfeeding (L)",
+    "nursingRight": "Breastfeeding (R)",
+    "pumping": "Pumping",
+    "mixedDiaper": "Wet and dirty"
+  },
+  "side": {
+    "LEFT": "(L)",
+    "RIGHT": "(R)",
+    "BOTH": "(L+R)"
+  },
+  "reportsTabs": {
+    "day": "Day",
+    "week": "Week",
+    "list": "List"
+  }
+}

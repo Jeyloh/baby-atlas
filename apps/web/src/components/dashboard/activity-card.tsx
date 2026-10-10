@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   getActivityCardClasses,
   type ActivityCategory,
 } from "@/lib/activity-colors";
 import { TimeSince } from "@/components/ui/time-since";
 import { LogModal } from "@/components/tracking/log-modal";
-import { formatDurationPrecise } from "@baby-atlas/utils";
+import { useFormatters } from "@/lib/format";
+import type enumMessages from "../../../messages/nb/enums.json";
 import { Moon, Baby, Milk, Utensils, Droplets, HeartPulse, Pill, Ruler, Thermometer, Sparkles } from "lucide-react";
 
 interface ActivityCardProps {
@@ -19,28 +21,44 @@ interface ActivityCardProps {
   activeLabel?: string;
 }
 
+type CategoryLabelKey =
+  | "trackingType.sleep"
+  | "trackingType.breastfeeding"
+  | "trackingType.bottle"
+  | "trackingType.solids"
+  | "trackingType.diaper"
+  | "trackingType.pumping"
+  | "trackingType.medicine"
+  | "trackingType.growth"
+  | "trackingType.temperatureShort"
+  | "trackingType.activity"
+  | "diaperType.WET"
+  | "diaperType.DIRTY"
+  | "diaperType.BOTH"
+  | "diaperType.DRY";
+
 const categoryConfig: Record<
   ActivityCategory,
   {
     icon: typeof Moon;
-    label: string;
+    labelKey: CategoryLabelKey;
     logType: "sleep" | "breast" | "bottle" | "diaper" | "solids" | "pumping" | "medicine" | "growth" | "temperature" | "activity";
   }
 > = {
-  sleep: { icon: Moon, label: "Sleep", logType: "sleep" },
-  nursing: { icon: Baby, label: "Nursing", logType: "breast" },
-  bottle: { icon: Milk, label: "Bottle", logType: "bottle" },
-  solids: { icon: Utensils, label: "Solids", logType: "solids" },
-  diaper: { icon: Droplets, label: "Diaper", logType: "diaper" },
-  diaperWet: { icon: Droplets, label: "Wet Diaper", logType: "diaper" },
-  diaperDirty: { icon: Droplets, label: "Dirty Diaper", logType: "diaper" },
-  diaperBoth: { icon: Droplets, label: "Mixed Diaper", logType: "diaper" },
-  diaperDry: { icon: Droplets, label: "Dry Diaper", logType: "diaper" },
-  pumping: { icon: HeartPulse, label: "Pumping", logType: "pumping" },
-  medicine: { icon: Pill, label: "Medicine", logType: "medicine" },
-  growth: { icon: Ruler, label: "Growth", logType: "growth" },
-  temperature: { icon: Thermometer, label: "Temperature", logType: "temperature" },
-  activity: { icon: Sparkles, label: "Activity", logType: "activity" },
+  sleep: { icon: Moon, labelKey: "trackingType.sleep", logType: "sleep" },
+  nursing: { icon: Baby, labelKey: "trackingType.breastfeeding", logType: "breast" },
+  bottle: { icon: Milk, labelKey: "trackingType.bottle", logType: "bottle" },
+  solids: { icon: Utensils, labelKey: "trackingType.solids", logType: "solids" },
+  diaper: { icon: Droplets, labelKey: "trackingType.diaper", logType: "diaper" },
+  diaperWet: { icon: Droplets, labelKey: "diaperType.WET", logType: "diaper" },
+  diaperDirty: { icon: Droplets, labelKey: "diaperType.DIRTY", logType: "diaper" },
+  diaperBoth: { icon: Droplets, labelKey: "diaperType.BOTH", logType: "diaper" },
+  diaperDry: { icon: Droplets, labelKey: "diaperType.DRY", logType: "diaper" },
+  pumping: { icon: HeartPulse, labelKey: "trackingType.pumping", logType: "pumping" },
+  medicine: { icon: Pill, labelKey: "trackingType.medicine", logType: "medicine" },
+  growth: { icon: Ruler, labelKey: "trackingType.growth", logType: "growth" },
+  temperature: { icon: Thermometer, labelKey: "trackingType.temperatureShort", logType: "temperature" },
+  activity: { icon: Sparkles, labelKey: "trackingType.activity", logType: "activity" },
 };
 
 export function ActivityCard({
@@ -51,6 +69,8 @@ export function ActivityCard({
   isActive,
   activeLabel,
 }: ActivityCardProps) {
+  const t = useTranslations("dashboard.card");
+  const tEnums = useTranslations("enums");
   const [modalOpen, setModalOpen] = useState(false);
   const config = categoryConfig[category];
   const Icon = config.icon;
@@ -64,7 +84,7 @@ export function ActivityCard({
         {isActive && (
           <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/20 text-xs">
             <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            {activeLabel || "Active"}
+            {activeLabel || t("active")}
           </div>
         )}
 
@@ -73,11 +93,11 @@ export function ActivityCard({
             <Icon className="h-5 w-5 md:h-6 md:w-6" />
           </div>
           <div className="flex-1 text-left">
-            <h3 className="font-semibold text-base md:text-lg">{config.label}</h3>
+            <h3 className="font-semibold text-base md:text-lg">{tEnums(config.labelKey)}</h3>
             <TimeSince
               date={lastTime}
               className="text-xs md:text-sm opacity-90"
-              fallback="No records"
+              fallback={t("noRecords")}
             />
             {details && (
               <p className="text-xs md:text-sm mt-1 opacity-80">{details}</p>
@@ -96,190 +116,147 @@ export function ActivityCard({
   );
 }
 
-/**
- * Format sleep details for display
- */
-export function formatSleepDetails(
-  lastSleep: { startTime: Date; endTime: Date | null; sleepType: string } | null
-): string {
-  if (!lastSleep || !lastSleep.endTime) return "";
-  const duration = formatDurationPrecise(lastSleep.startTime, lastSleep.endTime);
-  return duration;
-}
+type Side = "LEFT" | "RIGHT" | "BOTH";
+
+const isSide = (value: string | null | undefined): value is Side =>
+  value === "LEFT" || value === "RIGHT" || value === "BOTH";
 
 /**
- * Format breastfeeding details for display
+ * Locale-aware detail lines for the home dashboard cards (metric only).
  */
-export function formatNursingDetails(
-  lastFeeding: {
-    startTime: Date;
-    endTime: Date | null;
-    side: string | null;
-  } | null
-): string {
-  if (!lastFeeding || !lastFeeding.endTime) return "";
-  const duration = formatDurationPrecise(lastFeeding.startTime, lastFeeding.endTime);
-  const sideInfo = lastFeeding.side
-    ? lastFeeding.side === "LEFT"
-      ? "(L)"
-      : lastFeeding.side === "RIGHT"
-        ? "(R)"
-        : "(L+R)"
-    : "";
-  return `${duration} ${sideInfo}`.trim();
-}
+export function useActivityDetails() {
+  const t = useTranslations("dashboard.card");
+  const tSide = useTranslations("dashboard.side");
+  const tEnums = useTranslations("enums");
+  const { durationPrecise, ml, weightKg, heightCm, temperatureC } = useFormatters();
 
-/**
- * Format bottle details for display
- */
-export function formatBottleDetails(
-  lastBottle: {
-    amountMl: number | null;
-    bottleContentType: string | null;
-  } | null
-): string {
-  if (!lastBottle) return "";
-  const amount = lastBottle.amountMl
-    ? `${Math.round(lastBottle.amountMl / 29.574)}oz`
-    : "";
-  const type =
-    lastBottle.bottleContentType === "BREAST_MILK"
-      ? "Breast Milk"
-      : lastBottle.bottleContentType === "FORMULA"
-        ? "Formula"
+  const sleep = (
+    lastSleep: { startTime: Date; endTime: Date | null; sleepType: string } | null
+  ): string => {
+    if (!lastSleep || !lastSleep.endTime) return "";
+    return durationPrecise(lastSleep.startTime, lastSleep.endTime);
+  };
+
+  const nursing = (
+    lastFeeding: {
+      startTime: Date;
+      endTime: Date | null;
+      side: string | null;
+    } | null
+  ): string => {
+    if (!lastFeeding || !lastFeeding.endTime) return "";
+    const duration = durationPrecise(lastFeeding.startTime, lastFeeding.endTime);
+    const sideInfo = isSide(lastFeeding.side) ? tSide(lastFeeding.side) : "";
+    return `${duration} ${sideInfo}`.trim();
+  };
+
+  const bottle = (
+    lastBottle: {
+      amountMl: number | null;
+      bottleContentType: string | null;
+    } | null
+  ): string => {
+    if (!lastBottle) return "";
+    const amount = lastBottle.amountMl ? ml(lastBottle.amountMl) : "";
+    const type =
+      lastBottle.bottleContentType === "BREAST_MILK" ||
+      lastBottle.bottleContentType === "FORMULA"
+        ? tEnums(`bottleContent.${lastBottle.bottleContentType}`)
         : "";
-  return [amount, type].filter(Boolean).join(" ");
-}
+    return [amount, type].filter(Boolean).join(" ");
+  };
 
-/**
- * Format diaper details for display
- */
-export function formatDiaperDetails(
-  lastDiaper: {
-    diaperType: string;
-    amount?: string | null;
-    color?: string | null;
-  } | null
-): string {
-  if (!lastDiaper) return "";
-  const typeLabel =
-    lastDiaper.diaperType === "WET"
-      ? "Wet"
-      : lastDiaper.diaperType === "DIRTY"
-        ? "Dirty"
-        : lastDiaper.diaperType === "BOTH"
-          ? "Mixed"
-          : "Dry";
-  return typeLabel;
-}
+  const diaper = (
+    lastDiaper: {
+      diaperType: string;
+      amount?: string | null;
+      color?: string | null;
+    } | null
+  ): string => {
+    if (!lastDiaper) return "";
+    switch (lastDiaper.diaperType) {
+      case "WET":
+        return tEnums("diaperType.WET");
+      case "DIRTY":
+        return tEnums("diaperType.DIRTY");
+      case "BOTH":
+        return t("mixedDiaper");
+      default:
+        return tEnums("diaperType.DRY");
+    }
+  };
 
-/**
- * Format solids details for display
- */
-export function formatSolidsDetails(
-  lastSolids: {
-    notes?: string | null;
-  } | null
-): string {
-  if (!lastSolids) return "";
-  return lastSolids.notes ?? "";
-}
+  const solids = (lastSolids: { notes?: string | null } | null): string => {
+    if (!lastSolids) return "";
+    return lastSolids.notes ?? "";
+  };
 
-/**
- * Format pumping details for display
- */
-export function formatPumpingDetails(
-  lastPumping: {
-    startTime: Date;
-    endTime: Date | null;
-    amountMl: number | null;
-  } | null
-): string {
-  if (!lastPumping) return "";
-  const parts: string[] = [];
-  if (lastPumping.endTime) {
-    const duration = formatDurationPrecise(lastPumping.startTime, lastPumping.endTime);
-    parts.push(duration);
-  }
-  if (lastPumping.amountMl) {
-    parts.push(`${Math.round(lastPumping.amountMl / 29.574)}oz`);
-  }
-  return parts.join(" ");
-}
+  const pumping = (
+    lastPumping: {
+      startTime: Date;
+      endTime: Date | null;
+      amountMl: number | null;
+    } | null
+  ): string => {
+    if (!lastPumping) return "";
+    const parts: string[] = [];
+    if (lastPumping.endTime) {
+      parts.push(durationPrecise(lastPumping.startTime, lastPumping.endTime));
+    }
+    if (lastPumping.amountMl) {
+      parts.push(ml(lastPumping.amountMl));
+    }
+    return parts.join(" ");
+  };
 
-/**
- * Format medicine details for display
- */
-export function formatMedicineDetails(
-  lastMedicine: {
-    medicine: {
-      name: string;
-    };
-    dosageGiven?: string | null;
-  } | null
-): string {
-  if (!lastMedicine) return "";
-  const name = lastMedicine.medicine.name;
-  if (lastMedicine.dosageGiven) {
-    return `${name} (${lastMedicine.dosageGiven})`;
-  }
-  return name;
-}
+  const medicine = (
+    lastMedicine: {
+      medicine: { name: string };
+      dosageGiven?: string | null;
+    } | null
+  ): string => {
+    if (!lastMedicine) return "";
+    const name = lastMedicine.medicine.name;
+    return lastMedicine.dosageGiven ? `${name} (${lastMedicine.dosageGiven})` : name;
+  };
 
-/**
- * Format growth details for display
- */
-export function formatGrowthDetails(
-  lastGrowth: {
-    weightKg?: number | null;
-    heightCm?: number | null;
-    headCircumferenceCm?: number | null;
-  } | null
-): string {
-  if (!lastGrowth) return "";
-  const parts: string[] = [];
-  if (lastGrowth.weightKg) {
-    const lbs = lastGrowth.weightKg * 2.20462;
-    parts.push(`${lbs.toFixed(1)}lbs`);
-  }
-  if (lastGrowth.heightCm) {
-    const inches = lastGrowth.heightCm / 2.54;
-    parts.push(`${inches.toFixed(1)}in`);
-  }
-  return parts.join(" / ");
-}
+  const growth = (
+    lastGrowth: {
+      weightKg?: number | null;
+      heightCm?: number | null;
+      headCircumferenceCm?: number | null;
+    } | null
+  ): string => {
+    if (!lastGrowth) return "";
+    const parts: string[] = [];
+    if (lastGrowth.weightKg) parts.push(weightKg(lastGrowth.weightKg));
+    if (lastGrowth.heightCm) parts.push(heightCm(lastGrowth.heightCm));
+    return parts.join(" / ");
+  };
 
-/**
- * Format temperature details for display
- */
-export function formatTemperatureDetails(
-  lastTemperature: {
-    temperatureCelsius: number;
-  } | null
-): string {
-  if (!lastTemperature) return "";
-  const fahrenheit = lastTemperature.temperatureCelsius * 9/5 + 32;
-  return `${fahrenheit.toFixed(1)}°F`;
-}
+  const temperature = (
+    lastTemperature: { temperatureCelsius: number } | null
+  ): string => {
+    if (!lastTemperature) return "";
+    return temperatureC(lastTemperature.temperatureCelsius);
+  };
 
-/**
- * Format activity details for display
- */
-export function formatActivityDetails(
-  lastActivity: {
-    activityType: string;
-    startTime: Date;
-    endTime: Date | null;
-  } | null
-): string {
-  if (!lastActivity) return "";
-  const type = lastActivity.activityType
-    .toLowerCase()
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-  if (lastActivity.endTime) {
-    const duration = formatDurationPrecise(lastActivity.startTime, lastActivity.endTime);
-    return `${type} (${duration})`;
-  }
-  return type;
+  const activity = (
+    lastActivity: {
+      activityType: string;
+      startTime: Date;
+      endTime: Date | null;
+    } | null
+  ): string => {
+    if (!lastActivity) return "";
+    const type = tEnums(
+      `activityType.${lastActivity.activityType as keyof typeof enumMessages.activityType}`
+    );
+    if (lastActivity.endTime) {
+      return `${type} (${durationPrecise(lastActivity.startTime, lastActivity.endTime)})`;
+    }
+    return type;
+  };
+
+  return { sleep, nursing, bottle, diaper, solids, pumping, medicine, growth, temperature, activity };
 }

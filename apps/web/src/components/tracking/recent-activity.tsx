@@ -2,7 +2,9 @@
 
 import { trpc } from "@/lib/trpc/provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatTime, formatDuration, calculateDurationMinutes } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { calculateDurationMinutes } from "@baby-atlas/utils";
+import { useFormatters } from "@/lib/format";
 import { Moon, Baby, Droplets, Milk, Dumbbell } from "lucide-react";
 
 interface RecentActivityProps {
@@ -18,6 +20,14 @@ type ActivityItem = {
 };
 
 export function RecentActivity({ childId }: RecentActivityProps) {
+  const t = useTranslations("tracking.recentActivity");
+  const tEnums = useTranslations("enums");
+  const { time, duration: formatDuration, ml } = useFormatters();
+  const sideLabel = (side: string | null) =>
+    side === "LEFT" || side === "RIGHT" || side === "BOTH"
+      ? tEnums(`breastSide.${side}`)
+      : (side ?? "");
+
   const { data: sleepRecords } = trpc.sleep.list.useQuery({
     childId,
     period: "today",
@@ -43,8 +53,8 @@ export function RecentActivity({ childId }: RecentActivityProps) {
       id: `sleep-${record.id}`,
       type: "sleep",
       time: record.startTime,
-      details: record.sleepType === "NAP" ? "Nap" : "Night Sleep",
-      subDetails: duration !== null ? formatDuration(duration) : "In progress",
+      details: tEnums(record.sleepType === "NAP" ? "sleepType.NAP" : "sleepType.NIGHT"),
+      subDetails: duration !== null ? formatDuration(duration) : t("inProgress"),
     });
   });
 
@@ -53,18 +63,18 @@ export function RecentActivity({ childId }: RecentActivityProps) {
     let subDetails = "";
 
     if (record.feedingType === "BREAST") {
-      details = `Breastfeeding (${record.side})`;
+      details = t("breastfeeding", { side: sideLabel(record.side) });
       if (record.endTime) {
-        const duration = calculateDurationMinutes(record.startTime, record.endTime);
-        subDetails = formatDuration(duration);
+        const minutes = calculateDurationMinutes(record.startTime, record.endTime);
+        subDetails = formatDuration(minutes);
       } else {
-        subDetails = "In progress";
+        subDetails = t("inProgress");
       }
     } else if (record.feedingType === "BOTTLE") {
-      details = "Bottle";
-      subDetails = `${record.amountMl}ml`;
+      details = tEnums("feedingType.BOTTLE");
+      subDetails = record.amountMl ? ml(record.amountMl) : "";
     } else {
-      details = "Solids";
+      details = tEnums("feedingType.SOLIDS");
       subDetails = record.foodItems?.join(", ") || "";
     }
 
@@ -82,8 +92,8 @@ export function RecentActivity({ childId }: RecentActivityProps) {
       id: `diaper-${record.id}`,
       type: "diaper",
       time: record.time,
-      details: `Diaper - ${record.diaperType.toLowerCase()}`,
-      subDetails: record.color ? record.color.toLowerCase() : undefined,
+      details: tEnums(`diaperType.${record.diaperType}`),
+      subDetails: record.color ? tEnums(`diaperColor.${record.color}`) : undefined,
     });
   });
 
@@ -109,12 +119,12 @@ export function RecentActivity({ childId }: RecentActivityProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
         {recentActivities.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No activity logged today
+            {t("empty")}
           </p>
         ) : (
           <div className="space-y-3">
@@ -135,7 +145,7 @@ export function RecentActivity({ childId }: RecentActivityProps) {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {formatTime(activity.time)}
+                  {time(activity.time)}
                 </p>
               </div>
             ))}

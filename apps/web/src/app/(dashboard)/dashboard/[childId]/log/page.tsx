@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { ActiveTimers } from "@/components/tracking/active-timers";
 import { LogModal } from "@/components/tracking/log-modal";
@@ -22,12 +23,27 @@ import {
 
 type LogType = "sleep" | "breast" | "bottle" | "diaper" | "solids" | "pumping" | "medicine" | "growth" | "temperature" | "activity";
 
+type TrackingLabelKey =
+  | "sleep"
+  | "breastfeeding"
+  | "bottle"
+  | "diaper"
+  | "solids"
+  | "pumping"
+  | "medicine"
+  | "growth"
+  | "temperature"
+  | "activity";
+
 export default function LogPage({
   params,
 }: {
   params: Promise<{ childId: string }>;
 }) {
   const { childId } = use(params);
+  const t = useTranslations("activities");
+  const tEnums = useTranslations("enums");
+  const tCommon = useTranslations("common");
   const { data: child, isLoading } = trpc.child.get.useQuery({ id: childId });
 
   const [modalType, setModalType] = useState<LogType | null>(null);
@@ -35,7 +51,7 @@ export default function LogPage({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{tCommon("loading")}</div>
       </div>
     );
   }
@@ -43,19 +59,26 @@ export default function LogPage({
   if (!child) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-muted-foreground">Child not found</p>
+        <p className="text-muted-foreground">{t("notFound")}</p>
         <Button asChild>
-          <Link href="/dashboard">Back to Dashboard</Link>
+          <Link href="/dashboard">{t("backToDashboard")}</Link>
         </Button>
       </div>
     );
   }
 
-  const logOptions = [
+  const logOptions: {
+    type: LogType;
+    labelKey: TrackingLabelKey;
+    icon: typeof Moon;
+    iconColor: string;
+    bgColor: string;
+    textColor: string;
+    descColor: string;
+  }[] = [
     {
-      type: "sleep" as const,
-      label: "Sleep",
-      description: "Log nap or night sleep",
+      type: "sleep",
+      labelKey: "sleep",
       icon: Moon,
       iconColor: "text-indigo-600 dark:text-indigo-400",
       bgColor: "bg-indigo-100 dark:bg-indigo-900/50",
@@ -63,9 +86,8 @@ export default function LogPage({
       descColor: "text-indigo-700 dark:text-indigo-300",
     },
     {
-      type: "breast" as const,
-      label: "Breastfeeding",
-      description: "Log breastfeeding session",
+      type: "breast",
+      labelKey: "breastfeeding",
       icon: Baby,
       iconColor: "text-pink-600 dark:text-pink-400",
       bgColor: "bg-pink-100 dark:bg-pink-900/50",
@@ -73,9 +95,8 @@ export default function LogPage({
       descColor: "text-pink-700 dark:text-pink-300",
     },
     {
-      type: "bottle" as const,
-      label: "Bottle",
-      description: "Log bottle feeding",
+      type: "bottle",
+      labelKey: "bottle",
       icon: Baby,
       iconColor: "text-orange-600 dark:text-orange-400",
       bgColor: "bg-orange-100 dark:bg-orange-900/50",
@@ -83,9 +104,8 @@ export default function LogPage({
       descColor: "text-orange-700 dark:text-orange-300",
     },
     {
-      type: "diaper" as const,
-      label: "Diaper",
-      description: "Log diaper change",
+      type: "diaper",
+      labelKey: "diaper",
       icon: Droplets,
       iconColor: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-100 dark:bg-blue-900/50",
@@ -93,9 +113,8 @@ export default function LogPage({
       descColor: "text-blue-700 dark:text-blue-300",
     },
     {
-      type: "solids" as const,
-      label: "Solids",
-      description: "Log solid foods",
+      type: "solids",
+      labelKey: "solids",
       icon: Utensils,
       iconColor: "text-emerald-600 dark:text-emerald-400",
       bgColor: "bg-emerald-100 dark:bg-emerald-900/50",
@@ -103,9 +122,8 @@ export default function LogPage({
       descColor: "text-emerald-700 dark:text-emerald-300",
     },
     {
-      type: "pumping" as const,
-      label: "Pumping",
-      description: "Log pumping session",
+      type: "pumping",
+      labelKey: "pumping",
       icon: HeartPulse,
       iconColor: "text-purple-600 dark:text-purple-400",
       bgColor: "bg-purple-100 dark:bg-purple-900/50",
@@ -113,9 +131,8 @@ export default function LogPage({
       descColor: "text-purple-700 dark:text-purple-300",
     },
     {
-      type: "medicine" as const,
-      label: "Medicine",
-      description: "Log medicine dose",
+      type: "medicine",
+      labelKey: "medicine",
       icon: Pill,
       iconColor: "text-red-600 dark:text-red-400",
       bgColor: "bg-red-100 dark:bg-red-900/50",
@@ -123,9 +140,8 @@ export default function LogPage({
       descColor: "text-red-700 dark:text-red-300",
     },
     {
-      type: "growth" as const,
-      label: "Growth",
-      description: "Log height, weight, head",
+      type: "growth",
+      labelKey: "growth",
       icon: Ruler,
       iconColor: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-100 dark:bg-green-900/50",
@@ -133,9 +149,8 @@ export default function LogPage({
       descColor: "text-green-700 dark:text-green-300",
     },
     {
-      type: "temperature" as const,
-      label: "Temperature",
-      description: "Log body temperature",
+      type: "temperature",
+      labelKey: "temperature",
       icon: Thermometer,
       iconColor: "text-rose-600 dark:text-rose-400",
       bgColor: "bg-rose-100 dark:bg-rose-900/50",
@@ -143,9 +158,8 @@ export default function LogPage({
       descColor: "text-rose-700 dark:text-rose-300",
     },
     {
-      type: "activity" as const,
-      label: "Activity",
-      description: "Log bath, tummy time, etc",
+      type: "activity",
+      labelKey: "activity",
       icon: Sparkles,
       iconColor: "text-amber-600 dark:text-amber-400",
       bgColor: "bg-amber-100 dark:bg-amber-900/50",
@@ -160,10 +174,11 @@ export default function LogPage({
         <Button asChild variant="ghost" size="icon">
           <Link href={`/dashboard/${childId}`}>
             <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">{t("back")}</span>
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Log Activity</h1>
+          <h1 className="text-2xl font-bold">{t("log.title")}</h1>
           <p className="text-sm text-muted-foreground">{child.name}</p>
         </div>
       </div>
@@ -179,8 +194,12 @@ export default function LogPage({
           >
             <option.icon className={`h-8 w-8 ${option.iconColor}`} />
             <div className="flex-1">
-              <p className={`font-semibold ${option.textColor}`}>{option.label}</p>
-              <p className={`text-sm ${option.descColor}`}>{option.description}</p>
+              <p className={`font-semibold ${option.textColor}`}>
+                {tEnums(`trackingType.${option.labelKey}`)}
+              </p>
+              <p className={`text-sm ${option.descColor}`}>
+                {t(`log.descriptions.${option.type}`)}
+              </p>
             </div>
             <ChevronRight className={`h-5 w-5 ${option.iconColor}`} />
           </button>

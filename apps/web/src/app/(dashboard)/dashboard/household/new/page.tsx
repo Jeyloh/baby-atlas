@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,17 +14,18 @@ import { ArrowLeft } from "lucide-react";
 
 export default function NewHouseholdPage() {
   const router = useRouter();
+  const t = useTranslations("household");
   const { toast } = useToast();
   const [name, setName] = useState("");
 
   const createHousehold = trpc.household.create.useMutation({
     onSuccess: (household) => {
-      toast({ title: "Household created!" });
+      toast({ title: t("new.created") });
       router.push(`/dashboard/${household.id}/child/new`);
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description: error.message,
         variant: "destructive",
       });
@@ -42,24 +44,22 @@ export default function NewHouseholdPage() {
       <Button asChild variant="ghost" size="sm">
         <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          {t("back")}
         </Link>
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle>Create a Household</CardTitle>
-          <CardDescription>
-            A household lets you track your children and share access with other caregivers.
-          </CardDescription>
+          <CardTitle>{t("new.title")}</CardTitle>
+          <CardDescription>{t("new.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Household Name</Label>
+              <Label htmlFor="name">{t("new.nameLabel")}</Label>
               <Input
                 id="name"
-                placeholder="e.g., Smith Family"
+                placeholder={t("new.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -70,7 +70,7 @@ export default function NewHouseholdPage() {
               className="w-full"
               disabled={createHousehold.isPending}
             >
-              {createHousehold.isPending ? "Creating..." : "Create Household"}
+              {createHousehold.isPending ? t("new.creating") : t("create")}
             </Button>
           </form>
         </CardContent>

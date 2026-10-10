@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { mlToOz, ozToMl } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import { Moon, Baby, Droplets, Plus, Play, Square } from "lucide-react";
 
 type BottleContentType = "FORMULA" | "BREAST_MILK";
@@ -32,6 +33,7 @@ interface QuickLogGridProps {
 }
 
 export function QuickLogGrid({ childId }: QuickLogGridProps) {
+  const t = useTranslations("tracking.quickLog");
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -41,7 +43,7 @@ export function QuickLogGrid({ childId }: QuickLogGridProps) {
   const startSleep = trpc.sleep.start.useMutation({
     onSuccess: () => {
       utils.sleep.getActive.invalidate({ childId });
-      toast({ title: "Sleep timer started" });
+      toast({ title: t("toast.sleepStarted") });
     },
   });
 
@@ -50,14 +52,14 @@ export function QuickLogGrid({ childId }: QuickLogGridProps) {
       utils.sleep.list.invalidate();
       utils.sleep.getActive.invalidate({ childId });
       utils.sleep.summary.invalidate({ childId });
-      toast({ title: "Sleep recorded" });
+      toast({ title: t("toast.sleepRecorded") });
     },
   });
 
   const startBreastfeeding = trpc.feeding.startBreastfeeding.useMutation({
     onSuccess: () => {
       utils.feeding.getActive.invalidate({ childId });
-      toast({ title: "Feeding timer started" });
+      toast({ title: t("toast.feedingStarted") });
     },
   });
 
@@ -66,7 +68,7 @@ export function QuickLogGrid({ childId }: QuickLogGridProps) {
       utils.feeding.list.invalidate();
       utils.feeding.getActive.invalidate({ childId });
       utils.feeding.summary.invalidate({ childId });
-      toast({ title: "Feeding recorded" });
+      toast({ title: t("toast.feedingRecorded") });
     },
   });
 
@@ -74,7 +76,7 @@ export function QuickLogGrid({ childId }: QuickLogGridProps) {
     onSuccess: () => {
       utils.diaper.list.invalidate();
       utils.diaper.summary.invalidate({ childId });
-      toast({ title: "Diaper change logged" });
+      toast({ title: t("toast.diaperLogged") });
     },
   });
 
@@ -82,7 +84,7 @@ export function QuickLogGrid({ childId }: QuickLogGridProps) {
     onSuccess: () => {
       utils.feeding.list.invalidate();
       utils.feeding.summary.invalidate({ childId });
-      toast({ title: "Bottle feeding logged" });
+      toast({ title: t("toast.bottleLogged") });
     },
   });
 
@@ -115,7 +117,7 @@ export function QuickLogGrid({ childId }: QuickLogGridProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quick Log</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -150,6 +152,8 @@ function SleepButton({
   elapsed: string;
   onToggle: (type: "NAP" | "NIGHT") => void;
 }) {
+  const t = useTranslations("tracking.quickLog");
+  const tEnums = useTranslations("enums");
   const [open, setOpen] = useState(false);
 
   if (isRunning) {
@@ -161,7 +165,7 @@ function SleepButton({
       >
         <Square className="h-5 w-5" />
         <span className="text-xs">{elapsed}</span>
-        <span className="text-xs">Stop Sleep</span>
+        <span className="text-xs">{t("stopSleep")}</span>
       </Button>
     );
   }
@@ -171,12 +175,12 @@ function SleepButton({
       <DialogTrigger asChild>
         <Button variant="outline" className="h-20 flex-col gap-1">
           <Moon className="h-5 w-5" />
-          <span className="text-xs">Sleep</span>
+          <span className="text-xs">{tEnums("trackingType.sleep")}</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Start Sleep Timer</DialogTitle>
+          <DialogTitle>{t("startSleepTitle")}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4">
           <Button
@@ -187,7 +191,7 @@ function SleepButton({
             }}
           >
             <Moon className="mr-2 h-4 w-4" />
-            Nap
+            {tEnums("sleepType.NAP")}
           </Button>
           <Button
             size="lg"
@@ -198,7 +202,7 @@ function SleepButton({
             }}
           >
             <Moon className="mr-2 h-4 w-4" />
-            Night Sleep
+            {tEnums("sleepType.NIGHT")}
           </Button>
         </div>
       </DialogContent>
@@ -217,6 +221,8 @@ function FeedingButton({
   side?: "LEFT" | "RIGHT" | "BOTH";
   onToggle: (side: "LEFT" | "RIGHT") => void;
 }) {
+  const t = useTranslations("tracking.quickLog");
+  const tEnums = useTranslations("enums");
   const [open, setOpen] = useState(false);
 
   if (isRunning) {
@@ -228,7 +234,9 @@ function FeedingButton({
       >
         <Square className="h-5 w-5" />
         <span className="text-xs">{elapsed}</span>
-        <span className="text-xs">Stop {side}</span>
+        <span className="text-xs">
+          {side ? t("stopSide", { side: tEnums(`breastSide.${side}`) }) : t("stopFeeding")}
+        </span>
       </Button>
     );
   }
@@ -238,12 +246,12 @@ function FeedingButton({
       <DialogTrigger asChild>
         <Button variant="outline" className="h-20 flex-col gap-1">
           <Baby className="h-5 w-5" />
-          <span className="text-xs">Breast</span>
+          <span className="text-xs">{tEnums("trackingType.breastfeeding")}</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Start Breastfeeding</DialogTitle>
+          <DialogTitle>{t("startBreastfeedingTitle")}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4">
           <Button
@@ -253,7 +261,7 @@ function FeedingButton({
               setOpen(false);
             }}
           >
-            Left Side
+            {t("leftSide")}
           </Button>
           <Button
             size="lg"
@@ -263,13 +271,15 @@ function FeedingButton({
               setOpen(false);
             }}
           >
-            Right Side
+            {t("rightSide")}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+const BOTTLE_PRESETS_ML = [60, 90, 120, 150, 180];
 
 function BottleDialog({
   childId,
@@ -278,32 +288,12 @@ function BottleDialog({
   childId: string;
   onLog: (data: { childId: string; startTime: Date; amountMl: number; bottleContentType?: BottleContentType }) => Promise<unknown>;
 }) {
+  const t = useTranslations("tracking.quickLog");
+  const tEnums = useTranslations("enums");
+  const { ml } = useFormatters();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("120");
-  const [unit, setUnit] = useState<"ml" | "oz">("ml");
   const [contentType, setContentType] = useState<BottleContentType>("FORMULA");
-
-  const presetsMl = [60, 90, 120, 150, 180];
-  const presetsOz = [2, 3, 4, 5, 6];
-
-  const displayAmount = unit === "ml" ? amount : String(mlToOz(parseInt(amount, 10) || 0));
-
-  const handleAmountChange = (value: string) => {
-    const numValue = parseInt(value, 10) || 0;
-    if (unit === "oz") {
-      setAmount(String(ozToMl(numValue)));
-    } else {
-      setAmount(value);
-    }
-  };
-
-  const handlePresetClick = (value: number) => {
-    if (unit === "oz") {
-      setAmount(String(ozToMl(value)));
-    } else {
-      setAmount(String(value));
-    }
-  };
 
   const handleSubmit = async () => {
     await onLog({
@@ -321,74 +311,52 @@ function BottleDialog({
       <DialogTrigger asChild>
         <Button variant="outline" className="h-20 flex-col gap-1">
           <Baby className="h-5 w-5" />
-          <span className="text-xs">Bottle</span>
+          <span className="text-xs">{tEnums("feedingType.BOTTLE")}</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Log Bottle Feeding</DialogTitle>
+          <DialogTitle>{t("logBottleTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Content Type</Label>
+            <Label>{t("contentType")}</Label>
             <Select value={contentType} onValueChange={(v) => setContentType(v as BottleContentType)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="FORMULA">Formula</SelectItem>
-                <SelectItem value="BREAST_MILK">Breast Milk</SelectItem>
+                <SelectItem value="FORMULA">{tEnums("bottleContent.FORMULA")}</SelectItem>
+                <SelectItem value="BREAST_MILK">{tEnums("bottleContent.BREAST_MILK")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="amount">Amount</Label>
-              <div className="flex gap-1">
-                <Button
-                  variant={unit === "ml" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setUnit("ml")}
-                >
-                  ml
-                </Button>
-                <Button
-                  variant={unit === "oz" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setUnit("oz")}
-                >
-                  oz
-                </Button>
-              </div>
-            </div>
+            <Label htmlFor="amount">{t("amount")} (ml)</Label>
             <Input
               id="amount"
               type="number"
-              value={displayAmount}
-              onChange={(e) => handleAmountChange(e.target.value)}
+              inputMode="numeric"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               min="0"
-              max={unit === "ml" ? "500" : "17"}
+              max="500"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
-            {(unit === "ml" ? presetsMl : presetsOz).map((value) => (
+            {BOTTLE_PRESETS_ML.map((value) => (
               <Button
                 key={value}
-                variant={
-                  (unit === "ml" && amount === String(value)) ||
-                  (unit === "oz" && amount === String(ozToMl(value)))
-                    ? "default"
-                    : "outline"
-                }
+                variant={amount === String(value) ? "default" : "outline"}
                 size="sm"
-                onClick={() => handlePresetClick(value)}
+                onClick={() => setAmount(String(value))}
               >
-                {value}{unit}
+                {ml(value)}
               </Button>
             ))}
           </div>
           <Button className="w-full" onClick={handleSubmit}>
-            Log Bottle
+            {t("logBottle")}
           </Button>
         </div>
       </DialogContent>
@@ -403,23 +371,25 @@ function DiaperButtons({
   childId: string;
   onLog: (data: { childId: string; diaperType: "WET" | "DIRTY" | "BOTH" }) => Promise<unknown>;
 }) {
+  const t = useTranslations("tracking.quickLog");
+
   return (
     <div className="flex flex-col gap-2">
       <Button
         variant="outline"
-        className="h-9 text-xs"
+        className="min-h-12 text-xs"
         onClick={() => onLog({ childId, diaperType: "WET" })}
       >
         <Droplets className="mr-1 h-3 w-3" />
-        Wet
+        {t("wet")}
       </Button>
       <Button
         variant="outline"
-        className="h-9 text-xs"
+        className="min-h-12 text-xs"
         onClick={() => onLog({ childId, diaperType: "DIRTY" })}
       >
         <Droplets className="mr-1 h-3 w-3" />
-        Dirty
+        {t("dirty")}
       </Button>
     </div>
   );

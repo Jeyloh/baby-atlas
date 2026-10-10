@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { signIn, getProviders } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 
 export default function LoginPage() {
+  const t = useTranslations("auth.login");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -38,9 +40,12 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle>Check your email</CardTitle>
+            <CardTitle>{t("checkEmailTitle")}</CardTitle>
             <CardDescription>
-              We sent a magic link to <strong>{email}</strong>. Click the link to sign in.
+              {t.rich("checkEmailDescription", {
+                email,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -49,7 +54,7 @@ export default function LoginPage() {
               className="w-full"
               onClick={() => setEmailSent(false)}
             >
-              Use a different email
+              {t("useDifferentEmail")}
             </Button>
           </CardContent>
         </Card>
@@ -61,10 +66,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome to Baby Atlas</CardTitle>
-          <CardDescription>
-            Sign in to start tracking your baby&apos;s activities
-          </CardDescription>
+          <CardTitle className="text-2xl">{t("welcome")}</CardTitle>
+          <CardDescription>{t("subtitle")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {providers?.google && (
@@ -92,7 +95,7 @@ export default function LoginPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                Continue with Google
+                {t("continueWithGoogle")}
               </Button>
 
               <div className="relative">
@@ -101,7 +104,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with email
+                    {t("orContinueWithEmail")}
                   </span>
                 </div>
               </div>
@@ -110,18 +113,18 @@ export default function LoginPage() {
 
           <form onSubmit={handleEmailSignIn} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("emailLabel")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Sending magic link..." : "Send magic link"}
+              {isLoading ? t("sending") : t("sendLink")}
             </Button>
           </form>
         </CardContent>

@@ -1,0 +1,44 @@
+{
+  "errorTitle": "Error",
+  "notFound": "Child not found",
+  "backToDashboard": "Back to Dashboard",
+  "back": "Back",
+  "settings": "Settings",
+  "tabs": {
+    "home": "Home",
+    "reports": "Reports",
+    "chat": "Chat"
+  },
+  "form": {
+    "nameLabel": "Name",
+    "birthDateLabel": "Birth Date",
+    "genderLabel": "Gender (Optional)",
+    "genderPlaceholder": "Select gender"
+  },
+  "new": {
+    "title": "Add a Child",
+    "description": "Add your child's information to start tracking their activities.",
+    "namePlaceholder": "e.g., Emma",
+    "adding": "Adding...",
+    "submit": "Add Child",
+    "added": "{name} added!"
+  },
+  "settingsPage": {
+    "backTo": "Back to {name}",
+    "title": "Child Settings",
+    "description": "Update {name}'s information.",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "updated": "Child updated!"
+  },
+  "danger": {
+    "title": "Danger Zone",
+    "description": "Permanently delete this child and all associated records.",
+    "deleteChild": "Delete Child",
+    "dialogTitle": "Delete {name}?",
+    "dialogDescription": "This will permanently delete all sleep, feeding, diaper, and other records for {name}. This action cannot be undone.",
+    "confirmLabel": "Type \"{name}\" to confirm",
+    "deleting": "Deleting...",
+    "deleted": "Child deleted"
+  }
+}

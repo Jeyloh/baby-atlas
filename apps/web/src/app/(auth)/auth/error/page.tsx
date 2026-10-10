@@ -1,43 +1,52 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Suspense } from "react";
 
+const knownErrors = ["Configuration", "AccessDenied", "Verification"] as const;
+type KnownError = (typeof knownErrors)[number];
+
+function isKnownError(error: string | null): error is KnownError {
+  return knownErrors.includes(error as KnownError);
+}
+
 function AuthErrorContent() {
+  const t = useTranslations("auth.error");
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
-  const errorMessages: Record<string, string> = {
-    Configuration: "There is a problem with the server configuration.",
-    AccessDenied: "You do not have permission to sign in.",
-    Verification: "The verification link has expired or has already been used.",
-    Default: "An error occurred during authentication.",
-  };
-
-  const errorMessage = error ? errorMessages[error] || errorMessages.Default : errorMessages.Default;
+  const errorMessage = isKnownError(error)
+    ? t(`messages.${error}`)
+    : t("messages.Default");
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-destructive">Authentication Error</CardTitle>
+        <CardTitle className="text-destructive">{t("title")}</CardTitle>
         <CardDescription>{errorMessage}</CardDescription>
       </CardHeader>
       <CardContent className="text-center">
         <Button asChild>
-          <Link href="/login">Try again</Link>
+          <Link href="/login">{t("tryAgain")}</Link>
         </Button>
       </CardContent>
     </Card>
   );
 }
 
+function LoadingFallback() {
+  const t = useTranslations("common");
+  return <div>{t("loading")}</div>;
+}
+
 export default function AuthErrorPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingFallback />}>
         <AuthErrorContent />
       </Suspense>
     </div>

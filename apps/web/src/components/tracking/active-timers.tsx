@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import enumMessages from "../../../messages/nb/enums.json";
 import { useAllTimers } from "@/hooks/use-timer";
 import { useTimerStore, formatElapsedTime } from "@/stores/timer-store";
 import { trpc } from "@/lib/trpc/provider";
@@ -14,6 +16,8 @@ interface ActiveTimersProps {
 }
 
 export function ActiveTimers({ childId }: ActiveTimersProps) {
+  const t = useTranslations("tracking.activeTimers");
+  const tEnums = useTranslations("enums");
   const timers = useAllTimers(childId);
   const stopTimer = useTimerStore((state) => state.stopTimer);
   const { toast } = useToast();
@@ -24,7 +28,7 @@ export function ActiveTimers({ childId }: ActiveTimersProps) {
     onSuccess: () => {
       utils.sleep.list.invalidate();
       utils.sleep.summary.invalidate({ childId });
-      toast({ title: "Sleep recorded" });
+      toast({ title: t("toast.sleepRecorded") });
     },
   });
 
@@ -32,7 +36,7 @@ export function ActiveTimers({ childId }: ActiveTimersProps) {
     onSuccess: () => {
       utils.feeding.list.invalidate();
       utils.feeding.summary.invalidate({ childId });
-      toast({ title: "Feeding recorded" });
+      toast({ title: t("toast.feedingRecorded") });
     },
   });
 
@@ -40,7 +44,7 @@ export function ActiveTimers({ childId }: ActiveTimersProps) {
     onSuccess: () => {
       utils.pumping.list.invalidate({ childId });
       utils.pumping.summary.invalidate({ childId });
-      toast({ title: "Pumping recorded" });
+      toast({ title: t("toast.pumpingRecorded") });
     },
   });
 
@@ -48,7 +52,7 @@ export function ActiveTimers({ childId }: ActiveTimersProps) {
     onSuccess: () => {
       utils.activity.list.invalidate({ childId });
       utils.activity.summary.invalidate({ childId });
-      toast({ title: "Activity recorded" });
+      toast({ title: t("toast.activityRecorded") });
     },
   });
 
@@ -95,16 +99,33 @@ export function ActiveTimers({ childId }: ActiveTimersProps) {
     }
   };
 
+  const sideLabel = (side: string) =>
+    side === "LEFT" || side === "RIGHT" || side === "BOTH"
+      ? tEnums(`breastSide.${side}`)
+      : side;
+
   const getLabel = (timer: (typeof timers)[0]) => {
     switch (timer.type) {
       case "sleep":
-        return timer.metadata?.sleepType === "NIGHT" ? "Night Sleep" : "Nap";
+        return tEnums(
+          timer.metadata?.sleepType === "NIGHT" ? "sleepType.NIGHT" : "sleepType.NAP"
+        );
       case "feeding":
-        return `Breastfeeding (${timer.metadata?.feedingSide})`;
+        return t("breastfeeding", {
+          side: timer.metadata?.feedingSide
+            ? `(${sideLabel(timer.metadata.feedingSide)})`
+            : "",
+        }).trim();
       case "pumping":
-        return `Pumping${timer.metadata?.pumpingSide ? ` (${timer.metadata.pumpingSide})` : ""}`;
-      case "activity":
-        return timer.metadata?.activityType?.replace(/_/g, " ") || "Activity";
+        return timer.metadata?.pumpingSide
+          ? t("pumpingSide", { side: sideLabel(timer.metadata.pumpingSide) })
+          : t("pumping");
+      case "activity": {
+        const type = timer.metadata?.activityType;
+        return type && type in enumMessages.activityType
+          ? tEnums(`activityType.${type as keyof typeof enumMessages.activityType}`)
+          : t("activity");
+      }
       default:
         return timer.type;
     }
@@ -113,7 +134,7 @@ export function ActiveTimers({ childId }: ActiveTimersProps) {
   return (
     <Card className="border-primary/50 bg-primary/5">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Active Timers</CardTitle>
+        <CardTitle className="text-sm font-medium">{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
@@ -134,10 +155,11 @@ export function ActiveTimers({ childId }: ActiveTimersProps) {
               <Button
                 variant="destructive"
                 size="sm"
+                className="min-h-12 min-w-12"
                 onClick={() => handleStop(timer)}
               >
                 <Square className="h-4 w-4 mr-1" />
-                Stop
+                {t("stop")}
               </Button>
             </div>
           ))}

@@ -10,6 +10,7 @@ import { ChildSelector } from "@/components/dashboard/child-selector";
 import { ChatInterface } from "@/components/chat";
 import { useChat } from "@/hooks/use-chat";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Settings, Home, BarChart3, MessageCircle } from "lucide-react";
 
 export default function ChildDashboardPage({
@@ -18,6 +19,8 @@ export default function ChildDashboardPage({
   params: Promise<{ childId: string }>;
 }) {
   const { childId } = use(params);
+  const t = useTranslations("child");
+  const tCommon = useTranslations("common");
   const [activeTab, setActiveTab] = useState("home");
   const { data: child, isLoading: childLoading } = trpc.child.get.useQuery({ id: childId });
 
@@ -32,7 +35,7 @@ export default function ChildDashboardPage({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{tCommon("loading")}</div>
       </div>
     );
   }
@@ -40,9 +43,9 @@ export default function ChildDashboardPage({
   if (!child) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-muted-foreground">Child not found</p>
+        <p className="text-muted-foreground">{t("notFound")}</p>
         <Button asChild>
-          <Link href="/dashboard">Back to Dashboard</Link>
+          <Link href="/dashboard">{t("backToDashboard")}</Link>
         </Button>
       </div>
     );
@@ -60,7 +63,7 @@ export default function ChildDashboardPage({
         <Button asChild variant="outline" size="sm">
           <Link href={`/dashboard/${childId}/settings`}>
             <Settings className="mr-2 h-4 w-4" />
-            Settings
+            {t("settings")}
           </Link>
         </Button>
       </div>
@@ -70,15 +73,15 @@ export default function ChildDashboardPage({
         <TabsList className="w-full grid grid-cols-3">
           <TabsTrigger value="home" className="gap-2">
             <Home className="h-4 w-4" />
-            Home
+            {t("tabs.home")}
           </TabsTrigger>
           <TabsTrigger value="reports" className="gap-2">
             <BarChart3 className="h-4 w-4" />
-            Reports
+            {t("tabs.reports")}
           </TabsTrigger>
           <TabsTrigger value="chat" className="gap-2">
             <MessageCircle className="h-4 w-4" />
-            Chat
+            {t("tabs.chat")}
           </TabsTrigger>
         </TabsList>
 

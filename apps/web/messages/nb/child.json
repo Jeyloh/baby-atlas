@@ -1,0 +1,44 @@
+{
+  "errorTitle": "Feil",
+  "notFound": "Fant ikke barnet",
+  "backToDashboard": "Tilbake til oversikten",
+  "back": "Tilbake",
+  "settings": "Innstillinger",
+  "tabs": {
+    "home": "Hjem",
+    "reports": "Rapporter",
+    "chat": "Chat"
+  },
+  "form": {
+    "nameLabel": "Navn",
+    "birthDateLabel": "Fødselsdato",
+    "genderLabel": "Kjønn (valgfritt)",
+    "genderPlaceholder": "Velg kjønn"
+  },
+  "new": {
+    "title": "Legg til barn",
+    "description": "Legg inn informasjon om barnet ditt for å begynne å loggføre.",
+    "namePlaceholder": "for eksempel Emma",
+    "adding": "Legger til …",
+    "submit": "Legg til barn",
+    "added": "{name} er lagt til"
+  },
+  "settingsPage": {
+    "backTo": "Tilbake til {name}",
+    "title": "Barneinnstillinger",
+    "description": "Oppdater informasjonen om {name}.",
+    "saving": "Lagrer …",
+    "saveChanges": "Lagre endringer",
+    "updated": "Barnet er oppdatert"
+  },
+  "danger": {
+    "title": "Faresone",
+    "description": "Slett dette barnet og alle tilhørende registreringer permanent.",
+    "deleteChild": "Slett barn",
+    "dialogTitle": "Vil du slette {name}?",
+    "dialogDescription": "Alle registreringer av søvn, mating, bleier og annet for {name} slettes permanent. Dette kan ikke angres.",
+    "confirmLabel": "Skriv inn «{name}» for å bekrefte",
+    "deleting": "Sletter …",
+    "deleted": "Barnet er slettet"
+  }
+}

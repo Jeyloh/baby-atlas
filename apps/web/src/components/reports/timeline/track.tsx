@@ -4,8 +4,9 @@ import {
   normalizeToTimelinePosition,
   DAY_START_HOUR,
   getTimelineHourLabels,
-  formatDurationPrecise,
 } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import {
   getActivityBarClasses,
   feedingTypeToCategory,
@@ -139,6 +140,8 @@ export function TimelineTrack({
   selectedDate,
   onEventClick,
 }: TimelineTrackProps) {
+  const te = useTranslations("enums");
+  const f = useFormatters();
   const hourLabels = getTimelineHourLabels(DAY_START_HOUR);
 
   // Convert all records to timeline events
@@ -149,7 +152,7 @@ export function TimelineTrack({
     const startPos = normalizeToTimelinePosition(record.startTime, DAY_START_HOUR);
     const endTime = record.endTime || new Date();
     const endPos = normalizeToTimelinePosition(endTime, DAY_START_HOUR);
-    const duration = formatDurationPrecise(record.startTime, endTime);
+    const duration = f.durationPrecise(record.startTime, endTime);
 
     events.push({
       id: `sleep-${record.id}`,
@@ -159,7 +162,7 @@ export function TimelineTrack({
       category: "sleep",
       startPos,
       endPos: Math.max(endPos, startPos + 0.25), // Minimum 15min display
-      label: record.sleepType === "NIGHT" ? "Night" : "Nap",
+      label: te(`sleepType.${record.sleepType === "NIGHT" ? "NIGHT" : "NAP"}`),
       duration,
       icon: Moon,
     });
@@ -180,16 +183,16 @@ export function TimelineTrack({
     let duration: string | undefined;
     let icon: LucideIcon | typeof DiaperIcon = Baby;
     if (record.feedingType === "BREAST") {
-      label = "Breast";
+      label = te("trackingType.breastfeeding");
       icon = Baby;
       if (record.endTime) {
-        duration = formatDurationPrecise(record.startTime, record.endTime);
+        duration = f.durationPrecise(record.startTime, record.endTime);
       }
     } else if (record.feedingType === "BOTTLE") {
-      label = "Bottle";
+      label = te("trackingType.bottle");
       icon = Milk;
     } else if (record.feedingType === "SOLIDS") {
-      label = "Solids";
+      label = te("trackingType.solids");
       icon = Utensils;
     }
 
@@ -211,14 +214,13 @@ export function TimelineTrack({
   diaperRecords.forEach((record) => {
     const pos = normalizeToTimelinePosition(record.time, DAY_START_HOUR);
 
-    const label =
-      record.diaperType === "WET"
-        ? "Wet"
-        : record.diaperType === "DIRTY"
-          ? "Poo"
-          : record.diaperType === "BOTH"
-            ? "Mixed"
-            : "Dry";
+    const label = te(
+      `diaperType.${
+        record.diaperType === "WET" || record.diaperType === "DIRTY" || record.diaperType === "BOTH"
+          ? record.diaperType
+          : "DRY"
+      }`
+    );
 
     const category = diaperTypeToCategory(
       record.diaperType as "WET" | "DIRTY" | "BOTH" | "DRY"
@@ -242,12 +244,9 @@ export function TimelineTrack({
     const startPos = normalizeToTimelinePosition(record.startTime, DAY_START_HOUR);
     const endTime = record.endTime || new Date();
     const endPos = normalizeToTimelinePosition(endTime, DAY_START_HOUR);
-    const duration = formatDurationPrecise(record.startTime, endTime);
+    const duration = f.durationPrecise(record.startTime, endTime);
 
-    let label = "Pump";
-    if (record.amountMl) {
-      label = `${Math.round(record.amountMl / 29.574)}oz`;
-    }
+    const label = record.amountMl ? f.ml(record.amountMl) : te("trackingType.pumping");
 
     events.push({
       id: `pumping-${record.id}`,
@@ -284,11 +283,7 @@ export function TimelineTrack({
   growthRecords.forEach((record) => {
     const pos = normalizeToTimelinePosition(record.date, DAY_START_HOUR);
 
-    let label = "Growth";
-    if (record.weightKg) {
-      const lbs = record.weightKg * 2.20462;
-      label = `${lbs.toFixed(1)}lbs`;
-    }
+    const label = record.weightKg ? f.weightKg(record.weightKg) : te("trackingType.growth");
 
     events.push({
       id: `growth-${record.id}`,
@@ -306,7 +301,6 @@ export function TimelineTrack({
   // Add temperature events (point events)
   temperatureRecords.forEach((record) => {
     const pos = normalizeToTimelinePosition(record.time, DAY_START_HOUR);
-    const fahrenheit = record.temperatureCelsius * 9 / 5 + 32;
 
     events.push({
       id: `temperature-${record.id}`,
@@ -316,7 +310,7 @@ export function TimelineTrack({
       category: "temperature",
       startPos: pos,
       endPos: pos + 0.25,
-      label: `${fahrenheit.toFixed(1)}°F`,
+      label: f.temperatureC(record.temperatureCelsius),
       icon: Thermometer,
     });
   });
@@ -326,12 +320,11 @@ export function TimelineTrack({
     const startPos = normalizeToTimelinePosition(record.startTime, DAY_START_HOUR);
     const endTime = record.endTime || new Date();
     const endPos = normalizeToTimelinePosition(endTime, DAY_START_HOUR);
-    const duration = record.endTime ? formatDurationPrecise(record.startTime, record.endTime) : undefined;
+    const duration = record.endTime ? f.durationPrecise(record.startTime, record.endTime) : undefined;
 
-    const label = record.activityType
-      .toLowerCase()
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    const label = te(
+      `activityType.${record.activityType as "TUMMY_TIME" | "BATH" | "OUTDOOR_PLAY" | "INDOOR_PLAY" | "SCREEN_TIME" | "SKIN_TO_SKIN" | "STORYTIME" | "TEETH_BRUSHING" | "OTHER"}`
+    );
 
     events.push({
       id: `activity-${record.id}`,

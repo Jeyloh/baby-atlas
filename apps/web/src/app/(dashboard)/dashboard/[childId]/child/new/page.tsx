@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,8 @@ import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+const genders = ["MALE", "FEMALE", "OTHER"] as const;
+
 export default function NewChildPage({
   params,
 }: {
@@ -25,6 +28,8 @@ export default function NewChildPage({
 }) {
   const { childId: householdId } = use(params);
   const router = useRouter();
+  const t = useTranslations("child");
+  const tGender = useTranslations("enums.gender");
   const { toast } = useToast();
 
   const [name, setName] = useState("");
@@ -33,12 +38,12 @@ export default function NewChildPage({
 
   const createChild = trpc.child.create.useMutation({
     onSuccess: (child) => {
-      toast({ title: `${child.name} added!` });
+      toast({ title: t("new.added", { name: child.name }) });
       router.push(`/dashboard/${child.id}`);
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description: error.message,
         variant: "destructive",
       });
@@ -52,7 +57,7 @@ export default function NewChildPage({
         householdId,
         name: name.trim(),
         birthDate: new Date(birthDate),
-        gender: gender ? (gender as "MALE" | "FEMALE" | "OTHER") : undefined,
+        gender: gender ? (gender as (typeof genders)[number]) : undefined,
       });
     }
   };
@@ -62,24 +67,22 @@ export default function NewChildPage({
       <Button asChild variant="ghost" size="sm">
         <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          {t("back")}
         </Link>
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle>Add a Child</CardTitle>
-          <CardDescription>
-            Add your child&apos;s information to start tracking their activities.
-          </CardDescription>
+          <CardTitle>{t("new.title")}</CardTitle>
+          <CardDescription>{t("new.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("form.nameLabel")}</Label>
               <Input
                 id="name"
-                placeholder="e.g., Emma"
+                placeholder={t("new.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -87,7 +90,7 @@ export default function NewChildPage({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthDate">Birth Date</Label>
+              <Label htmlFor="birthDate">{t("form.birthDateLabel")}</Label>
               <Input
                 id="birthDate"
                 type="date"
@@ -98,15 +101,17 @@ export default function NewChildPage({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gender">Gender (Optional)</Label>
+              <Label htmlFor="gender">{t("form.genderLabel")}</Label>
               <Select value={gender} onValueChange={setGender}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
+                  <SelectValue placeholder={t("form.genderPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MALE">Male</SelectItem>
-                  <SelectItem value="FEMALE">Female</SelectItem>
-                  <SelectItem value="OTHER">Other</SelectItem>
+                  {genders.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {tGender(g)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -116,7 +121,7 @@ export default function NewChildPage({
               className="w-full"
               disabled={createChild.isPending}
             >
-              {createChild.isPending ? "Adding..." : "Add Child"}
+              {createChild.isPending ? t("new.adding") : t("new.submit")}
             </Button>
           </form>
         </CardContent>

@@ -6,10 +6,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   startOfWeek,
   addDays,
-  format,
   isToday,
   startOfDay,
 } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 
 interface WeekCalendarStripProps {
   selectedDate: Date;
@@ -20,8 +21,10 @@ export function WeekCalendarStrip({
   selectedDate,
   onDateSelect,
 }: WeekCalendarStripProps) {
+  const t = useTranslations("reports");
+  const f = useFormatters();
   const weekStart = useMemo(
-    () => startOfWeek(selectedDate, { weekStartsOn: 0 }),
+    () => startOfWeek(selectedDate, { weekStartsOn: 1 }),
     [selectedDate]
   );
 
@@ -42,7 +45,7 @@ export function WeekCalendarStrip({
 
   return (
     <div className="flex items-center gap-2">
-      <Button variant="ghost" size="icon" onClick={handlePrevWeek}>
+      <Button variant="ghost" size="icon" onClick={handlePrevWeek} aria-label={t("previousWeek")}>
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
@@ -55,7 +58,9 @@ export function WeekCalendarStrip({
             <button
               key={day.toISOString()}
               onClick={() => onDateSelect(day)}
-              className={`flex flex-col items-center p-1.5 md:p-2 rounded-lg transition-colors touch-manipulation ${
+              aria-label={f.longDate(day)}
+              aria-pressed={isSelected}
+              className={`flex flex-col items-center justify-center min-h-12 p-1.5 md:p-2 rounded-lg transition-colors touch-manipulation ${
                 isSelected
                   ? "bg-primary text-primary-foreground"
                   : today
@@ -64,17 +69,17 @@ export function WeekCalendarStrip({
               }`}
             >
               <span className="text-[10px] md:text-xs font-medium">
-                {format(day, "EEE")}
+                {f.weekday(day)}
               </span>
               <span className={`text-base md:text-lg font-semibold ${today && !isSelected ? "text-primary" : ""}`}>
-                {format(day, "d")}
+                {f.pattern(day, "d")}
               </span>
             </button>
           );
         })}
       </div>
 
-      <Button variant="ghost" size="icon" onClick={handleNextWeek}>
+      <Button variant="ghost" size="icon" onClick={handleNextWeek} aria-label={t("nextWeek")}>
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>

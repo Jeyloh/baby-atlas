@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { formatElapsedTime } from "@/stores/timer-store";
 
@@ -20,6 +21,7 @@ export function BreastSideButton({
   onClick,
   disabled = false,
 }: BreastSideButtonProps) {
+  const t = useTranslations("tracking.breastSide");
   // Visual representation of breast with nipple pointing inward
   const isLeft = side === "LEFT";
 
@@ -78,12 +80,12 @@ export function BreastSideButton({
           isActive ? "text-primary-foreground" : "text-primary"
         )}
       >
-        {side}
+        {t(side)}
       </span>
 
       {/* Last Side badge */}
       {isLastSide && !isActive && (
-        <span className="text-[10px] text-primary/70 mt-0.5">Last Side</span>
+        <span className="text-[10px] text-primary/70 mt-0.5">{t("lastSide")}</span>
       )}
     </button>
   );

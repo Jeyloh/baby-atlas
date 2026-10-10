@@ -1,0 +1,35 @@
+{
+  "errorTitle": "Error",
+  "profile": {
+    "backToDashboard": "Back to Dashboard",
+    "notFound": "User not found",
+    "title": "Profile Settings",
+    "updated": "Profile updated!",
+    "displayName": "Display Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailLocked": "Email cannot be changed",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "language": {
+      "title": "Language",
+      "description": "Choose the language you want to use in the app.",
+      "label": "Language"
+    },
+    "session": {
+      "title": "Session",
+      "description": "Manage your current session.",
+      "signOut": "Sign Out"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "description": "Permanently delete your account and all associated data.",
+      "deleteAccount": "Delete Account",
+      "dialogTitle": "Delete your account?",
+      "dialogDescription": "This will permanently delete your account, remove you from all households, and delete any households where you are the sole owner. This action cannot be undone.",
+      "confirmLabel": "Type your email \"{email}\" to confirm",
+      "deleting": "Deleting...",
+      "deleted": "Account deleted"
+    }
+  }
+}

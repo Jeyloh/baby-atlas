@@ -20,18 +20,8 @@ import { Slider } from "@/components/ui/slider";
 import { TimeRow } from "@/components/ui/time-row";
 import { SimpleToggleGroup } from "@/components/ui/simple-toggle-group";
 import { useToast } from "@/hooks/use-toast";
-import {
-  mlToOz,
-  ozToMl,
-  kgToLbs,
-  lbsToKg,
-  kgToLbsOz,
-  lbsOzToKg,
-  cmToFtIn,
-  ftInToCm,
-  celsiusToFahrenheit,
-  fahrenheitToCelsius,
-} from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import {
   Play,
   Square,
@@ -104,6 +94,8 @@ export function LogModal({ childId, type, open, onOpenChange }: LogModalProps) {
 }
 
 function SleepModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
+  const tEnums = useTranslations("enums");
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const sleepTimer = useTimer(childId, "sleep");
@@ -127,7 +119,7 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
       utils.timeline.getLastActivities.invalidate({ childId });
       sleepTimer.start({ sleepType });
       sleepTimer.update({ recordId: result.id });
-      toast({ title: "Sleep timer started" });
+      toast({ title: t("sleep.timerStarted") });
       // Don't close - stay in modal to show running timer
     },
   });
@@ -137,7 +129,7 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
       utils.sleep.list.invalidate();
       utils.sleep.summary.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Sleep recorded" });
+      toast({ title: t("sleep.recorded") });
       onClose();
     },
   });
@@ -147,7 +139,7 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
       utils.sleep.list.invalidate();
       utils.sleep.summary.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Sleep recorded" });
+      toast({ title: t("sleep.recorded") });
       onClose();
     },
   });
@@ -180,12 +172,14 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
 
   // Timer is running - show running state
   if (sleepTimer.isRunning && !showManualEntry) {
-    const runningType = sleepTimer.timer?.metadata?.sleepType === "NIGHT" ? "Night Sleep" : "Nap";
+    const runningType = tEnums(
+      sleepTimer.timer?.metadata?.sleepType === "NIGHT" ? "sleepType.NIGHT" : "sleepType.NAP"
+    );
 
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Sleep in Progress</DialogTitle>
+          <DialogTitle className="text-center">{t("sleep.running")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center py-8 gap-4">
@@ -204,7 +198,7 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
             disabled={isLoading}
           >
             <Square className="h-5 w-5 mr-2" />
-            Stop
+            {t("stop")}
           </Button>
         </div>
       </>
@@ -216,20 +210,20 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Log Sleep</DialogTitle>
+          <DialogTitle className="text-center">{t("sleep.log")}</DialogTitle>
         </DialogHeader>
 
         <SimpleToggleGroup
           options={[
-            { value: "NAP", label: "Nap" },
-            { value: "NIGHT", label: "Night" },
+            { value: "NAP", label: tEnums("sleepType.NAP") },
+            { value: "NIGHT", label: tEnums("sleepType.NIGHT") },
           ]}
           value={sleepType}
           onChange={setSleepType}
         />
 
-        <TimeRow label="Start Time" value={startTime} onChange={setStartTime} />
-        <TimeRow label="End Time" value={endTime} onChange={setEndTime} placeholder="Set time" />
+        <TimeRow label={t("startTime")} value={startTime} onChange={setStartTime} />
+        <TimeRow label={t("endTime")} value={endTime} onChange={setEndTime} placeholder={t("setTime")} />
 
         <div className="p-6 pt-4 flex flex-col gap-3">
           <Button
@@ -238,13 +232,13 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
             onClick={handleManualSave}
             disabled={isLoading || !startTime || !endTime}
           >
-            Save
+            {t("save")}
           </Button>
           <button
             onClick={() => setShowManualEntry(false)}
-            className="text-sm text-muted-foreground hover:text-foreground"
+            className="text-sm min-h-12 px-4 text-muted-foreground hover:text-foreground"
           >
-            Start Timer Instead
+            {t("startTimerInstead")}
           </button>
         </div>
       </>
@@ -255,7 +249,7 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Sleep</DialogTitle>
+        <DialogTitle className="text-center">{t("sleep.add")}</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col items-center py-6 gap-6">
@@ -263,8 +257,8 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
 
         <SimpleToggleGroup
           options={[
-            { value: "NAP", label: "Nap" },
-            { value: "NIGHT", label: "Night" },
+            { value: "NAP", label: tEnums("sleepType.NAP") },
+            { value: "NIGHT", label: tEnums("sleepType.NIGHT") },
           ]}
           value={sleepType}
           onChange={setSleepType}
@@ -276,16 +270,16 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
           className="w-32 h-32 rounded-full bg-primary/20 border-2 border-dashed border-primary flex flex-col items-center justify-center gap-2 hover:bg-primary/30 transition-colors disabled:opacity-50"
         >
           <Play className="h-8 w-8 text-primary" />
-          <span className="text-primary font-semibold">START</span>
+          <span className="text-primary font-semibold">{t("start")}</span>
         </button>
       </div>
 
       <div className="p-6 pt-0 flex justify-center">
         <button
           onClick={() => setShowManualEntry(true)}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-sm min-h-12 px-4 text-muted-foreground hover:text-foreground"
         >
-          Manual Entry
+          {t("manualEntry")}
         </button>
       </div>
     </>
@@ -293,6 +287,8 @@ function SleepModal({ childId, onClose }: { childId: string; onClose: () => void
 }
 
 function BreastModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
+  const tEnums = useTranslations("enums");
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const feedingTimer = useTimer(childId, "feeding");
@@ -334,7 +330,7 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
       utils.timeline.getLastActivities.invalidate({ childId });
       feedingTimer.start({ feedingSide: side });
       feedingTimer.update({ recordId: result.id });
-      toast({ title: "Feeding timer started" });
+      toast({ title: t("breast.timerStarted") });
       // Don't close - stay in modal to show running timer
     },
   });
@@ -344,7 +340,7 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
       utils.feeding.list.invalidate();
       utils.feeding.summary.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Feeding recorded" });
+      toast({ title: t("breast.recorded") });
       onClose();
     },
   });
@@ -354,7 +350,7 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
       utils.feeding.list.invalidate();
       utils.feeding.summary.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Breastfeeding recorded" });
+      toast({ title: t("breast.recorded") });
       onClose();
     },
   });
@@ -432,7 +428,7 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Breastfeeding</DialogTitle>
+          <DialogTitle className="text-center">{tEnums("feedingType.BREAST")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center py-6 gap-6">
@@ -467,7 +463,7 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
             disabled={isLoading}
           >
             <Square className="h-5 w-5 mr-2" />
-            Stop
+            {t("stop")}
           </Button>
         </div>
       </>
@@ -479,20 +475,20 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Log Breastfeeding</DialogTitle>
+          <DialogTitle className="text-center">{t("breast.log")}</DialogTitle>
         </DialogHeader>
 
         <SimpleToggleGroup
           options={[
-            { value: "LEFT", label: "Left" },
-            { value: "RIGHT", label: "Right" },
+            { value: "LEFT", label: tEnums("breastSide.LEFT") },
+            { value: "RIGHT", label: tEnums("breastSide.RIGHT") },
           ]}
           value={side}
           onChange={(val) => setSide(val as "LEFT" | "RIGHT")}
         />
 
-        <TimeRow label="Start Time" value={startTime} onChange={setStartTime} />
-        <TimeRow label="End Time" value={endTime} onChange={setEndTime} placeholder="Set time" />
+        <TimeRow label={t("startTime")} value={startTime} onChange={setStartTime} />
+        <TimeRow label={t("endTime")} value={endTime} onChange={setEndTime} placeholder={t("setTime")} />
 
         <div className="p-6 pt-4 flex flex-col gap-3">
           <Button
@@ -501,13 +497,13 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
             onClick={handleManualSave}
             disabled={isLoading || !startTime || !endTime}
           >
-            Save
+            {t("save")}
           </Button>
           <button
             onClick={() => setShowManualEntry(false)}
-            className="text-sm text-muted-foreground hover:text-foreground"
+            className="text-sm min-h-12 px-4 text-muted-foreground hover:text-foreground"
           >
-            Start Timer Instead
+            {t("startTimerInstead")}
           </button>
         </div>
       </>
@@ -518,7 +514,7 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Breastfeeding</DialogTitle>
+        <DialogTitle className="text-center">{t("breast.add")}</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col items-center py-6 gap-6">
@@ -545,36 +541,39 @@ function BreastModal({ childId, onClose }: { childId: string; onClose: () => voi
       <div className="p-6 pt-0 flex justify-center">
         <button
           onClick={() => setShowManualEntry(true)}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-sm min-h-12 px-4 text-muted-foreground hover:text-foreground"
         >
-          Manual Entry
+          {t("manualEntry")}
         </button>
       </div>
     </>
   );
 }
 
+const BOTTLE_MAX_ML = 350;
+
 function BottleModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
+  const tEnums = useTranslations("enums");
+  const f = useFormatters();
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
   const [contentType, setContentType] = useState<"FORMULA" | "BREAST_MILK">("FORMULA");
   const [startTime, setStartTime] = useState<Date | null>(new Date());
-  const [unit, setUnit] = useState<"oz" | "ml">("oz");
-  const [amountOz, setAmountOz] = useState(3);
+  const [amountMl, setAmountMl] = useState(90);
 
   const logBottle = trpc.feeding.logBottle.useMutation({
     onSuccess: () => {
       utils.feeding.list.invalidate();
       utils.feeding.summary.invalidate({ childId });
-      toast({ title: "Bottle feeding logged" });
+      toast({ title: t("bottle.logged") });
       onClose();
     },
   });
 
   const handleSave = () => {
     if (!startTime) return;
-    const amountMl = unit === "oz" ? ozToMl(amountOz) : Math.round(amountOz);
     logBottle.mutate({
       childId,
       startTime,
@@ -583,57 +582,38 @@ function BottleModal({ childId, onClose }: { childId: string; onClose: () => voi
     });
   };
 
-  const displayAmount = unit === "oz" ? amountOz.toFixed(1) : Math.round(ozToMl(amountOz));
-  const maxAmount = unit === "oz" ? 12 : 350;
-
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Bottle</DialogTitle>
+        <DialogTitle className="text-center">{t("bottle.add")}</DialogTitle>
       </DialogHeader>
 
       <SimpleToggleGroup
         options={[
-          { value: "FORMULA", label: "Formula" },
-          { value: "BREAST_MILK", label: "Breast Milk" },
+          { value: "FORMULA", label: tEnums("bottleContent.FORMULA") },
+          { value: "BREAST_MILK", label: tEnums("bottleContent.BREAST_MILK") },
         ]}
         value={contentType}
         onChange={setContentType}
       />
 
-      <TimeRow label="Start Time" value={startTime} onChange={setStartTime} />
+      <TimeRow label={t("startTime")} value={startTime} onChange={setStartTime} />
 
       <div className="py-4 px-6 border-b border-border">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-muted-foreground">Amount</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-semibold">{displayAmount} {unit}</span>
-            <div className="flex rounded overflow-hidden border border-border ml-2">
-              <button
-                onClick={() => setUnit("oz")}
-                className={`px-3 py-1 text-sm ${unit === "oz" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-              >
-                oz
-              </button>
-              <button
-                onClick={() => setUnit("ml")}
-                className={`px-3 py-1 text-sm ${unit === "ml" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-              >
-                mL
-              </button>
-            </div>
-          </div>
+          <span className="text-muted-foreground">{t("amount")}</span>
+          <span className="text-xl font-semibold">{f.ml(amountMl)}</span>
         </div>
         <Slider
-          value={[unit === "oz" ? amountOz : ozToMl(amountOz)]}
-          onValueChange={([val]) => setAmountOz(unit === "oz" ? val : mlToOz(val))}
-          max={maxAmount}
-          step={unit === "oz" ? 0.5 : 10}
+          value={[amountMl]}
+          onValueChange={([val]) => setAmountMl(val)}
+          max={BOTTLE_MAX_ML}
+          step={10}
           className="w-full"
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-1">
           <span>0</span>
-          <span>{maxAmount}</span>
+          <span>{BOTTLE_MAX_ML}</span>
         </div>
       </div>
 
@@ -644,7 +624,7 @@ function BottleModal({ childId, onClose }: { childId: string; onClose: () => voi
           onClick={handleSave}
           disabled={logBottle.isPending || !startTime}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
     </>
@@ -654,21 +634,19 @@ function BottleModal({ childId, onClose }: { childId: string; onClose: () => voi
 type DiaperAmount = "SMALL" | "MEDIUM" | "LARGE";
 type DiaperColor = "YELLOW" | "GREEN" | "BROWN" | "BLACK" | "OTHER";
 
-const amountOptions: { value: DiaperAmount; label: string }[] = [
-  { value: "SMALL", label: "S" },
-  { value: "MEDIUM", label: "M" },
-  { value: "LARGE", label: "L" },
-];
+const amountOptions: DiaperAmount[] = ["SMALL", "MEDIUM", "LARGE"];
 
-const colorOptions: { value: DiaperColor; label: string; color: string }[] = [
-  { value: "YELLOW", label: "Yellow", color: "bg-yellow-400" },
-  { value: "GREEN", label: "Green", color: "bg-green-500" },
-  { value: "BROWN", label: "Brown", color: "bg-amber-700" },
-  { value: "BLACK", label: "Black", color: "bg-gray-900" },
-  { value: "OTHER", label: "Other", color: "bg-gray-400" },
+const colorOptions: { value: DiaperColor; color: string }[] = [
+  { value: "YELLOW", color: "bg-yellow-400" },
+  { value: "GREEN", color: "bg-green-500" },
+  { value: "BROWN", color: "bg-amber-700" },
+  { value: "BLACK", color: "bg-gray-900" },
+  { value: "OTHER", color: "bg-gray-400" },
 ];
 
 function DiaperModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
+  const tEnums = useTranslations("enums");
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -681,7 +659,7 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
     onSuccess: () => {
       utils.diaper.list.invalidate();
       utils.diaper.summary.invalidate({ childId });
-      toast({ title: "Diaper change logged" });
+      toast({ title: t("diaper.logged") });
       onClose();
     },
   });
@@ -697,9 +675,9 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
   };
 
   const typeOptions = [
-    { value: "WET" as const, label: "Wet", icon: Droplets },
-    { value: "DIRTY" as const, label: "Dirty", icon: Cloud },
-    { value: "BOTH" as const, label: "Mixed", icon: CloudRain },
+    { value: "WET" as const, label: tEnums("diaperType.WET"), icon: Droplets },
+    { value: "DIRTY" as const, label: tEnums("diaperType.DIRTY"), icon: Cloud },
+    { value: "BOTH" as const, label: tEnums("diaperType.BOTH"), icon: CloudRain },
   ];
 
   const showColorPicker = diaperType === "DIRTY" || diaperType === "BOTH";
@@ -707,10 +685,10 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Diaper</DialogTitle>
+        <DialogTitle className="text-center">{t("diaper.add")}</DialogTitle>
       </DialogHeader>
 
-      <TimeRow label="Time" value={time} onChange={setTime} />
+      <TimeRow label={t("time")} value={time} onChange={setTime} />
 
       <div className="px-6 py-4">
         <div className="flex justify-center gap-4">
@@ -718,14 +696,14 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
             <button
               key={option.value}
               onClick={() => setDiaperType(option.value)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-full w-20 h-20 transition-colors ${
+              className={`flex flex-col items-center justify-center gap-1 p-2 rounded-full w-24 h-24 transition-colors ${
                 diaperType === option.value
                   ? "bg-primary/20 border-2 border-primary"
                   : "bg-muted border-2 border-transparent hover:bg-muted/80"
               }`}
             >
               <option.icon className={`h-6 w-6 ${diaperType === option.value ? "text-primary" : "text-muted-foreground"}`} />
-              <span className={`text-xs ${diaperType === option.value ? "text-primary" : "text-muted-foreground"}`}>
+              <span className={`text-xs text-center leading-tight ${diaperType === option.value ? "text-primary" : "text-muted-foreground"}`}>
                 {option.label}
               </span>
             </button>
@@ -735,18 +713,20 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
 
       {showColorPicker && (
         <div className="px-6 py-3 border-t border-border">
-          <p className="text-sm text-muted-foreground mb-2">Color</p>
+          <p className="text-sm text-muted-foreground mb-2">{t("diaper.color")}</p>
           <div className="flex gap-2 justify-center">
             {colorOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => setColor(color === option.value ? null : option.value)}
-                className={`w-10 h-10 rounded-full ${option.color} transition-all ${
+                className={`w-12 h-12 rounded-full ${option.color} transition-all ${
                   color === option.value
                     ? "ring-2 ring-primary ring-offset-2"
                     : "opacity-60 hover:opacity-100"
                 }`}
-                title={option.label}
+                title={tEnums(`diaperColor.${option.value}`)}
+                aria-label={tEnums(`diaperColor.${option.value}`)}
+                aria-pressed={color === option.value}
               />
             ))}
           </div>
@@ -754,19 +734,19 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
       )}
 
       <div className="px-6 py-3 border-t border-border">
-        <p className="text-sm text-muted-foreground mb-2">Amount</p>
+        <p className="text-sm text-muted-foreground mb-2">{t("amount")}</p>
         <div className="flex gap-3 justify-center">
           {amountOptions.map((option) => (
             <button
-              key={option.value}
-              onClick={() => setAmount(amount === option.value ? null : option.value)}
-              className={`w-12 h-12 rounded-full text-sm font-medium transition-colors ${
-                amount === option.value
+              key={option}
+              onClick={() => setAmount(amount === option ? null : option)}
+              className={`min-w-12 h-12 px-4 rounded-full text-sm font-medium transition-colors ${
+                amount === option
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              {option.label}
+              {tEnums(`diaperAmount.${option}`)}
             </button>
           ))}
         </div>
@@ -779,7 +759,7 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
           onClick={handleSave}
           disabled={logDiaper.isPending}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
     </>
@@ -788,13 +768,14 @@ function DiaperModal({ childId, onClose }: { childId: string; onClose: () => voi
 
 // Popular foods list for solids modal
 const POPULAR_FOODS = [
-  "avocado", "banana", "apple", "rice cereal",
-  "sweet potato", "oatmeal", "spinach", "chicken",
+  "avocado", "banana", "apple", "riceCereal",
+  "sweetPotato", "oatmeal", "spinach", "chicken",
   "peas", "pear", "yogurt", "carrot",
-  "broccoli", "prune", "green bean", "mango",
-];
+  "broccoli", "prune", "greenBean", "mango",
+] as const;
 
 function SolidsModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -808,7 +789,7 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
       utils.feeding.list.invalidate();
       utils.feeding.summary.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Solids logged" });
+      toast({ title: t("solids.logged") });
       onClose();
     },
   });
@@ -842,16 +823,16 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Solids</DialogTitle>
+        <DialogTitle className="text-center">{t("solids.add")}</DialogTitle>
       </DialogHeader>
 
-      <TimeRow label="Start Time" value={startTime} onChange={setStartTime} />
+      <TimeRow label={t("startTime")} value={startTime} onChange={setStartTime} />
 
       <div className="px-6 py-4 border-b border-border">
-        <p className="text-sm text-muted-foreground mb-3">Add food <span className="text-xs">(optional custom)</span></p>
+        <p className="text-sm text-muted-foreground mb-3">{t("solids.addFood")} <span className="text-xs">{t("solids.optionalCustom")}</span></p>
         <div className="flex gap-2">
           <Input
-            placeholder="Enter foods or add from below"
+            placeholder={t("solids.foodPlaceholder")}
             value={customFood}
             onChange={(e) => setCustomFood(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddCustomFood()}
@@ -862,6 +843,7 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
             size="icon"
             onClick={handleAddCustomFood}
             disabled={!customFood.trim()}
+            aria-label={t("solids.addFoodAria")}
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -871,13 +853,13 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
       {/* Selected foods */}
       {selectedFoods.length > 0 && (
         <div className="px-6 py-3 border-b border-border">
-          <p className="text-sm text-muted-foreground mb-2">Selected foods</p>
+          <p className="text-sm text-muted-foreground mb-2">{t("solids.selectedFoods")}</p>
           <div className="flex flex-wrap gap-2">
             {selectedFoods.map((food) => (
               <button
                 key={food}
                 onClick={() => handleFoodToggle(food)}
-                className="flex items-center gap-1 px-3 py-1 bg-primary/20 text-primary rounded-full text-sm"
+                className="flex items-center gap-1 px-4 min-h-12 bg-primary/20 text-primary rounded-full text-sm"
               >
                 {food}
                 <X className="h-3 w-3" />
@@ -889,9 +871,10 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
 
       {/* Popular foods grid */}
       <div className="px-6 py-4 max-h-64 overflow-y-auto">
-        <p className="text-sm text-muted-foreground mb-3">Most popular foods</p>
+        <p className="text-sm text-muted-foreground mb-3">{t("solids.popular")}</p>
         <div className="grid grid-cols-4 gap-3">
-          {POPULAR_FOODS.map((food) => {
+          {POPULAR_FOODS.map((key) => {
+            const food = t(`solids.foods.${key}`);
             const isSelected = selectedFoods.includes(food);
             return (
               <button
@@ -918,7 +901,7 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
       {/* Notes */}
       <div className="px-6 py-3 border-t border-border">
         <Textarea
-          placeholder="Add notes (optional)"
+          placeholder={t("notesPlaceholder")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="min-h-[60px]"
@@ -927,7 +910,7 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
 
       <div className="p-6 pt-0 flex items-center gap-4">
         <span className="text-sm text-muted-foreground">
-          Selected <span className="text-primary font-medium">{selectedFoods.length}</span>
+          {t("solids.selectedCount")} <span className="text-primary font-medium">{selectedFoods.length}</span>
         </span>
         <Button
           size="lg"
@@ -935,7 +918,7 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
           onClick={handleSave}
           disabled={logSolids.isPending || selectedFoods.length === 0}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
     </>
@@ -943,6 +926,7 @@ function SolidsModal({ childId, onClose }: { childId: string; onClose: () => voi
 }
 
 function PumpingModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const pumpingTimer = useTimer(childId, "pumping");
@@ -953,9 +937,8 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
   const [startTime, setStartTime] = useState<Date | null>(new Date());
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [amountMode, setAmountMode] = useState<"total" | "left/right">("total");
-  const [unit, setUnit] = useState<"oz" | "ml">("oz");
-  const [leftAmountOz, setLeftAmountOz] = useState(0.25);
-  const [rightAmountOz, setRightAmountOz] = useState(0.25);
+  const [leftAmountMl, setLeftAmountMl] = useState(10);
+  const [rightAmountMl, setRightAmountMl] = useState(10);
   const [notes, setNotes] = useState("");
 
   // Query for active pumping in database (started via MCP/chat)
@@ -980,7 +963,7 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
       utils.timeline.getLastActivities.invalidate({ childId });
       pumpingTimer.start({});
       pumpingTimer.update({ recordId: result.id });
-      toast({ title: "Pumping timer started" });
+      toast({ title: t("pumping.timerStarted") });
     },
   });
 
@@ -989,7 +972,7 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
       utils.pumping.list.invalidate();
       utils.pumping.summary.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Pumping recorded" });
+      toast({ title: t("pumping.recorded") });
       onClose();
     },
   });
@@ -999,7 +982,7 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
       utils.pumping.list.invalidate();
       utils.pumping.summary.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Pumping recorded" });
+      toast({ title: t("pumping.recorded") });
       onClose();
     },
   });
@@ -1010,14 +993,10 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
 
   const handleStop = async () => {
     if (pumpingTimer.timer?.recordId) {
-      const totalMl = amountMode === "total"
-        ? ozToMl(leftAmountOz + rightAmountOz)
-        : ozToMl(leftAmountOz) + ozToMl(rightAmountOz);
-
       stopTimer(pumpingTimer.timer.id);
       await endPumping.mutateAsync({
         id: pumpingTimer.timer.recordId,
-        amountMl: Math.round(totalMl),
+        amountMl: Math.round(leftAmountMl + rightAmountMl),
         notes: notes || undefined,
       });
     }
@@ -1025,14 +1004,10 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
 
   const handleManualSave = () => {
     if (!startTime) return;
-    const totalMl = amountMode === "total"
-      ? ozToMl(leftAmountOz + rightAmountOz)
-      : ozToMl(leftAmountOz) + ozToMl(rightAmountOz);
-
     logPumping.mutate({
       childId,
       startTime,
-      amountMl: Math.round(totalMl),
+      amountMl: Math.round(leftAmountMl + rightAmountMl),
       notes: notes || undefined,
     });
   };
@@ -1044,7 +1019,7 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Pumping in Progress</DialogTitle>
+          <DialogTitle className="text-center">{t("pumping.running")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center py-6">
@@ -1054,17 +1029,15 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
         <PumpingAmountEntry
           amountMode={amountMode}
           setAmountMode={setAmountMode}
-          unit={unit}
-          setUnit={setUnit}
-          leftAmountOz={leftAmountOz}
-          setLeftAmountOz={setLeftAmountOz}
-          rightAmountOz={rightAmountOz}
-          setRightAmountOz={setRightAmountOz}
+          leftAmountMl={leftAmountMl}
+          setLeftAmountMl={setLeftAmountMl}
+          rightAmountMl={rightAmountMl}
+          setRightAmountMl={setRightAmountMl}
         />
 
         <div className="px-6 py-3 border-t border-border">
           <Textarea
-            placeholder="Add note (optional)"
+            placeholder={t("notesPlaceholder")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[60px]"
@@ -1080,7 +1053,7 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
             disabled={isLoading}
           >
             <Square className="h-5 w-5 mr-2" />
-            Stop
+            {t("stop")}
           </Button>
         </div>
       </>
@@ -1092,25 +1065,23 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Add Pumping</DialogTitle>
+          <DialogTitle className="text-center">{t("pumping.add")}</DialogTitle>
         </DialogHeader>
 
-        <TimeRow label="Start Time" value={startTime} onChange={setStartTime} />
+        <TimeRow label={t("startTime")} value={startTime} onChange={setStartTime} />
 
         <PumpingAmountEntry
           amountMode={amountMode}
           setAmountMode={setAmountMode}
-          unit={unit}
-          setUnit={setUnit}
-          leftAmountOz={leftAmountOz}
-          setLeftAmountOz={setLeftAmountOz}
-          rightAmountOz={rightAmountOz}
-          setRightAmountOz={setRightAmountOz}
+          leftAmountMl={leftAmountMl}
+          setLeftAmountMl={setLeftAmountMl}
+          rightAmountMl={rightAmountMl}
+          setRightAmountMl={setRightAmountMl}
         />
 
         <div className="px-6 py-3 border-t border-border">
           <Textarea
-            placeholder="Add note (optional)"
+            placeholder={t("notesPlaceholder")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[60px]"
@@ -1124,13 +1095,13 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
             onClick={handleManualSave}
             disabled={isLoading || !startTime}
           >
-            Save
+            {t("save")}
           </Button>
           <button
             onClick={() => setShowManualEntry(false)}
-            className="text-sm text-primary hover:underline"
+            className="text-sm min-h-12 px-4 text-primary hover:underline"
           >
-            Switch to timer
+            {t("startTimerInstead")}
           </button>
         </div>
       </>
@@ -1141,7 +1112,7 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Pumping</DialogTitle>
+        <DialogTitle className="text-center">{t("pumping.add")}</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col items-center py-8 gap-6">
@@ -1153,16 +1124,16 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
           className="w-32 h-32 rounded-full bg-primary/20 border-2 border-dashed border-primary flex flex-col items-center justify-center gap-2 hover:bg-primary/30 transition-colors disabled:opacity-50"
         >
           <Play className="h-8 w-8 text-primary" />
-          <span className="text-primary font-semibold">START</span>
+          <span className="text-primary font-semibold">{t("start")}</span>
         </button>
       </div>
 
       <div className="p-6 pt-0 flex justify-center">
         <button
           onClick={() => setShowManualEntry(true)}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-sm min-h-12 px-4 text-muted-foreground hover:text-foreground"
         >
-          Manual Entry
+          {t("manualEntry")}
         </button>
       </div>
     </>
@@ -1173,58 +1144,38 @@ function PumpingModal({ childId, onClose }: { childId: string; onClose: () => vo
 function PumpingAmountEntry({
   amountMode,
   setAmountMode,
-  unit,
-  setUnit,
-  leftAmountOz,
-  setLeftAmountOz,
-  rightAmountOz,
-  setRightAmountOz,
+  leftAmountMl,
+  setLeftAmountMl,
+  rightAmountMl,
+  setRightAmountMl,
 }: {
   amountMode: "total" | "left/right";
   setAmountMode: (mode: "total" | "left/right") => void;
-  unit: "oz" | "ml";
-  setUnit: (unit: "oz" | "ml") => void;
-  leftAmountOz: number;
-  setLeftAmountOz: (val: number) => void;
-  rightAmountOz: number;
-  setRightAmountOz: (val: number) => void;
+  leftAmountMl: number;
+  setLeftAmountMl: (val: number) => void;
+  rightAmountMl: number;
+  setRightAmountMl: (val: number) => void;
 }) {
-  const totalOz = leftAmountOz + rightAmountOz;
-  const maxSlider = unit === "oz" ? 8 : Math.round(ozToMl(8));
-
-  const displayValue = (oz: number) =>
-    unit === "oz" ? oz.toFixed(2) : Math.round(ozToMl(oz));
+  const t = useTranslations("logModal");
+  const f = useFormatters();
+  const totalMl = leftAmountMl + rightAmountMl;
+  const maxSlider = 240;
 
   return (
     <div className="px-6 py-4 border-t border-border space-y-4">
-      {/* Mode and unit toggles */}
       <div className="flex items-center justify-between">
         <div className="flex rounded overflow-hidden border border-border">
           <button
             onClick={() => setAmountMode("total")}
-            className={`px-3 py-1.5 text-sm ${amountMode === "total" ? "bg-muted" : ""}`}
+            className={`px-4 min-h-12 text-sm sm:min-h-10 ${amountMode === "total" ? "bg-primary text-primary-foreground" : ""}`}
           >
-            total
+            {t("pumping.modeTotal")}
           </button>
           <button
             onClick={() => setAmountMode("left/right")}
-            className={`px-3 py-1.5 text-sm ${amountMode === "left/right" ? "bg-primary text-primary-foreground" : ""}`}
+            className={`px-4 min-h-12 text-sm sm:min-h-10 ${amountMode === "left/right" ? "bg-primary text-primary-foreground" : ""}`}
           >
-            left/right
-          </button>
-        </div>
-        <div className="flex rounded overflow-hidden border border-border">
-          <button
-            onClick={() => setUnit("oz")}
-            className={`px-3 py-1.5 text-sm ${unit === "oz" ? "bg-primary text-primary-foreground" : ""}`}
-          >
-            oz
-          </button>
-          <button
-            onClick={() => setUnit("ml")}
-            className={`px-3 py-1.5 text-sm ${unit === "ml" ? "bg-primary text-primary-foreground" : ""}`}
-          >
-            ml
+            {t("pumping.modeLeftRight")}
           </button>
         </div>
       </div>
@@ -1232,18 +1183,17 @@ function PumpingAmountEntry({
       {amountMode === "total" ? (
         <div>
           <div className="flex justify-between mb-2">
-            <span className="text-muted-foreground">Total</span>
-            <span className="font-semibold">{displayValue(totalOz)} {unit}</span>
+            <span className="text-muted-foreground">{t("pumping.total")}</span>
+            <span className="font-semibold">{f.ml(totalMl)}</span>
           </div>
           <Slider
-            value={[unit === "oz" ? totalOz : ozToMl(totalOz)]}
+            value={[totalMl]}
             onValueChange={([val]) => {
-              const oz = unit === "oz" ? val : mlToOz(val);
-              setLeftAmountOz(oz / 2);
-              setRightAmountOz(oz / 2);
+              setLeftAmountMl(val / 2);
+              setRightAmountMl(val / 2);
             }}
             max={maxSlider}
-            step={unit === "oz" ? 0.25 : 5}
+            step={5}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -1255,14 +1205,14 @@ function PumpingAmountEntry({
         <>
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-muted-foreground">Left</span>
-              <span className="font-semibold">{displayValue(leftAmountOz)} {unit}</span>
+              <span className="text-muted-foreground">{t("pumping.left")}</span>
+              <span className="font-semibold">{f.ml(leftAmountMl)}</span>
             </div>
             <Slider
-              value={[unit === "oz" ? leftAmountOz : ozToMl(leftAmountOz)]}
-              onValueChange={([val]) => setLeftAmountOz(unit === "oz" ? val : mlToOz(val))}
+              value={[leftAmountMl]}
+              onValueChange={([val]) => setLeftAmountMl(val)}
               max={maxSlider}
-              step={unit === "oz" ? 0.25 : 5}
+              step={5}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -1272,14 +1222,14 @@ function PumpingAmountEntry({
           </div>
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-muted-foreground">Right</span>
-              <span className="font-semibold">{displayValue(rightAmountOz)} {unit}</span>
+              <span className="text-muted-foreground">{t("pumping.right")}</span>
+              <span className="font-semibold">{f.ml(rightAmountMl)}</span>
             </div>
             <Slider
-              value={[unit === "oz" ? rightAmountOz : ozToMl(rightAmountOz)]}
-              onValueChange={([val]) => setRightAmountOz(unit === "oz" ? val : mlToOz(val))}
+              value={[rightAmountMl]}
+              onValueChange={([val]) => setRightAmountMl(val)}
               max={maxSlider}
-              step={unit === "oz" ? 0.25 : 5}
+              step={5}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -1293,9 +1243,11 @@ function PumpingAmountEntry({
   );
 }
 
-type MedicineUnit = "oz" | "ml" | "drops" | "tsp";
+type MedicineUnit = "ml" | "drops" | "tsp";
+const MEDICINE_UNITS: MedicineUnit[] = ["ml", "drops", "tsp"];
 
 function MedicineModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -1319,7 +1271,7 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
       utils.medicine.list.invalidate({ childId });
       setSelectedMedicineId(result.id);
       setShowCreateNew(false);
-      toast({ title: "Medicine created" });
+      toast({ title: t("medicine.created") });
     },
   });
 
@@ -1327,7 +1279,7 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
     onSuccess: () => {
       utils.medicine.list.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Medicine logged" });
+      toast({ title: t("medicine.logged") });
       onClose();
     },
   });
@@ -1344,7 +1296,7 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
   const handleSave = () => {
     if (!selectedMedicineId || !startTime) return;
 
-    const dosageGiven = amount ? `${amount} ${unit}` : undefined;
+    const dosageGiven = amount ? `${amount} ${t(`medicine.units.${unit}`)}` : undefined;
 
     logMedicineRecord.mutate({
       medicineId: selectedMedicineId,
@@ -1360,28 +1312,28 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Medicine</DialogTitle>
+        <DialogTitle className="text-center">{t("medicine.title")}</DialogTitle>
       </DialogHeader>
 
-      <TimeRow label="Start time" value={startTime} onChange={setStartTime} />
+      <TimeRow label={t("startTime")} value={startTime} onChange={setStartTime} />
 
       {/* Medicine type selection */}
       <div className="px-6 py-4 border-b border-border">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-muted-foreground">Type:</span>
+          <span className="text-muted-foreground">{t("medicine.type")}</span>
           {showCreateNew ? (
             <button
               onClick={() => setShowCreateNew(false)}
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:underline min-h-12 px-2"
             >
-              Select existing
+              {t("medicine.selectExisting")}
             </button>
           ) : (
             <button
               onClick={() => setShowCreateNew(true)}
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:underline min-h-12 px-2"
             >
-              + Add new
+              {t("medicine.addNew")}
             </button>
           )}
         </div>
@@ -1389,33 +1341,33 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
         {showCreateNew ? (
           <div className="space-y-3">
             <Input
-              placeholder="Medicine name"
+              placeholder={t("medicine.namePlaceholder")}
               value={newMedicineName}
               onChange={(e) => setNewMedicineName(e.target.value)}
             />
             <Input
-              placeholder="Default dosage (e.g., 5ml)"
+              placeholder={t("medicine.dosagePlaceholder")}
               value={newMedicineDosage}
               onChange={(e) => setNewMedicineDosage(e.target.value)}
             />
             <Button
               onClick={handleCreateMedicine}
               disabled={!newMedicineName.trim() || !newMedicineDosage.trim() || createMedicine.isPending}
-              className="w-full"
+              className="w-full min-h-12"
             >
-              Create Medicine
+              {t("medicine.create")}
             </Button>
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
             {medicines?.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No medicines. Add one first.</p>
+              <p className="text-sm text-muted-foreground">{t("medicine.none")}</p>
             ) : (
               medicines?.map((medicine: { id: string; name: string }) => (
                 <button
                   key={medicine.id}
                   onClick={() => setSelectedMedicineId(medicine.id)}
-                  className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                  className={`px-4 min-h-12 rounded-lg text-sm transition-colors ${
                     selectedMedicineId === medicine.id
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted hover:bg-muted/80"
@@ -1430,7 +1382,7 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
 
         {selectedMedicine && (
           <p className="text-xs text-muted-foreground mt-2">
-            Default dosage: {selectedMedicine.dosage}
+            {t("medicine.defaultDosage", { dosage: selectedMedicine.dosage })}
           </p>
         )}
       </div>
@@ -1438,21 +1390,21 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
       {/* Amount with unit selection */}
       <div className="px-6 py-4 border-b border-border">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-muted-foreground">Amount</span>
+          <span className="text-muted-foreground">{t("amount")}</span>
           <div className="flex rounded overflow-hidden border border-border">
-            {(["oz", "ml", "drops", "tsp"] as MedicineUnit[]).map((u) => (
+            {MEDICINE_UNITS.map((u) => (
               <button
                 key={u}
                 onClick={() => setUnit(u)}
-                className={`px-2 py-1 text-xs ${unit === u ? "bg-muted" : ""}`}
+                className={`px-3 min-h-12 min-w-12 text-sm sm:min-h-10 ${unit === u ? "bg-primary text-primary-foreground" : ""}`}
               >
-                {u}
+                {t(`medicine.units.${u}`)}
               </button>
             ))}
           </div>
         </div>
         <Input
-          placeholder="Add amount (optional)"
+          placeholder={t("medicine.amountPlaceholder")}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           type="number"
@@ -1464,7 +1416,7 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
       {/* Notes */}
       <div className="px-6 py-3">
         <Textarea
-          placeholder="Add notes (optional)"
+          placeholder={t("notesPlaceholder")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="min-h-[60px]"
@@ -1478,7 +1430,7 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
           onClick={handleSave}
           disabled={isLoading || !selectedMedicineId}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
     </>
@@ -1486,21 +1438,15 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
 }
 
 function GrowthModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
   const [date, setDate] = useState<Date | null>(new Date());
-  const [unit, setUnit] = useState<"metric" | "imperial">("imperial");
   const [weightKg, setWeightKg] = useState<number | null>(null);
   const [heightCm, setHeightCm] = useState<number | null>(null);
   const [headCm, setHeadCm] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
-
-  // Imperial input state
-  const [weightLbs, setWeightLbs] = useState<number>(0);
-  const [weightOz, setWeightOz] = useState<number>(0);
-  const [heightFt, setHeightFt] = useState<number>(0);
-  const [heightIn, setHeightIn] = useState<number>(0);
 
   // Fetch latest growth record to pre-fill
   const { data: latestGrowth } = trpc.growth.getLatest.useQuery({ childId });
@@ -1510,15 +1456,9 @@ function GrowthModal({ childId, onClose }: { childId: string; onClose: () => voi
     if (latestGrowth) {
       if (latestGrowth.weightKg) {
         setWeightKg(latestGrowth.weightKg);
-        const { lbs, oz } = kgToLbsOz(latestGrowth.weightKg);
-        setWeightLbs(lbs);
-        setWeightOz(oz);
       }
       if (latestGrowth.heightCm) {
         setHeightCm(latestGrowth.heightCm);
-        const { ft, inches } = cmToFtIn(latestGrowth.heightCm);
-        setHeightFt(ft);
-        setHeightIn(inches);
       }
       if (latestGrowth.headCircumferenceCm) {
         setHeadCm(latestGrowth.headCircumferenceCm);
@@ -1531,7 +1471,7 @@ function GrowthModal({ childId, onClose }: { childId: string; onClose: () => voi
       utils.growth.list.invalidate();
       utils.growth.getLatest.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Growth recorded" });
+      toast({ title: t("growth.recorded") });
       onClose();
     },
   });
@@ -1539,23 +1479,11 @@ function GrowthModal({ childId, onClose }: { childId: string; onClose: () => voi
   const handleSave = () => {
     if (!date) return;
 
-    let finalWeightKg = weightKg;
-    let finalHeightCm = heightCm;
-
-    if (unit === "imperial") {
-      if (weightLbs > 0 || weightOz > 0) {
-        finalWeightKg = lbsOzToKg(weightLbs, weightOz);
-      }
-      if (heightFt > 0 || heightIn > 0) {
-        finalHeightCm = ftInToCm(heightFt, heightIn);
-      }
-    }
-
     logGrowth.mutate({
       childId,
       date,
-      weightKg: finalWeightKg ?? undefined,
-      heightCm: finalHeightCm ?? undefined,
+      weightKg: weightKg ?? undefined,
+      heightCm: heightCm ?? undefined,
       headCircumferenceCm: headCm ?? undefined,
       notes: notes || undefined,
     });
@@ -1566,130 +1494,47 @@ function GrowthModal({ childId, onClose }: { childId: string; onClose: () => voi
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Growth</DialogTitle>
+        <DialogTitle className="text-center">{t("growth.add")}</DialogTitle>
       </DialogHeader>
 
-      <TimeRow label="Date" value={date} onChange={setDate} />
+      <TimeRow label={t("date")} value={date} onChange={setDate} />
 
-      {/* Unit toggle */}
-      <div className="px-6 py-3 border-b border-border">
-        <div className="flex justify-end">
-          <div className="flex rounded overflow-hidden border border-border">
-            <button
-              onClick={() => setUnit("imperial")}
-              className={`px-3 py-1.5 text-sm ${unit === "imperial" ? "bg-primary text-primary-foreground" : ""}`}
-            >
-              lb/ft
-            </button>
-            <button
-              onClick={() => setUnit("metric")}
-              className={`px-3 py-1.5 text-sm ${unit === "metric" ? "bg-primary text-primary-foreground" : ""}`}
-            >
-              kg/cm
-            </button>
-          </div>
+      <div className="px-6 py-4 border-b border-border">
+        <p className="text-sm text-muted-foreground mb-2">{t("growth.weight")}</p>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            inputMode="decimal"
+            placeholder="0.00"
+            value={weightKg ?? ""}
+            onChange={(e) => setWeightKg(e.target.value ? Number(e.target.value) : null)}
+            step="0.01"
+            min="0"
+            max="50"
+          />
+          <span className="text-muted-foreground">kg</span>
         </div>
       </div>
 
-      {/* Weight */}
       <div className="px-6 py-4 border-b border-border">
-        <p className="text-sm text-muted-foreground mb-2">Weight</p>
-        {unit === "imperial" ? (
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={weightLbs || ""}
-                  onChange={(e) => setWeightLbs(Number(e.target.value))}
-                  min="0"
-                  max="50"
-                />
-                <span className="text-muted-foreground">lb</span>
-              </div>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={weightOz || ""}
-                  onChange={(e) => setWeightOz(Number(e.target.value))}
-                  min="0"
-                  max="15"
-                />
-                <span className="text-muted-foreground">oz</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              placeholder="0.00"
-              value={weightKg ?? ""}
-              onChange={(e) => setWeightKg(e.target.value ? Number(e.target.value) : null)}
-              step="0.01"
-              min="0"
-              max="50"
-            />
-            <span className="text-muted-foreground">kg</span>
-          </div>
-        )}
+        <p className="text-sm text-muted-foreground mb-2">{t("growth.height")}</p>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            inputMode="decimal"
+            placeholder="0.0"
+            value={heightCm ?? ""}
+            onChange={(e) => setHeightCm(e.target.value ? Number(e.target.value) : null)}
+            step="0.1"
+            min="0"
+            max="200"
+          />
+          <span className="text-muted-foreground">cm</span>
+        </div>
       </div>
 
-      {/* Height */}
       <div className="px-6 py-4 border-b border-border">
-        <p className="text-sm text-muted-foreground mb-2">Height</p>
-        {unit === "imperial" ? (
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={heightFt || ""}
-                  onChange={(e) => setHeightFt(Number(e.target.value))}
-                  min="0"
-                  max="6"
-                />
-                <span className="text-muted-foreground">ft</span>
-              </div>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={heightIn || ""}
-                  onChange={(e) => setHeightIn(Number(e.target.value))}
-                  min="0"
-                  max="11"
-                />
-                <span className="text-muted-foreground">in</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              placeholder="0.0"
-              value={heightCm ?? ""}
-              onChange={(e) => setHeightCm(e.target.value ? Number(e.target.value) : null)}
-              step="0.1"
-              min="0"
-              max="200"
-            />
-            <span className="text-muted-foreground">cm</span>
-          </div>
-        )}
-      </div>
-
-      {/* Head circumference */}
-      <div className="px-6 py-4 border-b border-border">
-        <p className="text-sm text-muted-foreground mb-2">Head Circumference</p>
+        <p className="text-sm text-muted-foreground mb-2">{t("growth.headCircumference")}</p>
         <div className="flex items-center gap-2">
           <Input
             type="number"
@@ -1707,7 +1552,7 @@ function GrowthModal({ childId, onClose }: { childId: string; onClose: () => voi
       {/* Notes */}
       <div className="px-6 py-3">
         <Textarea
-          placeholder="Add notes (optional)"
+          placeholder={t("notesPlaceholder")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="min-h-[60px]"
@@ -1721,19 +1566,23 @@ function GrowthModal({ childId, onClose }: { childId: string; onClose: () => voi
           onClick={handleSave}
           disabled={isLoading}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
     </>
   );
 }
 
+const MIN_TEMP = 30;
+const MAX_TEMP = 45;
+
 function TemperatureModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
+  const f = useFormatters();
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
   const [time, setTime] = useState<Date | null>(new Date());
-  const [unit, setUnit] = useState<"F" | "C">("F");
   const [temperatureCelsius, setTemperatureCelsius] = useState(37.0); // Normal body temp
   const [notes, setNotes] = useState("");
 
@@ -1742,7 +1591,7 @@ function TemperatureModal({ childId, onClose }: { childId: string; onClose: () =
       utils.temperature.list.invalidate();
       utils.temperature.getLatest.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Temperature recorded" });
+      toast({ title: t("temperature.recorded") });
       onClose();
     },
   });
@@ -1758,28 +1607,13 @@ function TemperatureModal({ childId, onClose }: { childId: string; onClose: () =
     });
   };
 
-  const displayTemp = unit === "F"
-    ? celsiusToFahrenheit(temperatureCelsius)
-    : temperatureCelsius;
-
-  const minTemp = unit === "F" ? 86 : 30;
-  const maxTemp = unit === "F" ? 113 : 45;
-
-  const handleSliderChange = (value: number) => {
-    if (unit === "F") {
-      setTemperatureCelsius(fahrenheitToCelsius(value));
-    } else {
-      setTemperatureCelsius(value);
-    }
-  };
-
   // Temperature status and color
   const getTemperatureStatus = () => {
-    if (temperatureCelsius < 36.1) return { label: "Low", color: "text-blue-500" };
-    if (temperatureCelsius <= 37.2) return { label: "Normal", color: "text-green-500" };
-    if (temperatureCelsius <= 38.0) return { label: "Elevated", color: "text-yellow-500" };
-    if (temperatureCelsius <= 39.0) return { label: "Fever", color: "text-orange-500" };
-    return { label: "High Fever", color: "text-red-500" };
+    if (temperatureCelsius < 36.1) return { label: t("temperature.low"), color: "text-blue-500" };
+    if (temperatureCelsius <= 37.2) return { label: t("temperature.normal"), color: "text-green-500" };
+    if (temperatureCelsius <= 38.0) return { label: t("temperature.elevated"), color: "text-yellow-500" };
+    if (temperatureCelsius <= 39.0) return { label: t("temperature.fever"), color: "text-orange-500" };
+    return { label: t("temperature.highFever"), color: "text-red-500" };
   };
 
   const status = getTemperatureStatus();
@@ -1788,61 +1622,35 @@ function TemperatureModal({ childId, onClose }: { childId: string; onClose: () =
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Temperature</DialogTitle>
+        <DialogTitle className="text-center">{t("temperature.add")}</DialogTitle>
       </DialogHeader>
 
-      <TimeRow label="Time" value={time} onChange={setTime} />
+      <TimeRow label={t("time")} value={time} onChange={setTime} />
 
-      {/* Temperature display */}
       <div className="flex flex-col items-center py-6 gap-2">
-        <div className="flex items-baseline gap-1">
-          <span className="text-5xl font-bold">{displayTemp.toFixed(1)}</span>
-          <span className="text-2xl text-muted-foreground">{unit === "F" ? "°F" : "°C"}</span>
-        </div>
+        <span className="text-5xl font-bold">{f.temperatureC(temperatureCelsius)}</span>
         <span className={`text-sm font-medium ${status.color}`}>{status.label}</span>
       </div>
 
-      {/* Unit toggle */}
-      <div className="px-6 py-3 border-b border-border">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">Unit</span>
-          <div className="flex rounded overflow-hidden border border-border">
-            <button
-              onClick={() => setUnit("F")}
-              className={`px-4 py-1.5 text-sm ${unit === "F" ? "bg-primary text-primary-foreground" : ""}`}
-            >
-              °F
-            </button>
-            <button
-              onClick={() => setUnit("C")}
-              className={`px-4 py-1.5 text-sm ${unit === "C" ? "bg-primary text-primary-foreground" : ""}`}
-            >
-              °C
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Temperature slider */}
       <div className="px-6 py-4 border-b border-border">
         <Slider
-          value={[displayTemp]}
-          onValueChange={([val]) => handleSliderChange(val)}
-          min={minTemp}
-          max={maxTemp}
+          value={[temperatureCelsius]}
+          onValueChange={([val]) => setTemperatureCelsius(val)}
+          min={MIN_TEMP}
+          max={MAX_TEMP}
           step={0.1}
           className="w-full"
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-1">
-          <span>{minTemp}°</span>
-          <span>{maxTemp}°</span>
+          <span>{MIN_TEMP}°</span>
+          <span>{MAX_TEMP}°</span>
         </div>
       </div>
 
       {/* Notes */}
       <div className="px-6 py-3">
         <Textarea
-          placeholder="Add notes (optional)"
+          placeholder={t("notesPlaceholder")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="min-h-[60px]"
@@ -1856,7 +1664,7 @@ function TemperatureModal({ childId, onClose }: { childId: string; onClose: () =
           onClick={handleSave}
           disabled={isLoading}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
     </>
@@ -1874,18 +1682,20 @@ type ActivityType =
   | "TEETH_BRUSHING"
   | "OTHER";
 
-const ACTIVITY_OPTIONS: { type: ActivityType; label: string; icon: typeof Bath }[] = [
-  { type: "TUMMY_TIME", label: "Tummy Time", icon: BabyIcon },
-  { type: "BATH", label: "Bath", icon: Bath },
-  { type: "OUTDOOR_PLAY", label: "Outdoor", icon: Sun },
-  { type: "INDOOR_PLAY", label: "Indoor", icon: Home },
-  { type: "SCREEN_TIME", label: "Screen", icon: Tv },
-  { type: "SKIN_TO_SKIN", label: "Skin to Skin", icon: Heart },
-  { type: "STORYTIME", label: "Story", icon: BookOpen },
-  { type: "TEETH_BRUSHING", label: "Teeth", icon: Smile },
+const ACTIVITY_OPTIONS: { type: ActivityType; icon: typeof Bath }[] = [
+  { type: "TUMMY_TIME", icon: BabyIcon },
+  { type: "BATH", icon: Bath },
+  { type: "OUTDOOR_PLAY", icon: Sun },
+  { type: "INDOOR_PLAY", icon: Home },
+  { type: "SCREEN_TIME", icon: Tv },
+  { type: "SKIN_TO_SKIN", icon: Heart },
+  { type: "STORYTIME", icon: BookOpen },
+  { type: "TEETH_BRUSHING", icon: Smile },
 ];
 
 function ActivityModal({ childId, onClose }: { childId: string; onClose: () => void }) {
+  const t = useTranslations("logModal");
+  const tEnums = useTranslations("enums");
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const activityTimer = useTimer(childId, "activity");
@@ -1903,7 +1713,7 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
       utils.timeline.getLastActivities.invalidate({ childId });
       activityTimer.start({ activityType: selectedType ?? undefined });
       activityTimer.update({ recordId: result.id });
-      toast({ title: "Activity timer started" });
+      toast({ title: t("activity.timerStarted") });
     },
   });
 
@@ -1911,7 +1721,7 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
     onSuccess: () => {
       utils.activity.list.invalidate();
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Activity recorded" });
+      toast({ title: t("activity.recorded") });
       onClose();
     },
   });
@@ -1920,7 +1730,7 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
     onSuccess: () => {
       utils.activity.list.invalidate();
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Activity recorded" });
+      toast({ title: t("activity.recorded") });
       onClose();
     },
   });
@@ -1966,14 +1776,14 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Activity in Progress</DialogTitle>
+          <DialogTitle className="text-center">{t("activity.running")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center py-6 gap-4">
           {runningOption && (
             <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
               <runningOption.icon className="h-5 w-5 text-primary" />
-              <span className="text-primary font-medium">{runningOption.label}</span>
+              <span className="text-primary font-medium">{tEnums(`activityType.${runningOption.type}`)}</span>
             </div>
           )}
           <TimerDisplay elapsedMs={activityTimer.elapsedMs} size="large" />
@@ -1981,7 +1791,7 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
 
         <div className="px-6 py-3 border-t border-border">
           <Textarea
-            placeholder="Add notes (optional)"
+            placeholder={t("notesPlaceholder")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[60px]"
@@ -1997,7 +1807,7 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
             disabled={isLoading}
           >
             <Square className="h-5 w-5 mr-2" />
-            Stop
+            {t("stop")}
           </Button>
         </div>
       </>
@@ -2009,12 +1819,12 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
     return (
       <>
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-center">Log Activity</DialogTitle>
+          <DialogTitle className="text-center">{t("activity.log")}</DialogTitle>
         </DialogHeader>
 
         {/* Activity type grid */}
         <div className="px-6 py-4">
-          <p className="text-sm text-muted-foreground mb-3">Activity Type</p>
+          <p className="text-sm text-muted-foreground mb-3">{t("activity.type")}</p>
           <div className="grid grid-cols-4 gap-3">
             {ACTIVITY_OPTIONS.map((option) => {
               const isSelected = selectedType === option.type;
@@ -2029,19 +1839,19 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
                   }`}
                 >
                   <option.icon className={`h-6 w-6 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="text-xs text-center leading-tight">{option.label}</span>
+                  <span className="text-xs text-center leading-tight">{tEnums(`activityType.${option.type}`)}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        <TimeRow label="Start Time" value={startTime} onChange={setStartTime} />
-        <TimeRow label="End Time" value={endTime} onChange={setEndTime} placeholder="Set time" />
+        <TimeRow label={t("startTime")} value={startTime} onChange={setStartTime} />
+        <TimeRow label={t("endTime")} value={endTime} onChange={setEndTime} placeholder={t("setTime")} />
 
         <div className="px-6 py-3 border-t border-border">
           <Textarea
-            placeholder="Add notes (optional)"
+            placeholder={t("notesPlaceholder")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[60px]"
@@ -2055,13 +1865,13 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
             onClick={handleManualSave}
             disabled={isLoading || !selectedType || !startTime}
           >
-            Save
+            {t("save")}
           </Button>
           <button
             onClick={() => setShowManualEntry(false)}
-            className="text-sm text-muted-foreground hover:text-foreground"
+            className="text-sm min-h-12 px-4 text-muted-foreground hover:text-foreground"
           >
-            Start Timer Instead
+            {t("startTimerInstead")}
           </button>
         </div>
       </>
@@ -2072,12 +1882,12 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
   return (
     <>
       <DialogHeader className="p-6 pb-0">
-        <DialogTitle className="text-center">Add Activity</DialogTitle>
+        <DialogTitle className="text-center">{t("activity.add")}</DialogTitle>
       </DialogHeader>
 
       {/* Activity type grid */}
       <div className="px-6 py-4">
-        <p className="text-sm text-muted-foreground mb-3">Select Activity</p>
+        <p className="text-sm text-muted-foreground mb-3">{t("activity.select")}</p>
         <div className="grid grid-cols-4 gap-3">
           {ACTIVITY_OPTIONS.map((option) => {
             const isSelected = selectedType === option.type;
@@ -2092,7 +1902,7 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
                 }`}
               >
                 <option.icon className={`h-6 w-6 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                <span className="text-xs text-center leading-tight">{option.label}</span>
+                <span className="text-xs text-center leading-tight">{tEnums(`activityType.${option.type}`)}</span>
               </button>
             );
           })}
@@ -2108,16 +1918,16 @@ function ActivityModal({ childId, onClose }: { childId: string; onClose: () => v
           className="w-28 h-28 rounded-full bg-primary/20 border-2 border-dashed border-primary flex flex-col items-center justify-center gap-2 hover:bg-primary/30 transition-colors disabled:opacity-50"
         >
           <Play className="h-6 w-6 text-primary" />
-          <span className="text-primary font-semibold text-sm">START</span>
+          <span className="text-primary font-semibold text-sm">{t("start")}</span>
         </button>
       </div>
 
       <div className="p-6 pt-0 flex justify-center">
         <button
           onClick={() => setShowManualEntry(true)}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-sm min-h-12 px-4 text-muted-foreground hover:text-foreground"
         >
-          Manual Entry
+          {t("manualEntry")}
         </button>
       </div>
     </>

@@ -8,11 +8,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   startOfWeek,
   addDays,
-  format,
   normalizeToTimelinePosition,
   getTimelineHourLabels,
   DAY_START_HOUR,
 } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import {
   getActivityBarClasses,
   feedingTypeToCategory,
@@ -24,8 +25,10 @@ interface WeekViewProps {
 }
 
 export function WeekView({ childId }: WeekViewProps) {
+  const t = useTranslations("reports");
+  const f = useFormatters();
   const [weekStart, setWeekStart] = useState(() =>
-    startOfWeek(new Date(), { weekStartsOn: 0 })
+    startOfWeek(new Date(), { weekStartsOn: 1 })
   );
 
   const { data, isLoading } = trpc.timeline.getWeek.useQuery({
@@ -47,13 +50,13 @@ export function WeekView({ childId }: WeekViewProps) {
     <div className="space-y-4 mt-4">
       {/* Week navigation */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+        <Button variant="outline" size="icon" onClick={handlePrevWeek} aria-label={t("previousWeek")}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <span className="font-medium">
-          {format(weekStart, "MMM d")} - {format(addDays(weekStart, 6), "MMM d, yyyy")}
+          {f.shortDate(weekStart)} – {f.fullDate(addDays(weekStart, 6))}
         </span>
-        <Button variant="outline" size="icon" onClick={handleNextWeek}>
+        <Button variant="outline" size="icon" onClick={handleNextWeek} aria-label={t("nextWeek")}>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
@@ -63,7 +66,7 @@ export function WeekView({ childId }: WeekViewProps) {
           {isLoading ? (
             <div className="h-64 flex items-center justify-center">
               <div className="animate-pulse text-muted-foreground">
-                Loading week data...
+                {t("loadingWeek")}
               </div>
             </div>
           ) : data ? (
@@ -76,9 +79,9 @@ export function WeekView({ childId }: WeekViewProps) {
                     key={day.date}
                     className="flex-1 text-center py-2 text-sm font-medium"
                   >
-                    <div>{format(new Date(day.date), "EEE")}</div>
+                    <div>{f.weekday(new Date(day.date))}</div>
                     <div className="text-muted-foreground">
-                      {format(new Date(day.date), "d")}
+                      {f.pattern(new Date(day.date), "d")}
                     </div>
                   </div>
                 ))}
@@ -293,7 +296,7 @@ export function WeekView({ childId }: WeekViewProps) {
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-muted-foreground">
-              No data for this week
+              {t("noDataWeek")}
             </div>
           )}
         </CardContent>

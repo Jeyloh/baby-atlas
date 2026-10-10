@@ -2,7 +2,8 @@
 
 import { trpc } from "@/lib/trpc/provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDuration } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import { Moon, Baby, Droplets } from "lucide-react";
 
 interface DailySummaryProps {
@@ -10,6 +11,8 @@ interface DailySummaryProps {
 }
 
 export function DailySummary({ childId }: DailySummaryProps) {
+  const t = useTranslations("tracking.dailySummary");
+  const { duration: formatDuration, ml } = useFormatters();
   const { data: sleepSummary } = trpc.sleep.summary.useQuery({
     childId,
     period: "today",
@@ -28,28 +31,34 @@ export function DailySummary({ childId }: DailySummaryProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today&apos;s Summary</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex items-center gap-4 p-3 rounded-lg bg-indigo-100 dark:bg-indigo-900/50">
             <Moon className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
             <div className="flex-1">
-              <p className="font-semibold text-indigo-900 dark:text-indigo-100">Sleep</p>
+              <p className="font-semibold text-indigo-900 dark:text-indigo-100">{t("sleep")}</p>
               <div className="text-sm text-indigo-700 dark:text-indigo-300">
                 {sleepSummary ? (
                   <>
                     <p>
-                      Total: {formatDuration(sleepSummary.totalMinutes)} ({sleepSummary.totalSessions} sessions)
+                      {t("sleepTotal", {
+                        duration: formatDuration(sleepSummary.totalMinutes),
+                        count: sleepSummary.totalSessions,
+                      })}
                     </p>
                     <p>
-                      Naps: {formatDuration(sleepSummary.napMinutes)} ({sleepSummary.napCount})
-                      {" | "}
-                      Night: {formatDuration(sleepSummary.nightMinutes)} ({sleepSummary.nightCount})
+                      {t("sleepSplit", {
+                        napDuration: formatDuration(sleepSummary.napMinutes),
+                        napCount: sleepSummary.napCount,
+                        nightDuration: formatDuration(sleepSummary.nightMinutes),
+                        nightCount: sleepSummary.nightCount,
+                      })}
                     </p>
                   </>
                 ) : (
-                  "No sleep recorded"
+                  t("noSleep")
                 )}
               </div>
             </div>
@@ -58,19 +67,31 @@ export function DailySummary({ childId }: DailySummaryProps) {
           <div className="flex items-center gap-4 p-3 rounded-lg bg-pink-100 dark:bg-pink-900/50">
             <Baby className="h-8 w-8 text-pink-600 dark:text-pink-400" />
             <div className="flex-1">
-              <p className="font-semibold text-pink-900 dark:text-pink-100">Feeding</p>
+              <p className="font-semibold text-pink-900 dark:text-pink-100">{t("feeding")}</p>
               <div className="text-sm text-pink-700 dark:text-pink-300">
                 {feedingSummary ? (
                   <>
-                    <p>Total: {feedingSummary.totalFeedings} feedings</p>
+                    <p>{t("feedingTotal", { count: feedingSummary.totalFeedings })}</p>
                     <p>
-                      Breast: {feedingSummary.breastfeedingCount} ({formatDuration(feedingSummary.breastfeedingMinutes)})
-                      {feedingSummary.bottleCount > 0 && ` | Bottle: ${feedingSummary.bottleCount} (${feedingSummary.totalBottleMl}ml)`}
-                      {feedingSummary.solidsCount > 0 && ` | Solids: ${feedingSummary.solidsCount}`}
+                      {[
+                        t("breastPart", {
+                          count: feedingSummary.breastfeedingCount,
+                          duration: formatDuration(feedingSummary.breastfeedingMinutes),
+                        }),
+                        feedingSummary.bottleCount > 0 &&
+                          t("bottlePart", {
+                            count: feedingSummary.bottleCount,
+                            amount: ml(feedingSummary.totalBottleMl),
+                          }),
+                        feedingSummary.solidsCount > 0 &&
+                          t("solidsPart", { count: feedingSummary.solidsCount }),
+                      ]
+                        .filter(Boolean)
+                        .join(" | ")}
                     </p>
                   </>
                 ) : (
-                  "No feedings recorded"
+                  t("noFeedings")
                 )}
               </div>
             </div>
@@ -79,17 +100,20 @@ export function DailySummary({ childId }: DailySummaryProps) {
           <div className="flex items-center gap-4 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/50">
             <Droplets className="h-8 w-8 text-blue-600 dark:text-blue-400" />
             <div className="flex-1">
-              <p className="font-semibold text-blue-900 dark:text-blue-100">Diapers</p>
+              <p className="font-semibold text-blue-900 dark:text-blue-100">{t("diapers")}</p>
               <div className="text-sm text-blue-700 dark:text-blue-300">
                 {diaperSummary ? (
                   <>
-                    <p>Total: {diaperSummary.totalChanges} changes</p>
+                    <p>{t("diaperTotal", { count: diaperSummary.totalChanges })}</p>
                     <p>
-                      Wet: {diaperSummary.wetCount} | Dirty: {diaperSummary.dirtyCount}
+                      {t("diaperSplit", {
+                        wet: diaperSummary.wetCount,
+                        dirty: diaperSummary.dirtyCount,
+                      })}
                     </p>
                   </>
                 ) : (
-                  "No diapers recorded"
+                  t("noDiapers")
                 )}
               </div>
             </div>

@@ -1,0 +1,92 @@
+{
+  "feedingType": {
+    "BREAST": "Amming",
+    "BOTTLE": "Flaske",
+    "SOLIDS": "Fast føde"
+  },
+  "breastSide": {
+    "LEFT": "Venstre",
+    "RIGHT": "Høyre",
+    "BOTH": "Begge"
+  },
+  "bottleContent": {
+    "FORMULA": "Morsmelkerstatning",
+    "BREAST_MILK": "Morsmelk"
+  },
+  "sleepType": {
+    "NAP": "Dupp",
+    "NIGHT": "Nattesøvn"
+  },
+  "diaperType": {
+    "WET": "Tissebleie",
+    "DIRTY": "Bæsjbleie",
+    "BOTH": "Tisse og bæsj",
+    "DRY": "Tørr bleie"
+  },
+  "diaperColor": {
+    "YELLOW": "Gul",
+    "GREEN": "Grønn",
+    "BROWN": "Brun",
+    "BLACK": "Svart",
+    "RED": "Rød",
+    "WHITE": "Hvit",
+    "OTHER": "Annen"
+  },
+  "diaperConsistency": {
+    "WATERY": "Vannaktig",
+    "LOOSE": "Løs",
+    "SOFT": "Myk",
+    "FORMED": "Fast",
+    "HARD": "Hard"
+  },
+  "diaperSize": {
+    "NEWBORN": "Nyfødt",
+    "SIZE_1": "Str. 1",
+    "SIZE_2": "Str. 2",
+    "SIZE_3": "Str. 3",
+    "SIZE_4": "Str. 4",
+    "SIZE_5": "Str. 5",
+    "SIZE_6": "Str. 6"
+  },
+  "diaperAmount": {
+    "SMALL": "Lite",
+    "MEDIUM": "Middels",
+    "LARGE": "Mye"
+  },
+  "activityType": {
+    "TUMMY_TIME": "Mageleie",
+    "BATH": "Bad",
+    "OUTDOOR_PLAY": "Utelek",
+    "INDOOR_PLAY": "Innelek",
+    "SCREEN_TIME": "Skjermtid",
+    "SKIN_TO_SKIN": "Hud mot hud",
+    "STORYTIME": "Høytlesing",
+    "TEETH_BRUSHING": "Tannpuss",
+    "OTHER": "Annet"
+  },
+  "trackingType": {
+    "sleep": "Søvn",
+    "feeding": "Mating",
+    "breastfeeding": "Amming",
+    "bottle": "Flaske",
+    "solids": "Fast føde",
+    "diaper": "Bleie",
+    "pumping": "Pumping",
+    "growth": "Vekst",
+    "temperature": "Kroppstemperatur",
+    "temperatureShort": "Temperatur",
+    "medicine": "Medisin",
+    "activity": "Aktivitet"
+  },
+  "householdRole": {
+    "OWNER": "Eier",
+    "ADMIN": "Administrator",
+    "CAREGIVER": "Omsorgsperson",
+    "VIEWER": "Leser"
+  },
+  "gender": {
+    "MALE": "Gutt",
+    "FEMALE": "Jente",
+    "OTHER": "Annet"
+  }
+}

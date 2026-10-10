@@ -1,0 +1,87 @@
+{
+  "defaultChildName": "Baby",
+  "loadingTimeline": "Loading timeline …",
+  "loadingWeek": "Loading week …",
+  "loadingActivities": "Loading activities …",
+  "noDataDay": "No data for this day",
+  "noDataWeek": "No data for this week",
+  "noActivitiesWeek": "No activities this week",
+  "previousWeek": "Previous week",
+  "nextWeek": "Next week",
+  "stats": {
+    "feedings": "Feedings",
+    "diapers": "Diapers"
+  },
+  "description": {
+    "sleepDone": "{name} slept for {duration}",
+    "sleepOngoing": "{name} is sleeping",
+    "breastDone": "{name} was breastfed for {duration}",
+    "breastOngoing": "{name} is breastfeeding",
+    "bottleWithAmount": "{name} had {amount} of {content} in a bottle",
+    "bottle": "{name} had {content} in a bottle",
+    "solids": "{name} ate {foods}",
+    "solidsFallback": "solid food",
+    "diaperWet": "{name} had a wet diaper 💧",
+    "diaperDirty": "{name} had a dirty diaper 💩",
+    "diaperBoth": "{name} had a wet and dirty diaper 💧💩",
+    "diaperDry": "{name} had a dry diaper",
+    "pumpingAmountDuration": "Pumped {amount} in {duration}",
+    "pumpingDuration": "Pumped for {duration}",
+    "pumpingOngoing": "Pumping in progress",
+    "medicine": "{name} took {medicine}",
+    "medicineWithAmount": "{name} took {medicine} ({amount})",
+    "growth": "{name} growth: {value}",
+    "growthRecorded": "recorded",
+    "temperature": "{name}'s temperature: {value}",
+    "activityDone": "{name} did {activity} for {duration}",
+    "activityOngoing": "{name} is doing {activity}"
+  },
+  "details": {
+    "fever": "Fever",
+    "sideSplit": "L {left} R {right}"
+  },
+  "edit": {
+    "title": "Edit activity",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "time": "Time",
+    "setTime": "Set time",
+    "durationSplit": "Duration split",
+    "total": "Total: {value}",
+    "leftValue": "Left: {value}",
+    "rightValue": "Right: {value}",
+    "allLeft": "All left",
+    "allRight": "All right",
+    "lastBreast": "Last breast used",
+    "durationSlider": "Split between left and right breast",
+    "amount": "Amount",
+    "amountSlider": "Amount in ml",
+    "color": "Colour",
+    "save": "Save",
+    "saving": "Saving …",
+    "delete": "Delete",
+    "deleting": "Deleting …",
+    "cancel": "Cancel"
+  },
+  "deleteDialog": {
+    "title": "Delete activity?",
+    "message": "Are you sure you want to delete this activity? This cannot be undone."
+  },
+  "toast": {
+    "deleted": {
+      "sleep": "Sleep record deleted",
+      "feeding": "Feeding record deleted",
+      "diaper": "Diaper record deleted",
+      "pumping": "Pumping record deleted",
+      "medicine": "Medicine record deleted",
+      "growth": "Growth record deleted",
+      "temperature": "Temperature record deleted",
+      "activity": "Activity record deleted"
+    },
+    "updated": {
+      "sleep": "Sleep record updated",
+      "feeding": "Feeding record updated",
+      "diaper": "Diaper record updated"
+    }
+  }
+}

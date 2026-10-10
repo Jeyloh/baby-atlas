@@ -1,0 +1,75 @@
+{
+  "quickLog": {
+    "title": "Quick log",
+    "stopSleep": "Stop sleep",
+    "stopSide": "Stop {side}",
+    "stopFeeding": "Stop breastfeeding",
+    "startSleepTitle": "Start sleep timer",
+    "startBreastfeedingTitle": "Start breastfeeding",
+    "leftSide": "Left side",
+    "rightSide": "Right side",
+    "logBottleTitle": "Log bottle",
+    "contentType": "Content",
+    "amount": "Amount",
+    "logBottle": "Log bottle",
+    "wet": "Wet",
+    "dirty": "Dirty",
+    "toast": {
+      "sleepStarted": "Sleep timer started",
+      "sleepRecorded": "Sleep recorded",
+      "feedingStarted": "Feeding timer started",
+      "feedingRecorded": "Breastfeeding recorded",
+      "diaperLogged": "Diaper change logged",
+      "bottleLogged": "Bottle logged"
+    }
+  },
+  "activeTimers": {
+    "title": "Active timers",
+    "stop": "Stop",
+    "breastfeeding": "Breastfeeding {side}",
+    "pumping": "Pumping",
+    "pumpingSide": "Pumping ({side})",
+    "activity": "Activity",
+    "toast": {
+      "sleepRecorded": "Sleep recorded",
+      "feedingRecorded": "Breastfeeding recorded",
+      "pumpingRecorded": "Pumping recorded",
+      "activityRecorded": "Activity recorded"
+    }
+  },
+  "recentActivity": {
+    "title": "Recent activity",
+    "empty": "Nothing logged today",
+    "inProgress": "In progress",
+    "breastfeeding": "Breastfeeding ({side})"
+  },
+  "dailySummary": {
+    "title": "Today's summary",
+    "sleep": "Sleep",
+    "feeding": "Feeding",
+    "diapers": "Diapers",
+    "noSleep": "No sleep recorded",
+    "noFeedings": "No feedings recorded",
+    "noDiapers": "No diapers recorded",
+    "sleepTotal": "Total: {duration} ({count, plural, one {# session} other {# sessions}})",
+    "sleepSplit": "Naps: {napDuration} ({napCount}) | Night: {nightDuration} ({nightCount})",
+    "feedingTotal": "Total: {count, plural, one {# feeding} other {# feedings}}",
+    "breastPart": "Breastfeeding: {count} ({duration})",
+    "bottlePart": "Bottle: {count} ({amount})",
+    "solidsPart": "Solid food: {count}",
+    "diaperTotal": "Total: {count, plural, one {# change} other {# changes}}",
+    "diaperSplit": "Wet: {wet} | Dirty: {dirty}"
+  },
+  "breastSide": {
+    "LEFT": "Left",
+    "RIGHT": "Right",
+    "lastSide": "Last side"
+  },
+  "timeRow": {
+    "setTime": "Set time"
+  },
+  "timer": {
+    "min": "MIN",
+    "sec": "SEC"
+  }
+}

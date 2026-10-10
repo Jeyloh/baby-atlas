@@ -18,7 +18,7 @@ test.describe("Household Management", () => {
     // Should see the test household name or dashboard UI
     await expect(
       authenticatedPage.getByText(new RegExp(testData.household.name, "i")).or(
-        authenticatedPage.getByText(/dashboard|household|family/i)
+        authenticatedPage.getByText(/dashboard|husstand|familie/i)
       )
     ).toBeVisible({ timeout: 10000 });
   });
@@ -55,7 +55,7 @@ test.describe("Household Management", () => {
 
     // Should show quick log or tracking options (using first() since multiple elements match)
     await expect(
-      authenticatedPage.getByText(/sleep|feeding|diaper/i).first()
+      authenticatedPage.getByText(/søvn|mating|bleie/i).first()
     ).toBeVisible({ timeout: 10000 });
   });
 });
@@ -73,7 +73,7 @@ test.describe("Child Management", () => {
 
     // Should have tracking buttons
     await expect(
-      authenticatedPage.getByRole("button", { name: /sleep|nap/i })
+      authenticatedPage.getByRole("button", { name: /søvn|dupp/i })
     ).toBeVisible({ timeout: 10000 });
   });
 });

@@ -19,13 +19,9 @@ import {
   feedingTypeToCategory,
   type ActivityCategory,
 } from "@/lib/activity-colors";
-import {
-  formatTimeShort,
-  formatTimeRange,
-  formatDurationPrecise,
-  mlToOz,
-  ozToMl,
-} from "@baby-atlas/utils";
+import { lbsToKg, inchesToCm } from "@baby-atlas/utils";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/lib/format";
 import { Moon, Baby, Milk, Utensils, Droplets, ChevronRight, Trash2, Cloud, CloudRain, Heart, Pill, Ruler, Thermometer, Star } from "lucide-react";
 
 interface SleepRecord {
@@ -138,26 +134,39 @@ const iconMap = {
 
 type DiaperAmount = "SMALL" | "MEDIUM" | "LARGE";
 type DiaperColor = "YELLOW" | "GREEN" | "BROWN" | "BLACK" | "OTHER";
+type ActivityTypeValue =
+  | "TUMMY_TIME" | "BATH" | "OUTDOOR_PLAY" | "INDOOR_PLAY" | "SCREEN_TIME"
+  | "SKIN_TO_SKIN" | "STORYTIME" | "TEETH_BRUSHING" | "OTHER";
 
-const amountOptions: { value: DiaperAmount; label: string }[] = [
-  { value: "SMALL", label: "S" },
-  { value: "MEDIUM", label: "M" },
-  { value: "LARGE", label: "L" },
+const amountOptions: DiaperAmount[] = ["SMALL", "MEDIUM", "LARGE"];
+
+const colorOptions: { value: DiaperColor; color: string }[] = [
+  { value: "YELLOW", color: "bg-yellow-400" },
+  { value: "GREEN", color: "bg-green-500" },
+  { value: "BROWN", color: "bg-amber-700" },
+  { value: "BLACK", color: "bg-gray-900" },
+  { value: "OTHER", color: "bg-gray-400" },
 ];
 
-const colorOptions: { value: DiaperColor; label: string; color: string }[] = [
-  { value: "YELLOW", label: "Yellow", color: "bg-yellow-400" },
-  { value: "GREEN", label: "Green", color: "bg-green-500" },
-  { value: "BROWN", label: "Brown", color: "bg-amber-700" },
-  { value: "BLACK", label: "Black", color: "bg-gray-900" },
-  { value: "OTHER", label: "Other", color: "bg-gray-400" },
-];
+const DEFAULT_BOTTLE_ML = 90;
+const MAX_BOTTLE_ML = 350;
 
-export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdit = false, onEditClose }: ActivityRowProps) {
+const FEVER_THRESHOLD_CELSIUS = 38;
+
+export function ActivityRow({ activity, childId, childName: childNameProp, autoOpenEdit = false, onEditClose }: ActivityRowProps) {
+  const t = useTranslations("reports");
+  const te = useTranslations("enums");
+  const f = useFormatters();
+  const childName = childNameProp ?? t("defaultChildName");
   const [editOpen, setEditOpen] = useState(autoOpenEdit);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const { toast } = useToast();
   const utils = trpc.useUtils();
+
+  const deletedToast = (kind: "sleep" | "feeding" | "diaper" | "pumping" | "medicine" | "growth" | "temperature" | "activity") =>
+    toast({ title: t(`toast.deleted.${kind}`) });
+  const updatedToast = (kind: "sleep" | "feeding" | "diaper") =>
+    toast({ title: t(`toast.updated.${kind}`) });
 
   // Edit state for sleep
   const [editSleepType, setEditSleepType] = useState<"NAP" | "NIGHT">("NAP");
@@ -173,9 +182,8 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
 
   // Edit state for bottle
   const [editBottleContentType, setEditBottleContentType] = useState<"FORMULA" | "BREAST_MILK">("FORMULA");
-  const [editBottleAmountOz, setEditBottleAmountOz] = useState(3);
+  const [editBottleAmountMl, setEditBottleAmountMl] = useState(DEFAULT_BOTTLE_ML);
   const [editBottleTime, setEditBottleTime] = useState<Date | null>(null);
-  const [editBottleUnit, setEditBottleUnit] = useState<"oz" | "ml">("oz");
 
   // Edit state for diaper
   const [editDiaperType, setEditDiaperType] = useState<"WET" | "DIRTY" | "BOTH" | "DRY">("WET");
@@ -225,7 +233,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
           }
         } else if (r.feedingType === "BOTTLE") {
           setEditBottleContentType((r.bottleContentType as "FORMULA" | "BREAST_MILK") || "FORMULA");
-          setEditBottleAmountOz(r.amountMl ? mlToOz(r.amountMl) : 3);
+          setEditBottleAmountMl(r.amountMl ?? DEFAULT_BOTTLE_ML);
           setEditBottleTime(new Date(r.startTime));
         }
       } else if (activity.type === "DIAPER") {
@@ -245,7 +253,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getList.invalidate({ childId });
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
-      toast({ title: "Sleep record deleted" });
+      deletedToast("sleep");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -257,7 +265,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getList.invalidate({ childId });
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
-      toast({ title: "Feeding record deleted" });
+      deletedToast("feeding");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -269,7 +277,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getList.invalidate({ childId });
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
-      toast({ title: "Diaper record deleted" });
+      deletedToast("diaper");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -282,7 +290,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Pumping record deleted" });
+      deletedToast("pumping");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -295,7 +303,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Medicine record deleted" });
+      deletedToast("medicine");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -308,7 +316,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Growth record deleted" });
+      deletedToast("growth");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -321,7 +329,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Temperature record deleted" });
+      deletedToast("temperature");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -334,7 +342,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
-      toast({ title: "Activity record deleted" });
+      deletedToast("activity");
       setDeleteConfirmOpen(false);
       closeEditDialog();
     },
@@ -347,7 +355,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getList.invalidate({ childId });
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
-      toast({ title: "Sleep record updated" });
+      updatedToast("sleep");
       closeEditDialog();
     },
   });
@@ -358,7 +366,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getList.invalidate({ childId });
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
-      toast({ title: "Feeding record updated" });
+      updatedToast("feeding");
       closeEditDialog();
     },
   });
@@ -369,7 +377,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       utils.timeline.getList.invalidate({ childId });
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });
-      toast({ title: "Diaper record updated" });
+      updatedToast("diaper");
       closeEditDialog();
     },
   });
@@ -427,13 +435,10 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
             rightDurationSeconds: editRightDurationSeconds,
           });
         } else if (r.feedingType === "BOTTLE" && editBottleTime) {
-          const amountMl = editBottleUnit === "oz"
-            ? ozToMl(editBottleAmountOz)
-            : Math.round(editBottleAmountOz);
           updateFeeding.mutate({
             id: activity.record.id,
             bottleContentType: editBottleContentType,
-            amountMl,
+            amountMl: Math.round(editBottleAmountMl),
             startTime: editBottleTime,
           });
         }
@@ -469,55 +474,56 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
     case "SLEEP": {
       category = "sleep";
       const r = activity.record;
-      const duration = r.endTime ? formatDurationPrecise(r.startTime, r.endTime) : "";
-      description = duration ? `${childName} slept for ${duration}` : `${childName} is sleeping`;
-      timeDisplay = r.endTime
-        ? formatTimeRange(r.startTime, r.endTime)
-        : `${formatTimeShort(r.startTime)} - ongoing`;
-      details = r.sleepType === "NIGHT" ? "Night" : "Nap";
+      const duration = r.endTime ? f.durationPrecise(r.startTime, r.endTime) : "";
+      description = duration
+        ? t("description.sleepDone", { name: childName, duration })
+        : t("description.sleepOngoing", { name: childName });
+      timeDisplay = f.timeRange(r.startTime, r.endTime);
+      details = te(`sleepType.${r.sleepType === "NIGHT" ? "NIGHT" : "NAP"}`);
       break;
     }
     case "FEEDING": {
       const r = activity.record;
       if (r.feedingType === "BREAST") {
         category = "nursing";
-        const duration = r.endTime ? formatDurationPrecise(r.startTime, r.endTime) : "";
-        description = duration ? `${childName} was breastfed for ${duration}` : `${childName} is breastfeeding`;
-        timeDisplay = r.endTime
-          ? formatTimeRange(r.startTime, r.endTime)
-          : `${formatTimeShort(r.startTime)} - ongoing`;
-        // Show side details with per-side times if available
-        if (r.leftDurationSeconds != null && r.rightDurationSeconds != null && (r.leftDurationSeconds > 0 || r.rightDurationSeconds > 0)) {
+        const duration = r.endTime ? f.durationPrecise(r.startTime, r.endTime) : "";
+        description = duration
+          ? t("description.breastDone", { name: childName, duration })
+          : t("description.breastOngoing", { name: childName });
+        timeDisplay = f.timeRange(r.startTime, r.endTime);
+        const left = r.leftDurationSeconds ?? 0;
+        const right = r.rightDurationSeconds ?? 0;
+        if (r.leftDurationSeconds != null && r.rightDurationSeconds != null && (left > 0 || right > 0)) {
           const formatSecs = (s: number) => {
             const mins = Math.floor(s / 60);
             const secs = s % 60;
-            return secs > 0 ? `${mins}:${String(secs).padStart(2, "0")}` : `${mins}m`;
+            return secs > 0 ? `${mins}:${String(secs).padStart(2, "0")}` : f.duration(mins);
           };
-          if (r.leftDurationSeconds > 0 && r.rightDurationSeconds > 0) {
-            details = `L: ${formatSecs(r.leftDurationSeconds)} R: ${formatSecs(r.rightDurationSeconds)}`;
-          } else if (r.leftDurationSeconds > 0) {
-            details = "Left";
+          if (left > 0 && right > 0) {
+            details = t("details.sideSplit", { left: formatSecs(left), right: formatSecs(right) });
+          } else if (left > 0) {
+            details = te("breastSide.LEFT");
           } else {
-            details = "Right";
+            details = te("breastSide.RIGHT");
           }
         } else {
-          details = r.side === "LEFT" ? "Left" : r.side === "RIGHT" ? "Right" : "Both";
+          details = te(`breastSide.${r.side === "LEFT" ? "LEFT" : r.side === "RIGHT" ? "RIGHT" : "BOTH"}`);
         }
       } else if (r.feedingType === "BOTTLE") {
         category = "bottle";
-        const amount = r.amountMl
-          ? `${Math.round(r.amountMl / 29.574)}oz`
-          : "";
-        const contentType =
-          r.bottleContentType === "BREAST_MILK" ? "breast milk" : "formula";
-        description = `${childName} had a ${amount} bottle of ${contentType}`;
-        timeDisplay = formatTimeShort(r.startTime);
+        const content = te(
+          `bottleContent.${r.bottleContentType === "BREAST_MILK" ? "BREAST_MILK" : "FORMULA"}`
+        ).toLowerCase();
+        description = r.amountMl
+          ? t("description.bottleWithAmount", { name: childName, amount: f.ml(r.amountMl), content })
+          : t("description.bottle", { name: childName, content });
+        timeDisplay = f.time(r.startTime);
         details = "";
       } else {
         category = "solids";
-        const foods = r.foodItems?.join(", ") || "solids";
-        description = `${childName} ate ${foods}`;
-        timeDisplay = formatTimeShort(r.startTime);
+        const foods = r.foodItems?.join(", ") || t("description.solidsFallback");
+        description = t("description.solids", { name: childName, foods });
+        timeDisplay = f.time(r.startTime);
         details = "";
       }
       break;
@@ -526,38 +532,40 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       category = "diaper";
       const r = activity.record;
       if (r.diaperType === "WET") {
-        description = `${childName} had pee 💧`;
+        description = t("description.diaperWet", { name: childName });
       } else if (r.diaperType === "DIRTY") {
-        description = `${childName} had poo 💩`;
+        description = t("description.diaperDirty", { name: childName });
       } else if (r.diaperType === "BOTH") {
-        description = `${childName} had poo and pee 💧💩`;
+        description = t("description.diaperBoth", { name: childName });
       } else {
-        description = `${childName} had a dry diaper`;
+        description = t("description.diaperDry", { name: childName });
       }
-      timeDisplay = formatTimeShort(r.time);
-      details = r.amount ? (r.amount === "SMALL" ? "S" : r.amount === "MEDIUM" ? "M" : "L") : "";
+      timeDisplay = f.time(r.time);
+      details = r.amount ? te(`diaperAmount.${r.amount as DiaperAmount}`) : "";
       break;
     }
     case "PUMPING": {
       category = "pumping";
       const r = activity.record;
-      const duration = r.endTime ? formatDurationPrecise(r.startTime, r.endTime) : "";
-      const amount = r.amountMl ? `${Math.round(r.amountMl / 29.574)}oz` : "";
+      const duration = r.endTime ? f.durationPrecise(r.startTime, r.endTime) : "";
+      const amount = r.amountMl ? f.ml(r.amountMl) : "";
       description = duration
-        ? `Pumped ${amount ? amount + " in " : ""}${duration}`
-        : "Pumping in progress";
-      timeDisplay = r.endTime
-        ? formatTimeRange(r.startTime, r.endTime)
-        : `${formatTimeShort(r.startTime)} - ongoing`;
-      details = amount || "";
+        ? amount
+          ? t("description.pumpingAmountDuration", { amount, duration })
+          : t("description.pumpingDuration", { duration })
+        : t("description.pumpingOngoing");
+      timeDisplay = f.timeRange(r.startTime, r.endTime);
+      details = amount;
       break;
     }
     case "MEDICINE": {
       category = "medicine";
       const r = activity.record;
       const amountStr = r.amount && r.unit ? `${r.amount} ${r.unit}` : "";
-      description = `${childName} took ${r.medicine.name}${amountStr ? ` (${amountStr})` : ""}`;
-      timeDisplay = formatTimeShort(r.time);
+      description = amountStr
+        ? t("description.medicineWithAmount", { name: childName, medicine: r.medicine.name, amount: amountStr })
+        : t("description.medicine", { name: childName, medicine: r.medicine.name });
+      timeDisplay = f.time(r.time);
       details = "";
       break;
     }
@@ -565,41 +573,36 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       category = "growth";
       const r = activity.record;
       const parts: string[] = [];
-      if (r.weightOz) {
-        const lbs = Math.floor(r.weightOz / 16);
-        const oz = r.weightOz % 16;
-        parts.push(`${lbs}lb ${oz}oz`);
-      }
-      if (r.heightIn) {
-        const ft = Math.floor(r.heightIn / 12);
-        const inches = r.heightIn % 12;
-        parts.push(`${ft}ft ${inches}in`);
-      }
-      description = `${childName} growth: ${parts.join(", ") || "recorded"}`;
-      timeDisplay = formatTimeShort(r.date);
+      if (r.weightOz) parts.push(f.weightKg(lbsToKg(r.weightOz / 16)));
+      if (r.heightIn) parts.push(f.heightCm(inchesToCm(r.heightIn)));
+      description = t("description.growth", {
+        name: childName,
+        value: parts.join(", ") || t("description.growthRecorded"),
+      });
+      timeDisplay = f.time(r.date);
       details = "";
       break;
     }
     case "TEMPERATURE": {
       category = "temperature";
       const r = activity.record;
-      const tempF = (r.temperatureCelsius * 9/5) + 32;
-      description = `${childName}'s temperature: ${tempF.toFixed(1)}°F`;
-      timeDisplay = formatTimeShort(r.time);
-      details = tempF >= 100.4 ? "Fever" : "";
+      description = t("description.temperature", {
+        name: childName,
+        value: f.temperatureC(r.temperatureCelsius),
+      });
+      timeDisplay = f.time(r.time);
+      details = r.temperatureCelsius >= FEVER_THRESHOLD_CELSIUS ? t("details.fever") : "";
       break;
     }
     case "ACTIVITY": {
       category = "activity";
       const r = activity.record;
-      const duration = r.endTime ? formatDurationPrecise(r.startTime, r.endTime) : "";
-      const activityName = r.activityType.replace(/_/g, " ").toLowerCase();
+      const duration = r.endTime ? f.durationPrecise(r.startTime, r.endTime) : "";
+      const activityName = te(`activityType.${r.activityType as ActivityTypeValue}`).toLowerCase();
       description = duration
-        ? `${childName} did ${activityName} for ${duration}`
-        : `${childName} is doing ${activityName}`;
-      timeDisplay = r.endTime
-        ? formatTimeRange(r.startTime, r.endTime)
-        : `${formatTimeShort(r.startTime)} - ongoing`;
+        ? t("description.activityDone", { name: childName, activity: activityName, duration })
+        : t("description.activityOngoing", { name: childName, activity: activityName });
+      timeDisplay = f.timeRange(r.startTime, r.endTime);
       details = "";
       break;
     }
@@ -615,15 +618,15 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
         <div className="space-y-4">
           <SimpleToggleGroup
             options={[
-              { value: "NAP", label: "Nap" },
-              { value: "NIGHT", label: "Night" },
+              { value: "NAP", label: te("sleepType.NAP") },
+              { value: "NIGHT", label: te("sleepType.NIGHT") },
             ]}
             value={editSleepType}
             onChange={setEditSleepType}
             className="mx-0 my-0"
           />
-          <TimeRow label="Start Time" value={editSleepStart} onChange={setEditSleepStart} />
-          <TimeRow label="End Time" value={editSleepEnd} onChange={setEditSleepEnd} placeholder="Set time" />
+          <TimeRow label={t("edit.startTime")} value={editSleepStart} onChange={setEditSleepStart} />
+          <TimeRow label={t("edit.endTime")} value={editSleepEnd} onChange={setEditSleepEnd} placeholder={t("edit.setTime")} />
         </div>
       );
     }
@@ -660,21 +663,21 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
 
         return (
           <div className="space-y-4">
-            <TimeRow label="Start Time" value={editBreastStart} onChange={setEditBreastStart} />
-            <TimeRow label="End Time" value={editBreastEnd} onChange={setEditBreastEnd} placeholder="Set time" />
+            <TimeRow label={t("edit.startTime")} value={editBreastStart} onChange={setEditBreastStart} />
+            <TimeRow label={t("edit.endTime")} value={editBreastEnd} onChange={setEditBreastEnd} placeholder={t("edit.setTime")} />
 
             {totalSeconds > 0 && (
               <div className="py-4 border-t border-border">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-muted-foreground">Duration Split</span>
+                  <span className="text-muted-foreground">{t("edit.durationSplit")}</span>
                   <span className="text-sm font-medium">
-                    Total: {formatDuration(totalSeconds)}
+                    {t("edit.total", { value: formatDuration(totalSeconds) })}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-primary font-medium">Left: {formatDuration(editLeftDurationSeconds)}</span>
-                  <span className="text-primary font-medium">Right: {formatDuration(editRightDurationSeconds)}</span>
+                  <span className="text-primary font-medium">{t("edit.leftValue", { value: formatDuration(editLeftDurationSeconds) })}</span>
+                  <span className="text-primary font-medium">{t("edit.rightValue", { value: formatDuration(editRightDurationSeconds) })}</span>
                 </div>
 
                 <Slider
@@ -684,22 +687,23 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
                   max={100}
                   step={1}
                   className="w-full"
+                  aria-label={t("edit.durationSlider")}
                 />
 
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>All Left</span>
-                  <span>All Right</span>
+                  <span>{t("edit.allLeft")}</span>
+                  <span>{t("edit.allRight")}</span>
                 </div>
               </div>
             )}
 
             <div className="pt-2 border-t border-border">
-              <p className="text-sm text-muted-foreground mb-2">Last breast used</p>
+              <p className="text-sm text-muted-foreground mb-2">{t("edit.lastBreast")}</p>
               <SimpleToggleGroup
                 options={[
-                  { value: "LEFT", label: "Left" },
-                  { value: "RIGHT", label: "Right" },
-                  { value: "BOTH", label: "Both" },
+                  { value: "LEFT", label: te("breastSide.LEFT") },
+                  { value: "RIGHT", label: te("breastSide.RIGHT") },
+                  { value: "BOTH", label: te("breastSide.BOTH") },
                 ]}
                 value={editBreastSide}
                 onChange={setEditBreastSide}
@@ -711,54 +715,34 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       }
 
       if (r.feedingType === "BOTTLE") {
-        const displayAmount = editBottleUnit === "oz"
-          ? editBottleAmountOz.toFixed(1)
-          : Math.round(ozToMl(editBottleAmountOz));
-        const maxAmount = editBottleUnit === "oz" ? 12 : 350;
-
         return (
           <div className="space-y-4">
             <SimpleToggleGroup
               options={[
-                { value: "FORMULA", label: "Formula" },
-                { value: "BREAST_MILK", label: "Breast Milk" },
+                { value: "FORMULA", label: te("bottleContent.FORMULA") },
+                { value: "BREAST_MILK", label: te("bottleContent.BREAST_MILK") },
               ]}
               value={editBottleContentType}
               onChange={setEditBottleContentType}
               className="mx-0 my-0"
             />
-            <TimeRow label="Time" value={editBottleTime} onChange={setEditBottleTime} />
+            <TimeRow label={t("edit.time")} value={editBottleTime} onChange={setEditBottleTime} />
             <div className="py-4 border-t border-border">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-muted-foreground">Amount</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-semibold">{displayAmount} {editBottleUnit}</span>
-                  <div className="flex rounded overflow-hidden border border-border ml-2">
-                    <button
-                      onClick={() => setEditBottleUnit("oz")}
-                      className={`px-3 py-1 text-sm ${editBottleUnit === "oz" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-                    >
-                      oz
-                    </button>
-                    <button
-                      onClick={() => setEditBottleUnit("ml")}
-                      className={`px-3 py-1 text-sm ${editBottleUnit === "ml" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-                    >
-                      mL
-                    </button>
-                  </div>
-                </div>
+                <span className="text-muted-foreground">{t("edit.amount")}</span>
+                <span className="text-xl font-semibold">{f.ml(Math.round(editBottleAmountMl))}</span>
               </div>
               <Slider
-                value={[editBottleUnit === "oz" ? editBottleAmountOz : ozToMl(editBottleAmountOz)]}
-                onValueChange={([val]) => setEditBottleAmountOz(editBottleUnit === "oz" ? val : mlToOz(val))}
-                max={maxAmount}
-                step={editBottleUnit === "oz" ? 0.5 : 10}
+                value={[editBottleAmountMl]}
+                onValueChange={([val]) => setEditBottleAmountMl(val)}
+                max={MAX_BOTTLE_ML}
+                step={10}
                 className="w-full"
+                aria-label={t("edit.amountSlider")}
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>0</span>
-                <span>{maxAmount}</span>
+                <span>{MAX_BOTTLE_ML}</span>
               </div>
             </div>
           </div>
@@ -781,32 +765,32 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
 
     if (activity.type === "DIAPER") {
       const typeOptions = [
-        { value: "WET" as const, label: "Wet", icon: Droplets },
-        { value: "DIRTY" as const, label: "Dirty", icon: Cloud },
-        { value: "BOTH" as const, label: "Mixed", icon: CloudRain },
+        { value: "WET" as const, icon: Droplets },
+        { value: "DIRTY" as const, icon: Cloud },
+        { value: "BOTH" as const, icon: CloudRain },
       ];
 
       const showColorPicker = editDiaperType === "DIRTY" || editDiaperType === "BOTH";
 
       return (
         <div className="space-y-4">
-          <TimeRow label="Time" value={editDiaperTime} onChange={setEditDiaperTime} />
+          <TimeRow label={t("edit.time")} value={editDiaperTime} onChange={setEditDiaperTime} />
 
           <div className="py-4 border-t border-border">
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-3">
               {typeOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setEditDiaperType(option.value)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-full w-20 h-20 transition-colors ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl w-24 min-h-20 transition-colors ${
                     editDiaperType === option.value
                       ? "bg-primary/20 border-2 border-primary"
                       : "bg-muted border-2 border-transparent hover:bg-muted/80"
                   }`}
                 >
                   <option.icon className={`h-6 w-6 ${editDiaperType === option.value ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className={`text-xs ${editDiaperType === option.value ? "text-primary" : "text-muted-foreground"}`}>
-                    {option.label}
+                  <span className={`text-xs text-center ${editDiaperType === option.value ? "text-primary" : "text-muted-foreground"}`}>
+                    {te(`diaperType.${option.value}`)}
                   </span>
                 </button>
               ))}
@@ -815,18 +799,20 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
 
           {showColorPicker && (
             <div className="py-3 border-t border-border">
-              <p className="text-sm text-muted-foreground mb-2">Color</p>
+              <p className="text-sm text-muted-foreground mb-2">{t("edit.color")}</p>
               <div className="flex gap-2 justify-center">
                 {colorOptions.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => setEditDiaperColor(editDiaperColor === option.value ? null : option.value)}
-                    className={`w-10 h-10 rounded-full ${option.color} transition-all ${
+                    className={`w-12 h-12 rounded-full ${option.color} transition-all ${
                       editDiaperColor === option.value
                         ? "ring-2 ring-primary ring-offset-2"
                         : "opacity-60 hover:opacity-100"
                     }`}
-                    title={option.label}
+                    title={te(`diaperColor.${option.value}`)}
+                    aria-label={te(`diaperColor.${option.value}`)}
+                    aria-pressed={editDiaperColor === option.value}
                   />
                 ))}
               </div>
@@ -834,19 +820,19 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
           )}
 
           <div className="py-3 border-t border-border">
-            <p className="text-sm text-muted-foreground mb-2">Amount</p>
+            <p className="text-sm text-muted-foreground mb-2">{t("edit.amount")}</p>
             <div className="flex gap-3 justify-center">
               {amountOptions.map((option) => (
                 <button
-                  key={option.value}
-                  onClick={() => setEditDiaperAmount(editDiaperAmount === option.value ? null : option.value)}
-                  className={`w-12 h-12 rounded-full text-sm font-medium transition-colors ${
-                    editDiaperAmount === option.value
+                  key={option}
+                  onClick={() => setEditDiaperAmount(editDiaperAmount === option ? null : option)}
+                  className={`min-w-12 min-h-12 px-4 rounded-full text-sm font-medium transition-colors ${
+                    editDiaperAmount === option
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                 >
-                  {option.label}
+                  {te(`diaperAmount.${option}`)}
                 </button>
               ))}
             </div>
@@ -880,7 +866,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
     <>
       <button
         onClick={() => setEditOpen(true)}
-        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+        className="w-full min-h-12 flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
       >
         <div className={`${iconClasses}`}>
           <Icon className="h-5 w-5" />
@@ -899,7 +885,7 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       <Dialog open={editOpen} onOpenChange={(open) => { if (!open) closeEditDialog(); else setEditOpen(true); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Activity</DialogTitle>
+            <DialogTitle>{t("edit.title")}</DialogTitle>
           </DialogHeader>
 
           {renderEditForm()}
@@ -911,14 +897,14 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
               className="w-full sm:w-auto"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              {t("edit.delete")}
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving}
               className="w-full sm:w-auto"
             >
-              {isSaving ? "Saving..." : "Save"}
+              {isSaving ? t("edit.saving") : t("edit.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -928,25 +914,22 @@ export function ActivityRow({ activity, childId, childName = "Baby", autoOpenEdi
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Activity?</DialogTitle>
+            <DialogTitle>{t("deleteDialog.title")}</DialogTitle>
           </DialogHeader>
-          <p className="text-muted-foreground">
-            Are you sure you want to delete this activity? This action cannot be
-            undone.
-          </p>
+          <p className="text-muted-foreground">{t("deleteDialog.message")}</p>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => setDeleteConfirmOpen(false)}
             >
-              Cancel
+              {t("edit.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? t("edit.deleting") : t("edit.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>
