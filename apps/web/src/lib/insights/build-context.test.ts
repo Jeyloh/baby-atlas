@@ -148,12 +148,22 @@ describe("summarizePotty, words and medicines", () => {
     );
   });
 
-  it("lists new words in date order", () => {
+  it("lists new words newest first with a count", () => {
     const lines = summarizeWords([
-      { word: "bil", firstSaidAt: new Date("2024-03-14") },
       { word: "mamma", firstSaidAt: new Date("2024-03-10") },
+      { word: "bil", firstSaidAt: new Date("2024-03-14") },
     ]);
-    expect(lines[0]).toBe("New words: mamma (2024-03-10), bil (2024-03-14)");
+    expect(lines[0]).toBe("New words (2): bil (2024-03-14), mamma (2024-03-10)");
+  });
+
+  it("caps the number of words sent to the model", () => {
+    const words = Array.from({ length: 80 }, (_, i) => ({
+      word: `ord${i}`,
+      firstSaidAt: new Date(Date.UTC(2024, 0, 1 + i)),
+    }));
+    const line = summarizeWords(words)[0]!;
+    expect(line.startsWith("New words (80): ord79")).toBe(true);
+    expect(line.endsWith("and 30 more")).toBe(true);
   });
 
   it("ignores skipped medicine doses", () => {

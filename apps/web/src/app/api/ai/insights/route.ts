@@ -62,7 +62,8 @@ export async function POST(request: Request) {
   const data = await loadInsightsData(prisma, child, now);
   const context = buildInsightsContext(data);
 
-  const userMessage = `Data for ${child.name}:\n\n${context}\n\nQuestion: ${
+  // The child's name is not needed for insights, so it is not sent
+  const userMessage = `Data for the child:\n\n${context}\n\nQuestion: ${
     question || DEFAULT_QUESTIONS[locale]
   }`;
 

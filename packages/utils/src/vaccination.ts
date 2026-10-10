@@ -1,5 +1,3 @@
-import { addDays, addMonths } from "date-fns";
-
 /**
  * The Norwegian childhood immunisation programme (Barnevaksinasjonsprogrammet,
  * FHI) for ages 0 to 3. Risk-group vaccines (BCG, hepatitis B at birth) are
@@ -32,10 +30,22 @@ export function isKnownVaccineKey(key: string): boolean {
   return NORWEGIAN_VACCINE_PROGRAMME.some((d) => d.key === key);
 }
 
+/**
+ * `birthDate` is a date-only value (UTC midnight, as Prisma returns @db.Date),
+ * so the arithmetic is done on UTC calendar fields. Local-time math would
+ * shift the result by a day when it crosses a daylight saving change.
+ * Month addition clamps to the last day (31 Jan + 1 month = 28/29 Feb).
+ */
 export function vaccineDueDate(birthDate: Date, dose: VaccineDose): Date {
-  return "weeks" in dose.due
-    ? addDays(birthDate, dose.due.weeks * 7)
-    : addMonths(birthDate, dose.due.months);
+  const y = birthDate.getUTCFullYear();
+  const m = birthDate.getUTCMonth();
+  const d = birthDate.getUTCDate();
+
+  if ("weeks" in dose.due) {
+    return new Date(Date.UTC(y, m, d + dose.due.weeks * 7));
+  }
+  const lastDayOfTargetMonth = new Date(Date.UTC(y, m + dose.due.months + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m + dose.due.months, Math.min(d, lastDayOfTargetMonth)));
 }
 
 export type VaccineStatus = "given" | "overdue" | "due" | "upcoming";

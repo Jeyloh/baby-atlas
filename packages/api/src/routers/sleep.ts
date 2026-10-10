@@ -11,6 +11,7 @@ import {
 } from "@baby-atlas/schemas";
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
+import { rethrowIfAlreadyEnded } from "../errors";
 
 export const sleepRouter = createTRPCRouter({
   list: householdProcedure
@@ -92,14 +93,16 @@ export const sleepRouter = createTRPCRouter({
         });
       }
 
-      const sleep = await ctx.prisma.sleepRecord.update({
-        where: { id: input.id },
-        data: {
-          endTime: input.endTime ?? new Date(),
-          quality: input.quality,
-          notes: input.notes,
-        },
-      });
+      const sleep = await ctx.prisma.sleepRecord
+        .update({
+          where: { id: input.id, endTime: null },
+          data: {
+            endTime: input.endTime ?? new Date(),
+            quality: input.quality,
+            notes: input.notes,
+          },
+        })
+        .catch(rethrowIfAlreadyEnded);
 
       return sleep;
     }),

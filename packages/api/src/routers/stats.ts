@@ -1,26 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, assertChildAccess } from "../trpc";
+import { osloDayKey as dayKey, lastOsloDayKeys as lastDayKeys } from "@baby-atlas/utils";
 import { premiumProcedure } from "../premium";
 
-const TIME_ZONE = "Europe/Oslo";
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-const dayFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: TIME_ZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
-export function dayKey(date: Date): string {
-  return dayFormatter.format(date);
-}
-
-export function lastDayKeys(days: number, now: Date): string[] {
-  return Array.from({ length: days }, (_, i) =>
-    dayKey(new Date(now.getTime() - (days - 1 - i) * DAY_MS))
-  );
-}
 
 export interface TrendInput {
   now: Date;

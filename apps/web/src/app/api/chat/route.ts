@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@baby-atlas/db";
 import Anthropic from "@anthropic-ai/sdk";
 import { registerTools, handleToolCall } from "@baby-atlas/mcp-server/tools";
-import { scopeToolCall, UNSCOPED_TOOLS } from "@/lib/agent/scope-tool-call";
+import { scopeToolCall, isReadOnlyTool, UNSCOPED_TOOLS } from "@/lib/agent/scope-tool-call";
 import { checkUserSubscription } from "@/lib/subscription";
 import { buildSystemPrompt } from "@/lib/insights/system-prompt";
 import { getRequestLocale } from "@/lib/insights/request-locale";
@@ -30,8 +30,10 @@ interface ChatRequest {
 }
 
 // Convert MCP tool definitions to Anthropic tool format
-function convertToolsToAnthropicFormat(): Anthropic.Tool[] {
-  const mcpTools = registerTools().filter((tool) => !UNSCOPED_TOOLS.has(tool.name));
+function convertToolsToAnthropicFormat(readOnly: boolean): Anthropic.Tool[] {
+  const mcpTools = registerTools().filter(
+    (tool) => !UNSCOPED_TOOLS.has(tool.name) && (!readOnly || isReadOnlyTool(tool.name))
+  );
   return mcpTools.map((tool) => ({
     name: tool.name,
     description: tool.description ?? "",
@@ -171,7 +173,9 @@ export async function POST(request: Request) {
       await getRequestLocale(),
       generateSystemPrompt(childId, child.name, child.birthDate)
     );
-    const tools = convertToolsToAnthropicFormat();
+    // Same rule as the tRPC procedures: viewers can read but not log
+    const readOnly = child.household.members[0]?.role === "VIEWER";
+    const tools = convertToolsToAnthropicFormat(readOnly);
 
     // Build messages array
     const messages: Anthropic.MessageParam[] = [
@@ -265,7 +269,7 @@ export async function POST(request: Request) {
                   // Execute the tool, scoped to the verified child
                   const result = await handleToolCall(
                     toolUse.name,
-                    await scopeToolCall(prisma, toolUse.name, toolInput, childId),
+                    await scopeToolCall(prisma, toolUse.name, toolInput, childId, { readOnly }),
                     prisma
                   );
 

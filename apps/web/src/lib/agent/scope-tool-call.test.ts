@@ -18,34 +18,43 @@ function prismaWith(records: Record<string, string | null>) {
 
 describe("scopeToolCall", () => {
   it("replaces a model-chosen childId with the verified child", async () => {
-    const input = await scopeToolCall(prismaWith({}), "log-diaper", { childId: "child-other", diaperType: "WET" }, CHILD);
+    const input = await scopeToolCall(prismaWith({}), "log-diaper", { childId: "child-other", diaperType: "WET" }, CHILD, { readOnly: false });
     expect(input).toEqual({ childId: CHILD, diaperType: "WET" });
   });
 
   it("blocks tools that are not scoped to one child", async () => {
-    await expect(scopeToolCall(prismaWith({}), "list-children", {}, CHILD)).rejects.toBeInstanceOf(ToolScopeError);
+    await expect(scopeToolCall(prismaWith({}), "list-children", {}, CHILD, { readOnly: false })).rejects.toBeInstanceOf(ToolScopeError);
   });
 
   it("allows record ids that belong to the child", async () => {
-    const input = await scopeToolCall(prismaWith({ s1: CHILD }), "end-sleep", { sleepId: "s1" }, CHILD);
+    const input = await scopeToolCall(prismaWith({ s1: CHILD }), "end-sleep", { sleepId: "s1" }, CHILD, { readOnly: false });
     expect(input).toMatchObject({ sleepId: "s1", childId: CHILD });
   });
 
   it("rejects record ids from another child", async () => {
     await expect(
-      scopeToolCall(prismaWith({ s1: "child-other" }), "end-sleep", { sleepId: "s1" }, CHILD)
+      scopeToolCall(prismaWith({ s1: "child-other" }), "end-sleep", { sleepId: "s1" }, CHILD, { readOnly: false })
     ).rejects.toBeInstanceOf(ToolScopeError);
   });
 
   it("rejects record ids that do not exist", async () => {
     await expect(
-      scopeToolCall(prismaWith({}), "log-medicine", { medicineId: "m1" }, CHILD)
+      scopeToolCall(prismaWith({}), "log-medicine", { medicineId: "m1" }, CHILD, { readOnly: false })
+    ).rejects.toBeInstanceOf(ToolScopeError);
+  });
+
+  it("lets viewers read but not write", async () => {
+    await expect(
+      scopeToolCall(prismaWith({}), "get-daily-summary", {}, CHILD, { readOnly: true })
+    ).resolves.toEqual({ childId: CHILD });
+    await expect(
+      scopeToolCall(prismaWith({}), "log-diaper", { diaperType: "WET" }, CHILD, { readOnly: true })
     ).rejects.toBeInstanceOf(ToolScopeError);
   });
 
   it("rejects unknown id arguments", async () => {
     await expect(
-      scopeToolCall(prismaWith({}), "some-tool", { householdId: "h1" }, CHILD)
+      scopeToolCall(prismaWith({}), "some-tool", { householdId: "h1" }, CHILD, { readOnly: false })
     ).rejects.toBeInstanceOf(ToolScopeError);
   });
 });

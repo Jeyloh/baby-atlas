@@ -1,6 +1,14 @@
-const TIME_ZONE = "Europe/Oslo";
-const DAY_MS = 24 * 60 * 60 * 1000;
+import {
+  OSLO_TIME_ZONE as TIME_ZONE,
+  osloDayKey as dayKey,
+  lastOsloDayKeys as lastDayKeys,
+} from "@baby-atlas/utils";
 export const FEVER_THRESHOLD_CELSIUS = 38;
+
+// Keep the prompt bounded no matter how much a user logs
+const MAX_WORDS = 50;
+const MAX_WORD_LENGTH = 40;
+const MAX_GROWTH_ROWS = 10;
 
 export interface SleepInput {
   startTime: Date;
@@ -61,13 +69,6 @@ export interface InsightsData {
   medicines: MedicineInput[];
 }
 
-const dayFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: TIME_ZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
 const timeFormatter = new Intl.DateTimeFormat("nb-NO", {
   timeZone: TIME_ZONE,
   month: "2-digit",
@@ -77,15 +78,7 @@ const timeFormatter = new Intl.DateTimeFormat("nb-NO", {
   hour12: false,
 });
 
-function dayKey(date: Date): string {
-  return dayFormatter.format(date);
-}
-
-export function lastDayKeys(days: number, now: Date): string[] {
-  return Array.from({ length: days }, (_, i) =>
-    dayKey(new Date(now.getTime() - (days - 1 - i) * DAY_MS))
-  );
-}
+export { lastDayKeys };
 
 export function ageInMonths(birthDate: Date, now: Date): number {
   let months =
@@ -200,7 +193,9 @@ export function summarizeTemperatures(records: TemperatureInput[]): string[] {
 
 export function summarizeGrowth(records: GrowthInput[]): string[] {
   if (records.length === 0) return [];
-  const sorted = [...records].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const sorted = [...records]
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+    .slice(-MAX_GROWTH_ROWS);
   return [
     "Growth measurements:",
     ...sorted.map((r) => {
@@ -231,11 +226,14 @@ export function summarizePotty(records: PottyInput[]): string[] {
 
 export function summarizeWords(records: WordInput[]): string[] {
   if (records.length === 0) return [];
-  const sorted = [...records].sort(
-    (a, b) => a.firstSaidAt.getTime() - b.firstSaidAt.getTime()
-  );
+  const newest = [...records]
+    .sort((a, b) => b.firstSaidAt.getTime() - a.firstSaidAt.getTime())
+    .slice(0, MAX_WORDS);
+  const more = records.length - newest.length;
   return [
-    `New words: ${sorted.map((r) => `${r.word} (${dayKey(r.firstSaidAt)})`).join(", ")}`,
+    `New words (${records.length}): ${newest
+      .map((r) => `${r.word.slice(0, MAX_WORD_LENGTH)} (${dayKey(r.firstSaidAt)})`)
+      .join(", ")}${more > 0 ? `, and ${more} more` : ""}`,
   ];
 }
 

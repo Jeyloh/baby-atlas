@@ -13,6 +13,11 @@ import type { PrismaClient } from "@baby-atlas/db";
 
 export const UNSCOPED_TOOLS = new Set(["list-children"]);
 
+// Household viewers may only use tools that read data
+export function isReadOnlyTool(name: string): boolean {
+  return /^(get|query|list)-/.test(name);
+}
+
 type RecordLookup = (prisma: PrismaClient, id: string) => Promise<{ childId: string } | null>;
 
 const RECORD_ID_ARGS: Record<string, RecordLookup> = {
@@ -28,9 +33,10 @@ export async function scopeToolCall(
   prisma: PrismaClient,
   toolName: string,
   input: Record<string, unknown>,
-  childId: string
+  childId: string,
+  opts: { readOnly: boolean }
 ): Promise<Record<string, unknown>> {
-  if (UNSCOPED_TOOLS.has(toolName)) {
+  if (UNSCOPED_TOOLS.has(toolName) || (opts.readOnly && !isReadOnlyTool(toolName))) {
     throw new ToolScopeError(`Tool ${toolName} is not available`);
   }
 

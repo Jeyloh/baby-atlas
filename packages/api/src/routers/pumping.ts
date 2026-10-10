@@ -11,6 +11,7 @@ import {
 } from "@baby-atlas/schemas";
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
+import { rethrowIfAlreadyEnded } from "../errors";
 
 export const pumpingRouter = createTRPCRouter({
   list: householdProcedure
@@ -64,14 +65,16 @@ export const pumpingRouter = createTRPCRouter({
         });
       }
 
-      const pumping = await ctx.prisma.pumpingRecord.update({
-        where: { id: input.id },
-        data: {
-          endTime: input.endTime ?? new Date(),
-          amountMl: input.amountMl,
-          notes: input.notes,
-        },
-      });
+      const pumping = await ctx.prisma.pumpingRecord
+        .update({
+          where: { id: input.id, endTime: null },
+          data: {
+            endTime: input.endTime ?? new Date(),
+            amountMl: input.amountMl,
+            notes: input.notes,
+          },
+        })
+        .catch(rethrowIfAlreadyEnded);
 
       return pumping;
     }),
