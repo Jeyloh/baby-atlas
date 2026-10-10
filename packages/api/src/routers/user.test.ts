@@ -19,6 +19,8 @@ describe("userRouter", () => {
         name: "Test User",
         email: "test@example.com",
         image: null,
+        isPremium: false,
+        quickActions: [],
         createdAt: new Date(),
       } as never);
 
@@ -27,6 +29,32 @@ describe("userRouter", () => {
       expect(result.id).toBe(userId);
       expect(result.name).toBe("Test User");
       expect(result.email).toBe("test@example.com");
+    });
+
+    it("returns default quick actions when none are pinned", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: userId,
+        isPremium: false,
+        quickActions: [],
+      } as never);
+
+      const result = await caller.get();
+
+      expect(result.quickActions).toEqual(["diaperWet", "diaperDirty", "sleep", "bottle"]);
+    });
+
+    it("drops unknown stored quick actions", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: userId,
+        isPremium: false,
+        quickActions: ["sleep", "retiredAction"],
+      } as never);
+
+      const result = await caller.get();
+
+      expect(result.quickActions).toEqual(["sleep"]);
     });
 
     it("throws NOT_FOUND when user does not exist", async () => {
@@ -38,6 +66,24 @@ describe("userRouter", () => {
       await expect(caller.get()).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
+    });
+  });
+
+  describe("setQuickActions", () => {
+    it("rejects more than four actions", async () => {
+      const caller = createCaller(createTestContext());
+      await expect(
+        caller.setQuickActions({
+          quickActions: ["diaperWet", "diaperDirty", "sleep", "bottle", "pumping"],
+        })
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    });
+
+    it("rejects duplicates", async () => {
+      const caller = createCaller(createTestContext());
+      await expect(
+        caller.setQuickActions({ quickActions: ["sleep", "sleep"] })
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
     });
   });
 

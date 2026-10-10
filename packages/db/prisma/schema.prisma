@@ -48,6 +48,10 @@ model User {
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
   image         String?
+  // Premium unlocks AI insights and advanced statistics. Logging is always free.
+  isPremium     Boolean   @default(false) @map("is_premium")
+  // Pinned one-tap shortcuts on the home screen, as QuickAction keys (max 4)
+  quickActions  String[]  @default([]) @map("quick_actions")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -145,6 +149,9 @@ model Child {
   activityRecords     ActivityRecord[]
   temperatureRecords  TemperatureRecord[]
   medicines           Medicine[]
+  speechWords         SpeechWord[]
+  pottyReadinessLogs  PottyReadinessLog[]
+  vaccinationRecords  VaccinationRecord[]
 
   @@map("children")
 }
@@ -417,4 +424,78 @@ model MedicineRecord {
 
   @@index([medicineId, time])
   @@map("medicine_records")
+}
+
+// ============================================================================
+// Speech & Vocabulary (toddler)
+// ============================================================================
+
+enum SpeechCategory {
+  WORD
+  SOUND
+  SIGN
+}
+
+model SpeechWord {
+  id          String         @id @default(cuid())
+  childId     String         @map("child_id")
+  word        String
+  category    SpeechCategory @default(WORD)
+  firstSaidAt DateTime       @map("first_said_at") @db.Date
+  notes       String?
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId, firstSaidAt])
+  @@map("speech_words")
+}
+
+// ============================================================================
+// Potty Training Readiness (18-36 months)
+// ============================================================================
+
+enum PottySignal {
+  DRY_TWO_HOURS
+  HIDES_TO_POOP
+  DISCOMFORT_DIRTY_DIAPER
+  INTEREST_IN_TOILET
+  PULLS_PANTS_UP_DOWN
+  ANNOUNCES_NEED
+}
+
+model PottyReadinessLog {
+  id        String        @id @default(cuid())
+  childId   String        @map("child_id")
+  time      DateTime
+  signals   PottySignal[]
+  notes     String?
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId, time])
+  @@map("potty_readiness_logs")
+}
+
+// ============================================================================
+// Vaccinations (Norwegian childhood immunisation programme)
+// ============================================================================
+
+model VaccinationRecord {
+  id         String   @id @default(cuid())
+  childId    String   @map("child_id")
+  // Key into the static programme in @baby-atlas/utils (vaccination.ts)
+  vaccineKey String   @map("vaccine_key")
+  givenAt    DateTime @map("given_at") @db.Date
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, vaccineKey])
+  @@map("vaccination_records")
 }

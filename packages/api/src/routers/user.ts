@@ -1,6 +1,23 @@
 import { TRPCError } from "@trpc/server";
-import { updateUserSchema, deleteUserSchema } from "@baby-atlas/schemas";
+import {
+  updateUserSchema,
+  deleteUserSchema,
+  setQuickActionsSchema,
+  quickActionSchema,
+  DEFAULT_QUICK_ACTIONS,
+  type QuickAction,
+} from "@baby-atlas/schemas";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+// Users who never pinned anything get the defaults. Unknown keys (from an
+// older app version) are dropped instead of failing the whole query.
+function parseQuickActions(stored: string[]): QuickAction[] {
+  if (stored.length === 0) return DEFAULT_QUICK_ACTIONS;
+  return stored.flatMap((key) => {
+    const parsed = quickActionSchema.safeParse(key);
+    return parsed.success ? [parsed.data] : [];
+  });
+}
 
 export const userRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx }) => {
@@ -11,6 +28,8 @@ export const userRouter = createTRPCRouter({
         name: true,
         email: true,
         image: true,
+        isPremium: true,
+        quickActions: true,
         createdAt: true,
       },
     });
@@ -19,8 +38,22 @@ export const userRouter = createTRPCRouter({
       throw new TRPCError({ code: "NOT_FOUND" });
     }
 
-    return user;
+    return {
+      ...user,
+      quickActions: parseQuickActions(user.quickActions),
+    };
   }),
+
+  setQuickActions: protectedProcedure
+    .input(setQuickActionsSchema)
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.prisma.user.update({
+        where: { id: ctx.session.user.id },
+        data: { quickActions: input.quickActions },
+        select: { quickActions: true },
+      });
+      return { quickActions: parseQuickActions(user.quickActions) };
+    }),
 
   update: protectedProcedure
     .input(updateUserSchema)

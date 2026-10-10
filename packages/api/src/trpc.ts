@@ -143,6 +143,41 @@ async function validateHouseholdAccess(
   return membership;
 }
 
+/**
+ * Validates that the user is a member of the child's household and returns
+ * the membership. Use this for mutations addressed by record id, where
+ * householdProcedure cannot resolve the household from the input.
+ * Pass `write: true` to also reject VIEWER members.
+ */
+export async function assertChildAccess(
+  ctx: { prisma: TRPCContext["prisma"]; session: { user: { id: string } } },
+  childId: string,
+  opts: { write?: boolean } = {}
+) {
+  const child = await ctx.prisma.child.findUnique({
+    where: { id: childId },
+    select: { householdId: true },
+  });
+  if (!child) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "Child not found" });
+  }
+
+  const membership = await validateHouseholdAccess(
+    ctx.prisma,
+    child.householdId,
+    ctx.session.user.id
+  );
+
+  if (opts.write && membership.role === "VIEWER") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Viewers cannot change records",
+    });
+  }
+
+  return membership;
+}
+
 // Create a procedure that validates household access using input
 // This approach works with tRPC v11's caller factory for testing
 export const householdProcedure = protectedProcedure.use(
