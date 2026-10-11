@@ -4,6 +4,7 @@
   "profile": "Profil",
   "householdSettings": "Husstandsinnstillinger",
   "signOut": "Logg ut",
+  "signOutFailed": "Kunne ikke logge ut uten nett. Prøv igjen når du er på nett.",
   "theme": "Utseende",
   "themes": { "light": "Lyst", "dark": "Mørkt", "system": "Som enheten" }
 }

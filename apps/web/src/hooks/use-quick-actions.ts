@@ -2,9 +2,10 @@
 
 import { useCallback } from "react";
 import type { QuickAction } from "@baby-atlas/schemas";
-import { trpc } from "@/lib/trpc/provider";
 import { useTimer } from "@/hooks/use-timer";
-import { sharedFreshness } from "@/lib/shared-freshness";
+import { useLastActivities, useUserId } from "@/hooks/use-last-activities";
+import { discardRecord, queueOp, type OutboxOp } from "@/lib/offline/outbox";
+import { createRecordId } from "@/lib/offline/record-id";
 import {
   getLeftElapsedMs,
   getRightElapsedMs,
@@ -13,11 +14,12 @@ import {
 } from "@/stores/timer-store";
 
 export type QuickActionResult =
-  | { kind: "logged"; undo: () => Promise<void> }
-  | { kind: "started"; undo: () => Promise<void> }
+  | { kind: "logged"; undo: () => void }
+  | { kind: "started"; undo: () => void }
   | { kind: "stopped"; durationMs: number }
   | { kind: "switched"; side: "LEFT" | "RIGHT" }
-  | { kind: "needsDetails" };
+  | { kind: "needsDetails" }
+  | { kind: "unavailable" };
 
 export interface QuickActionState {
   active: boolean;
@@ -69,42 +71,22 @@ export function sleepTypeFor(date: Date): "NAP" | "NIGHT" {
 }
 
 /**
- * Runs one-tap actions for the home screen. Timers follow the same pattern
- * as the log modal: the DB record is the source of truth and the local timer
- * store mirrors it, so the modal can stop a timer started here and the other
- * way round. If another caregiver started a timer, the DB record id is used.
+ * Runs one-tap actions for the home screen. Every write goes through the
+ * outbox with an id picked here, so taps work offline and undo or stop can
+ * refer to a record the server has not seen yet. Timers follow the same
+ * pattern as the log modal: the DB record is the source of truth and the
+ * local timer store mirrors it, so the modal can stop a timer started here
+ * and the other way round. If another caregiver started a timer, the DB
+ * record id is used.
  */
 export function useQuickActions(childId: string) {
-  const utils = trpc.useUtils();
-  const { data: last } = trpc.timeline.getLastActivities.useQuery({ childId }, sharedFreshness);
+  const { data: last } = useLastActivities(childId);
+  const userId = useUserId();
 
   const sleepTimer = useTimer(childId, "sleep");
   const feedingTimer = useTimer(childId, "feeding");
   const pumpingTimer = useTimer(childId, "pumping");
-
-  const invalidate = useCallback(() => {
-    void utils.timeline.invalidate();
-    void utils.sleep.invalidate();
-    void utils.feeding.invalidate();
-    void utils.diaper.invalidate();
-    void utils.pumping.invalidate();
-  }, [utils]);
-
-  const opts = { onSettled: invalidate };
-  const logDiaper = trpc.diaper.log.useMutation(opts);
-  const deleteDiaper = trpc.diaper.delete.useMutation(opts);
-  const logBottle = trpc.feeding.logBottle.useMutation(opts);
-  const deleteFeeding = trpc.feeding.delete.useMutation(opts);
-  const startSleep = trpc.sleep.start.useMutation(opts);
-  const endSleep = trpc.sleep.end.useMutation(opts);
-  const deleteSleep = trpc.sleep.delete.useMutation(opts);
-  const startBreast = trpc.feeding.startBreastfeeding.useMutation(opts);
-  const endBreast = trpc.feeding.endBreastfeeding.useMutation(opts);
-  const switchBreast = trpc.feeding.switchBreastfeedingSide.useMutation(opts);
   const switchTimerSide = useTimerStore((s) => s.switchBreastfeedingSide);
-  const startPumping = trpc.pumping.start.useMutation(opts);
-  const endPumping = trpc.pumping.end.useMutation(opts);
-  const deletePumping = trpc.pumping.delete.useMutation(opts);
 
   const activeSleep = last?.activeSleep ?? null;
   const activeFeeding = last?.activeFeeding ?? null;
@@ -136,36 +118,45 @@ export function useQuickActions(childId: string) {
   };
 
   const run = useCallback(
-    async (action: QuickAction): Promise<QuickActionResult> => {
+    (action: QuickAction): QuickActionResult => {
+      // Only missing on a first ever start without a connection
+      if (!userId) return { kind: "unavailable" };
+      const queue = (recordId: string, op: OutboxOp) => queueOp(userId, childId, recordId, op);
+      const discard = (recordId: string, op: OutboxOp) => discardRecord(userId, childId, recordId, op);
       const now = new Date();
 
       switch (action) {
         case "diaperWet":
         case "diaperDirty":
         case "diaperBoth": {
-          const record = await logDiaper.mutateAsync({
-            childId,
-            time: now,
-            diaperType: DIAPER_TYPE[action],
+          const recordId = createRecordId();
+          queue(recordId, {
+            path: "diaper.log",
+            input: { recordId, childId, time: now, diaperType: DIAPER_TYPE[action] },
           });
           return {
             kind: "logged",
-            undo: async () => void (await deleteDiaper.mutateAsync({ id: record.id })),
+            undo: () => discard(recordId, { path: "diaper.delete", input: { id: recordId } }),
           };
         }
 
         case "bottle": {
           const previous = last?.lastBottle;
           if (!previous?.amountMl) return { kind: "needsDetails" };
-          const record = await logBottle.mutateAsync({
-            childId,
-            startTime: now,
-            amountMl: previous.amountMl,
-            bottleContentType: previous.bottleContentType ?? undefined,
+          const recordId = createRecordId();
+          queue(recordId, {
+            path: "feeding.logBottle",
+            input: {
+              recordId,
+              childId,
+              startTime: now,
+              amountMl: previous.amountMl,
+              bottleContentType: previous.bottleContentType ?? undefined,
+            },
           });
           return {
             kind: "logged",
-            undo: async () => void (await deleteFeeding.mutateAsync({ id: record.id })),
+            undo: () => discard(recordId, { path: "feeding.delete", input: { id: recordId } }),
           };
         }
 
@@ -173,18 +164,22 @@ export function useQuickActions(childId: string) {
           sleepTimer.stop();
           if (runningSleepId) {
             const startedAt = activeSleep?.startTime ?? now;
-            await endSleep.mutateAsync({ id: runningSleepId, endTime: now });
+            queue(runningSleepId, { path: "sleep.end", input: { id: runningSleepId, endTime: now } });
             return { kind: "stopped", durationMs: now.getTime() - startedAt.getTime() };
           }
           const sleepType = sleepTypeFor(now);
-          const record = await startSleep.mutateAsync({ childId, sleepType, startTime: now });
+          const recordId = createRecordId();
+          queue(recordId, {
+            path: "sleep.start",
+            input: { recordId, childId, sleepType, startTime: now },
+          });
           sleepTimer.start({ sleepType });
-          sleepTimer.update({ recordId: record.id });
+          sleepTimer.update({ recordId });
           return {
             kind: "started",
-            undo: async () => {
+            undo: () => {
               sleepTimer.stop();
-              await deleteSleep.mutateAsync({ id: record.id });
+              discard(recordId, { path: "sleep.delete", input: { id: recordId } });
             },
           };
         }
@@ -202,7 +197,10 @@ export function useQuickActions(childId: string) {
             const totalSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
             const durations = breastSideDurations(localTimer, activeFeeding, totalSeconds);
             if (localTimer) switchTimerSide(localTimer.id, side);
-            await switchBreast.mutateAsync({ id: runningFeedingId, newSide: side, ...durations });
+            queue(runningFeedingId, {
+              path: "feeding.switchBreastfeedingSide",
+              input: { id: runningFeedingId, newSide: side, ...durations },
+            });
             return { kind: "switched", side };
           }
 
@@ -210,21 +208,28 @@ export function useQuickActions(childId: string) {
           if (runningFeedingId) {
             const startedAt = activeFeeding?.startTime ?? new Date(localTimer?.startTime ?? now);
             const totalSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
-            await endBreast.mutateAsync({
-              id: runningFeedingId,
-              endTime: now,
-              ...breastSideDurations(localTimer, activeFeeding, totalSeconds),
+            queue(runningFeedingId, {
+              path: "feeding.endBreastfeeding",
+              input: {
+                id: runningFeedingId,
+                endTime: now,
+                ...breastSideDurations(localTimer, activeFeeding, totalSeconds),
+              },
             });
             return { kind: "stopped", durationMs: totalSeconds * 1000 };
           }
-          const record = await startBreast.mutateAsync({ childId, side, startTime: now });
+          const recordId = createRecordId();
+          queue(recordId, {
+            path: "feeding.startBreastfeeding",
+            input: { recordId, childId, side, startTime: now },
+          });
           feedingTimer.start({ feedingSide: side });
-          feedingTimer.update({ recordId: record.id });
+          feedingTimer.update({ recordId });
           return {
             kind: "started",
-            undo: async () => {
+            undo: () => {
               feedingTimer.stop();
-              await deleteFeeding.mutateAsync({ id: record.id });
+              discard(recordId, { path: "feeding.delete", input: { id: recordId } });
             },
           };
         }
@@ -233,29 +238,33 @@ export function useQuickActions(childId: string) {
           pumpingTimer.stop();
           if (runningPumpingId) {
             const startedAt = activePumping?.startTime ?? now;
-            await endPumping.mutateAsync({ id: runningPumpingId, endTime: now });
+            queue(runningPumpingId, {
+              path: "pumping.end",
+              input: { id: runningPumpingId, endTime: now },
+            });
             return { kind: "stopped", durationMs: now.getTime() - startedAt.getTime() };
           }
-          const record = await startPumping.mutateAsync({ childId, startTime: now });
+          const recordId = createRecordId();
+          queue(recordId, {
+            path: "pumping.start",
+            input: { recordId, childId, startTime: now },
+          });
           pumpingTimer.start({});
-          pumpingTimer.update({ recordId: record.id });
+          pumpingTimer.update({ recordId });
           return {
             kind: "started",
-            undo: async () => {
+            undo: () => {
               pumpingTimer.stop();
-              await deletePumping.mutateAsync({ id: record.id });
+              discard(recordId, { path: "pumping.delete", input: { id: recordId } });
             },
           };
         }
       }
     },
     [
-      childId, last, activeSleep, activeFeeding, activePumping,
+      userId, childId, last, activeSleep, activeFeeding, activePumping,
       runningSleepId, runningFeedingId, runningPumpingId,
-      sleepTimer, feedingTimer, pumpingTimer,
-      logDiaper, deleteDiaper, logBottle, deleteFeeding,
-      startSleep, endSleep, deleteSleep, startBreast, endBreast, switchBreast, switchTimerSide,
-      startPumping, endPumping, deletePumping,
+      sleepTimer, feedingTimer, pumpingTimer, switchTimerSide,
     ]
   );
 

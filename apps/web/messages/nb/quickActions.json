@@ -26,5 +26,8 @@
   "bottleNeedsAmount": "Logg første flaske med mengde, så kan du gjenta den med ett trykk.",
   "undo": "Angre",
   "undone": "Angret",
-  "failed": "Kunne ikke lagre. Prøv igjen."
+  "failed": "Kunne ikke lagre. Prøv igjen.",
+  "savedOffline": "Lagret på telefonen. Sendes når du er på nett igjen.",
+  "pendingSync": "{count, plural, one {# registrering venter på nett} other {# registreringer venter på nett}}",
+  "syncFailed": "En registrering ble ikke lagret. Sjekk loggen og legg den inn på nytt."
 }

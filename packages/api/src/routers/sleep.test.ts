@@ -113,6 +113,49 @@ describe("sleepRouter", () => {
       ).rejects.toMatchObject({ code: "CONFLICT" });
     });
 
+    it("creates the record with the id the client picked", async () => {
+      const caller = createCaller(createTestContext());
+
+      prismaMock.sleepRecord.findUnique.mockResolvedValue(null);
+      prismaMock.sleepRecord.findFirst.mockResolvedValue(null);
+      prismaMock.sleepRecord.create.mockResolvedValue(
+        createTestSleepRecord({ endTime: null }) as never
+      );
+
+      await caller.start({ recordId, childId, sleepType: "NAP" });
+
+      expect(prismaMock.sleepRecord.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ id: recordId, childId }),
+      });
+    });
+
+    it("returns the stored record when a start is sent again", async () => {
+      const caller = createCaller(createTestContext());
+      const stored = createTestSleepRecord({ id: recordId, endTime: null });
+
+      prismaMock.sleepRecord.findUnique.mockResolvedValue(stored as never);
+      // The replayed record is itself the active session
+      prismaMock.sleepRecord.findFirst.mockResolvedValue(stored as never);
+
+      const result = await caller.start({ recordId, childId, sleepType: "NAP" });
+
+      expect(result).toEqual(stored);
+      expect(prismaMock.sleepRecord.create).not.toHaveBeenCalled();
+    });
+
+    it("rejects a client id that belongs to another child", async () => {
+      const caller = createCaller(createTestContext());
+
+      prismaMock.sleepRecord.findUnique.mockResolvedValue(
+        createTestSleepRecord({ id: recordId, childId: "cotherchild00000000000000" }) as never
+      );
+
+      await expect(
+        caller.start({ recordId, childId, sleepType: "NAP" })
+      ).rejects.toMatchObject({ code: "CONFLICT" });
+      expect(prismaMock.sleepRecord.create).not.toHaveBeenCalled();
+    });
+
     it("throws FORBIDDEN for VIEWER role", async () => {
       const ctx = createTestContext();
       const caller = createCaller(ctx);

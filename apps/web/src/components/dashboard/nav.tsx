@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
   const t = useTranslations("nav");
   const tCommon = useTranslations("common");
   const { theme, setTheme } = useTheme();
+  const signOut = useSignOut();
   const initials = user.name
     ?.split(" ")
     .map((n) => n[0])
@@ -102,7 +103,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer text-destructive focus:text-destructive"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={signOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
               {t("signOut")}

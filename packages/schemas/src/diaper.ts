@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, periodSchema, dateRangeSchema } from "./common";
+import { idSchema, periodSchema, dateRangeSchema, recordIdSchema } from "./common";
 
 export const diaperTypeSchema = z.enum(["WET", "DIRTY", "BOTH", "DRY"]);
 export type DiaperType = z.infer<typeof diaperTypeSchema>;
@@ -39,6 +39,7 @@ export const diaperAmountSchema = z.enum(["SMALL", "MEDIUM", "LARGE"]);
 export type DiaperAmount = z.infer<typeof diaperAmountSchema>;
 
 export const logDiaperSchema = z.object({
+  recordId: recordIdSchema,
   childId: idSchema,
   time: z.coerce.date().optional(),
   diaperType: diaperTypeSchema,

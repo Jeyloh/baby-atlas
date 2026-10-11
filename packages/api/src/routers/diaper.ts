@@ -8,6 +8,7 @@ import {
 } from "@baby-atlas/schemas";
 import { getDateRange } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
+import { findReplayedRecord } from "../replay";
 
 export const diaperRouter = createTRPCRouter({
   list: householdProcedure
@@ -41,8 +42,14 @@ export const diaperRouter = createTRPCRouter({
         });
       }
 
+      const replayed = await findReplayedRecord(input.recordId, input.childId, (id) =>
+        ctx.prisma.diaperRecord.findUnique({ where: { id } })
+      );
+      if (replayed) return replayed;
+
       const diaper = await ctx.prisma.diaperRecord.create({
         data: {
+          id: input.recordId,
           childId: input.childId,
           time: input.time ?? new Date(),
           diaperType: input.diaperType,

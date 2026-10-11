@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { DashboardNav } from "@/components/dashboard/nav";
+import { InstallHint } from "@/components/dashboard/install-hint";
 
 export default async function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default async function DashboardLayout({
       <DashboardNav user={session.user} />
       {/* One centred column: the app is phone-first and reads best narrow */}
       <main className="mx-auto max-w-2xl px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-5">
+        <InstallHint />
         {children}
       </main>
     </div>

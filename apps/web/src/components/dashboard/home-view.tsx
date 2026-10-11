@@ -1,8 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/provider";
-import { sharedFreshness } from "@/lib/shared-freshness";
 import { useTranslations } from "next-intl";
+import { useLastActivities } from "@/hooks/use-last-activities";
 import { ActivityCard, useActivityDetails } from "@/components/dashboard/activity-card";
 import { QuickActionBar } from "@/components/dashboard/quick-action-bar";
 import { ModuleLinks } from "@/components/dashboard/module-links";
@@ -15,8 +14,7 @@ export function HomeView({ childId }: HomeViewProps) {
   const t = useTranslations("dashboard.card");
   const tModules = useTranslations("dashboard.modules");
   const details = useActivityDetails();
-  const { data: lastActivities, isLoading } =
-    trpc.timeline.getLastActivities.useQuery({ childId }, sharedFreshness);
+  const { data: lastActivities, isLoading } = useLastActivities(childId);
 
   if (isLoading) {
     return (

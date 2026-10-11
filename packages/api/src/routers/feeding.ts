@@ -15,6 +15,7 @@ import {
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 import { rethrowIfAlreadyEnded } from "../errors";
+import { findReplayedRecord } from "../replay";
 
 export const feedingRouter = createTRPCRouter({
   list: householdProcedure
@@ -63,6 +64,11 @@ export const feedingRouter = createTRPCRouter({
         });
       }
 
+      const replayed = await findReplayedRecord(input.recordId, input.childId, (id) =>
+        ctx.prisma.feedingRecord.findUnique({ where: { id } })
+      );
+      if (replayed) return replayed;
+
       const existingActive = await ctx.prisma.feedingRecord.findFirst({
         where: {
           childId: input.childId,
@@ -80,6 +86,7 @@ export const feedingRouter = createTRPCRouter({
 
       const feeding = await ctx.prisma.feedingRecord.create({
         data: {
+          id: input.recordId,
           childId: input.childId,
           feedingType: "BREAST",
           startTime: input.startTime ?? new Date(),
@@ -176,8 +183,14 @@ export const feedingRouter = createTRPCRouter({
         });
       }
 
+      const replayed = await findReplayedRecord(input.recordId, input.childId, (id) =>
+        ctx.prisma.feedingRecord.findUnique({ where: { id } })
+      );
+      if (replayed) return replayed;
+
       const feeding = await ctx.prisma.feedingRecord.create({
         data: {
+          id: input.recordId,
           childId: input.childId,
           feedingType: "BOTTLE",
           startTime: input.startTime,

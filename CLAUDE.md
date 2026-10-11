@@ -226,6 +226,18 @@ Timers persist in localStorage via Zustand (`apps/web/src/stores/timer-store.ts`
 - Side switching during active breastfeeding timer
 - When activities are started via Chat/MCP (database only), the UI syncs on modal open via `getActive` queries
 
+### Offline and install
+
+- Quick actions never call tRPC directly. They pick the record id on the device (`createRecordId`, cuid shape) and queue the write in the outbox (`apps/web/src/lib/offline/outbox.ts`, persisted in localStorage with superjson). `OutboxSync` sends it in order: right away, on `online`, on return to the foreground, and with backoff. Network errors, 401 and 5xx retry (5xx gives up after `MAX_SERVER_FAILURES`). CONFLICT on a stop and NOT_FOUND on a delete count as done. Other errors drop the record's entries and show a toast. Each entry carries the user id (from the cached `user.get`) and only that user's session sends it. Sent entries stay as `synced` until the refetch lands, so the overlay does not flicker.
+- Create procedures take an optional `recordId` (not `id`: `householdProcedure` reads `id` as a child or household id). `findReplayedRecord` (`packages/api/src/replay.ts`) returns the stored record when a create is sent again.
+- Undo before sync removes the queued create. Otherwise it queues a delete.
+- `useLastActivities` overlays queued writes on `timeline.getLastActivities` (`applyPending`), so the home screen and quick-action state are right before sync. Timelines show offline entries after sync.
+- The React Query cache is saved to IndexedDB for 7 days (`lib/offline/query-persister.ts`) and restored in the background with `persistQueryClient`. Do not switch to `PersistQueryClientProvider`: it holds queries idle while restoring, so `isLoading` is false with no data and pages flash their empty states. Sign-out goes through `useSignOut`, which signs out first (it fails with a toast offline), then clears that cache and the service worker page cache but keeps the outbox.
+- `public/sw.js` (production only): `/_next/static` cache first, pages network first with a 4 second timeout, `/api` never cached. Bump `VERSION` to drop old caches.
+- Mutations default to `networkMode: "always"`, so detail forms fail with an error offline instead of waiting.
+- iOS has no install prompt. `InstallHint` (dashboard layout) shows the Share steps in iOS browsers, or "Open in Safari" in in-app browsers where iOS hides "Add to Home Screen". Dismissal is stored in localStorage.
+- The Capacitor shell has no service worker unless App-Bound Domains are set up. The outbox and saved cache still work there.
+
 ### AI Chat Interface
 
 The chat page and the dashboard Chat tab both render `Chat` (`apps/web/src/components/chat/chat.tsx`), built on assistant-ui (`@assistant-ui/react`, `LocalRuntime`):

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, periodSchema, dateRangeSchema } from "./common";
+import { idSchema, periodSchema, dateRangeSchema, recordIdSchema } from "./common";
 
 export const sleepTypeSchema = z.enum(["NAP", "NIGHT"]);
 export type SleepType = z.infer<typeof sleepTypeSchema>;
@@ -7,6 +7,7 @@ export type SleepType = z.infer<typeof sleepTypeSchema>;
 export const qualitySchema = z.number().min(1).max(5);
 
 export const startSleepSchema = z.object({
+  recordId: recordIdSchema,
   childId: idSchema,
   sleepType: sleepTypeSchema.default("NAP"),
   startTime: z.coerce.date().optional(),

@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { setLocale } from "@/i18n/actions";
 import { locales, type Locale } from "@/i18n/config";
 import { trpc } from "@/lib/trpc/provider";
@@ -40,6 +40,7 @@ export default function ProfileSettingsPage() {
   const [isSwitchingLocale, startLocaleTransition] = useTransition();
   const { toast } = useToast();
   const utils = trpc.useUtils();
+  const signOut = useSignOut();
 
   const { data: user, isLoading } = trpc.user.get.useQuery();
 
@@ -79,7 +80,7 @@ export default function ProfileSettingsPage() {
   const deleteUser = trpc.user.delete.useMutation({
     onSuccess: () => {
       toast({ title: t("profile.danger.deleted") });
-      signOut({ callbackUrl: "/" });
+      signOut();
     },
     onError: (error) => {
       toast({
@@ -101,9 +102,7 @@ export default function ProfileSettingsPage() {
     }
   };
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: "/" });
-  };
+  const handleSignOut = signOut;
 
   if (isLoading) {
     return (

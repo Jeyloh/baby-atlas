@@ -12,6 +12,7 @@ import {
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 import { rethrowIfAlreadyEnded } from "../errors";
+import { findReplayedRecord } from "../replay";
 
 export const pumpingRouter = createTRPCRouter({
   list: householdProcedure
@@ -44,8 +45,14 @@ export const pumpingRouter = createTRPCRouter({
         });
       }
 
+      const replayed = await findReplayedRecord(input.recordId, input.childId, (id) =>
+        ctx.prisma.pumpingRecord.findUnique({ where: { id } })
+      );
+      if (replayed) return replayed;
+
       const pumping = await ctx.prisma.pumpingRecord.create({
         data: {
+          id: input.recordId,
           childId: input.childId,
           startTime: input.startTime ?? new Date(),
           side: input.side,

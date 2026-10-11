@@ -26,5 +26,8 @@
   "bottleNeedsAmount": "Log your first bottle with an amount, then repeat it with one tap.",
   "undo": "Undo",
   "undone": "Undone",
-  "failed": "Could not save. Try again."
+  "failed": "Could not save. Try again.",
+  "savedOffline": "Saved on this phone. It is sent when you are online again.",
+  "pendingSync": "{count, plural, one {# entry waiting for a connection} other {# entries waiting for a connection}}",
+  "syncFailed": "An entry was not saved. Check the log and add it again."
 }

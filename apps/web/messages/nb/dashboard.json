@@ -30,5 +30,16 @@
     "day": "Dag",
     "week": "Uke",
     "list": "Liste"
+  },
+  "install": {
+    "shareButton": "Del-knappen",
+    "share": {
+      "title": "Legg Baby Atlas på Hjem-skjermen",
+      "body": "Da åpnes appen i fullskjerm og virker uten nett. Trykk på Del-knappen <share></share> og velg <strong>Legg til på Hjem-skjerm</strong>."
+    },
+    "openInSafari": {
+      "title": "Åpne i Safari for å installere",
+      "body": "Denne appen kan ikke legge Baby Atlas på Hjem-skjermen. Trykk på menyen og velg <strong>Åpne i Safari</strong>, og legg den til derfra."
+    }
   }
 }

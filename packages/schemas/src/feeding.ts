@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, periodSchema, dateRangeSchema } from "./common";
+import { idSchema, periodSchema, dateRangeSchema, recordIdSchema } from "./common";
 
 export const feedingTypeSchema = z.enum(["BREAST", "BOTTLE", "SOLIDS"]);
 export type FeedingType = z.infer<typeof feedingTypeSchema>;
@@ -22,6 +22,7 @@ export const logBreastfeedingSchema = z.object({
 export type LogBreastfeedingInput = z.infer<typeof logBreastfeedingSchema>;
 
 export const startBreastfeedingSchema = z.object({
+  recordId: recordIdSchema,
   childId: idSchema,
   side: breastSideSchema,
   startTime: z.coerce.date().optional(),
@@ -47,6 +48,7 @@ export const switchBreastfeedingSideSchema = z.object({
 export type SwitchBreastfeedingSideInput = z.infer<typeof switchBreastfeedingSideSchema>;
 
 export const logBottleSchema = z.object({
+  recordId: recordIdSchema,
   childId: idSchema,
   startTime: z.coerce.date(),
   endTime: z.coerce.date().optional(),

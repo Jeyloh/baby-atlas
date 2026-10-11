@@ -70,6 +70,13 @@ export default [
     },
   },
   {
+    files: ["public/sw.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: { self: "readonly", caches: "readonly" },
+    },
+  },
+  {
     ignores: [
       ".next/**",
       "node_modules/**",

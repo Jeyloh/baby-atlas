@@ -4,6 +4,7 @@
   "profile": "Profile",
   "householdSettings": "Household settings",
   "signOut": "Sign out",
+  "signOutFailed": "Could not sign out without a connection. Try again when you are online.",
   "theme": "Appearance",
   "themes": { "light": "Light", "dark": "Dark", "system": "Match device" }
 }

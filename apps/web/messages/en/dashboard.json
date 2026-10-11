@@ -30,5 +30,16 @@
     "day": "Day",
     "week": "Week",
     "list": "List"
+  },
+  "install": {
+    "shareButton": "the Share button",
+    "share": {
+      "title": "Add Baby Atlas to your Home Screen",
+      "body": "It then opens full screen and works without a connection. Tap the Share button <share></share> and choose <strong>Add to Home Screen</strong>."
+    },
+    "openInSafari": {
+      "title": "Open in Safari to install",
+      "body": "This app cannot add Baby Atlas to the Home Screen. Open the menu, choose <strong>Open in Safari</strong> and add it from there."
+    }
   }
 }

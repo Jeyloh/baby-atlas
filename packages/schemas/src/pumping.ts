@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { idSchema, periodSchema, dateRangeSchema } from "./common";
+import { idSchema, periodSchema, dateRangeSchema, recordIdSchema } from "./common";
 import { breastSideSchema } from "./feeding";
 
 export const startPumpingSchema = z.object({
+  recordId: recordIdSchema,
   childId: idSchema,
   side: breastSideSchema.optional(),
   startTime: z.coerce.date().optional(),

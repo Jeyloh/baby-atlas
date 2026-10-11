@@ -8,6 +8,7 @@ import { trpc } from "@/lib/trpc/provider";
 import { useToast } from "@/hooks/use-toast";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useQuickActions, type QuickActionState } from "@/hooks/use-quick-actions";
+import { usePendingCount } from "@/hooks/use-last-activities";
 import { getActivityChipClasses, type ActivityCategory } from "@/lib/activity-colors";
 import { formatElapsedTime } from "@/stores/timer-store";
 import { useFormatters } from "@/lib/format";
@@ -41,7 +42,7 @@ export function QuickActionBar({ childId }: { childId: string }) {
   const { toast } = useToast();
   const { data: user } = trpc.user.get.useQuery();
   const { state, run } = useQuickActions(childId);
-  const [busy, setBusy] = useState<QuickAction | null>(null);
+  const pendingCount = usePendingCount(childId);
   const [detailsFor, setDetailsFor] = useState<LogType | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -50,48 +51,49 @@ export function QuickActionBar({ childId }: { childId: string }) {
   const formatDuration = (ms: number) =>
     ms < 60_000 ? t("lessThanMinute") : duration(ms / 60000);
 
-  const handleTap = async (action: QuickAction) => {
-    if (busy) return;
-    setBusy(action);
+  const handleTap = (action: QuickAction) => {
     const label = t(`labels.${action}`);
-    try {
-      const result = await run(action);
-      vibrate();
-
-      if (result.kind === "needsDetails") {
-        toast({ title: t("bottleNeedsAmount") });
-        setDetailsFor(QUICK_ACTION_CONFIG[action].logType);
-        return;
-      }
-      if (result.kind === "stopped") {
-        toast({ title: t("stopped", { action: label, duration: formatDuration(result.durationMs) }) });
-        return;
-      }
-      if (result.kind === "switched") {
-        toast({ title: t("switched", { side: t(`sides.${result.side}`) }) });
-        return;
-      }
-
-      const undo = result.undo;
-      toast({
-        title: t(result.kind === "logged" ? "logged" : "started", { action: label }),
-        action: (
-          <ToastAction
-            altText={t("undo")}
-            onClick={async () => {
-              await undo();
-              toast({ title: t("undone") });
-            }}
-          >
-            {t("undo")}
-          </ToastAction>
-        ),
-      });
-    } catch {
+    const result = run(action);
+    if (result.kind === "unavailable") {
       toast({ title: t("failed"), variant: "destructive" });
-    } finally {
-      setBusy(null);
+      return;
     }
+    vibrate();
+    const description = navigator.onLine ? undefined : t("savedOffline");
+
+    if (result.kind === "needsDetails") {
+      toast({ title: t("bottleNeedsAmount") });
+      setDetailsFor(QUICK_ACTION_CONFIG[action].logType);
+      return;
+    }
+    if (result.kind === "stopped") {
+      toast({
+        title: t("stopped", { action: label, duration: formatDuration(result.durationMs) }),
+        description,
+      });
+      return;
+    }
+    if (result.kind === "switched") {
+      toast({ title: t("switched", { side: t(`sides.${result.side}`) }), description });
+      return;
+    }
+
+    const undo = result.undo;
+    toast({
+      title: t(result.kind === "logged" ? "logged" : "started", { action: label }),
+      description,
+      action: (
+        <ToastAction
+          altText={t("undo")}
+          onClick={() => {
+            undo();
+            toast({ title: t("undone") });
+          }}
+        >
+          {t("undo")}
+        </ToastAction>
+      ),
+    });
   };
 
   return (
@@ -105,7 +107,9 @@ export function QuickActionBar({ childId }: { childId: string }) {
           <h2 id="quick-actions-title" className="font-display text-lg font-semibold tracking-tight">
             {t("title")}
           </h2>
-          <p className="text-xs text-white/70">{t("hint")}</p>
+          <p className="text-xs text-white/70">
+            {pendingCount > 0 ? t("pendingSync", { count: pendingCount }) : t("hint")}
+          </p>
         </div>
         <Button
           variant="ghost"
@@ -124,7 +128,6 @@ export function QuickActionBar({ childId }: { childId: string }) {
             key={action}
             action={action}
             state={state[action]}
-            busy={busy === action}
             onTap={() => handleTap(action)}
             onLongPress={() => {
               vibrate();
@@ -151,13 +154,11 @@ export function QuickActionBar({ childId }: { childId: string }) {
 function QuickActionButton({
   action,
   state,
-  busy,
   onTap,
   onLongPress,
 }: {
   action: QuickAction;
   state: QuickActionState;
-  busy: boolean;
   onTap: () => void;
   onLongPress: () => void;
 }) {
@@ -171,7 +172,6 @@ function QuickActionButton({
     <button
       type="button"
       {...handlers}
-      disabled={busy}
       aria-label={state.active ? t("stopLabel", { action: label }) : label}
       aria-pressed={state.active}
       // Neutral action buttons, so they read differently from the colored status
