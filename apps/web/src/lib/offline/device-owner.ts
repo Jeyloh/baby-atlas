@@ -34,6 +34,9 @@ export async function claimDevice(queryClient: QueryClient, userId: string) {
   const previous = lastConfirmedOwner();
   const loaded = useDeviceOwner.getState().owner;
   if ((previous && previous !== userId) || (loaded && loaded !== userId)) {
+    // Unset first, so a load of the old owner's data that finishes during
+    // the clear fails the persister's owner check
+    useDeviceOwner.setState({ owner: undefined, verified: false });
     queryClient.clear();
     await clearSavedData();
   }

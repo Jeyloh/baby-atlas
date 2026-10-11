@@ -38,6 +38,18 @@ describe("device owner", () => {
     expect(useDeviceOwner.getState()).toEqual({ owner: bob, verified: true });
   });
 
+  it("unsets the old owner before clearing, so a late load of its data is dropped", async () => {
+    await claimDevice(queryClient, alice);
+    let ownerDuringClear: string | undefined = "not called";
+    vi.mocked(clearSavedData).mockImplementationOnce(async () => {
+      ownerDuringClear = useDeviceOwner.getState().owner;
+    });
+
+    await claimDevice(queryClient, bob);
+
+    expect(ownerDuringClear).toBeUndefined();
+  });
+
   it("loads the last confirmed user's data offline, unverified", async () => {
     await claimDevice(queryClient, alice);
     useDeviceOwner.setState({ owner: undefined, verified: false });
