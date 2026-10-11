@@ -132,7 +132,7 @@ export function DayView({ childId }: DayViewProps) {
 
       {data && (
         <DayFilterChips
-          items={summarizeDay(data)}
+          items={summarizeDay(data, { start: data.dayStart, end: data.dayEnd })}
           selected={filters}
           onToggle={toggleFilter}
           onClear={() => setFilters(new Set())}

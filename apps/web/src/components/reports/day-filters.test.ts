@@ -3,6 +3,9 @@ import { summarizeDay, filterDay, type DayRecords } from "./day-filters";
 
 const at = (h: number, m = 0) => new Date(2026, 9, 10, h, m);
 
+// The app's day runs 08:00 to 08:00
+const window = { start: at(8), end: new Date(2026, 9, 11, 8, 0) };
+
 const day: DayRecords = {
   sleepRecords: [
     { id: "s1", startTime: at(9), endTime: at(10, 30), sleepType: "NAP" },
@@ -24,7 +27,7 @@ const day: DayRecords = {
 
 describe("summarizeDay", () => {
   it("sums durations, amounts and counts per activity", () => {
-    const byFilter = Object.fromEntries(summarizeDay(day).map((i) => [i.filter, i.summary]));
+    const byFilter = Object.fromEntries(summarizeDay(day, window).map((i) => [i.filter, i.summary]));
     expect(byFilter.sleep).toEqual({ kind: "minutes", value: 90 });
     expect(byFilter.nursing).toEqual({ kind: "minutes", value: 20 });
     expect(byFilter.bottle).toEqual({ kind: "ml", value: 210 });
@@ -32,8 +35,22 @@ describe("summarizeDay", () => {
     expect(byFilter.diaper).toEqual({ kind: "count", value: 1 });
   });
 
+  it("counts only the part of a sleep that falls inside the day", () => {
+    const night: DayRecords = {
+      ...day,
+      sleepRecords: [
+        // Started the evening before, ended 08:30: only 30 minutes belong to this day
+        { id: "n0", startTime: new Date(2026, 9, 9, 19, 30), endTime: at(8, 30), sleepType: "NIGHT" },
+        // Started this evening, ends after the day closes at 08:00 tomorrow
+        { id: "n1", startTime: at(19, 30), endTime: new Date(2026, 9, 11, 8, 30), sleepType: "NIGHT" },
+      ],
+    };
+    const sleep = summarizeDay(night, window).find((i) => i.filter === "sleep")!;
+    expect(sleep.summary).toEqual({ kind: "minutes", value: 30 + 12 * 60 + 30 });
+  });
+
   it("always shows the core activities and adds others only when logged", () => {
-    expect(summarizeDay(day).map((i) => i.filter)).toEqual([
+    expect(summarizeDay(day, window).map((i) => i.filter)).toEqual([
       "sleep", "nursing", "bottle", "solids", "diaper", "temperature",
     ]);
   });

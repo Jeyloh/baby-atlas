@@ -57,7 +57,8 @@ interface LogModalProps {
 export function LogModal({ childId, type, open, onOpenChange }: LogModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+      {/* No overflow-hidden: the sheet must scroll so Save stays reachable on small phones */}
+      <DialogContent className="max-w-md gap-0 p-0 pb-[env(safe-area-inset-bottom)] sm:pb-0">
         {type === "sleep" && (
           <SleepModal childId={childId} onClose={() => onOpenChange(false)} />
         )}

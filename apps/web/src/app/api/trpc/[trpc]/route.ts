@@ -1,7 +1,7 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter, createTRPCContext } from "@baby-atlas/api";
 import { auth } from "@/lib/auth";
-import { getStorage } from "@/lib/storage";
+import { lazyStoredFileRemover } from "@/lib/storage";
 
 const handler = async (req: Request) => {
   const session = await auth();
@@ -13,7 +13,7 @@ const handler = async (req: Request) => {
     createContext: () =>
       createTRPCContext({
         headers: req.headers,
-        storage: getStorage(),
+        storage: lazyStoredFileRemover,
         session: session
           ? {
               user: {

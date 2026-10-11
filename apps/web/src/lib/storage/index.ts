@@ -34,3 +34,12 @@ export function getStorage(): Storage {
   }
   return instance;
 }
+
+/**
+ * What the tRPC context gets: storage is only resolved when a file is
+ * actually deleted, so a missing storage config cannot break every other
+ * API call (logging must keep working).
+ */
+export const lazyStoredFileRemover = {
+  delete: (key: string) => getStorage().delete(key),
+};
