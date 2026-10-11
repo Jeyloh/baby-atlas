@@ -50,6 +50,19 @@ describe("device owner", () => {
     expect(ownerDuringClear).toBeUndefined();
   });
 
+  it("never falls back to the old owner while switching to a new one", async () => {
+    await claimDevice(queryClient, alice);
+    let fallbackOwner: string | undefined;
+    vi.mocked(clearSavedData).mockImplementationOnce(async () => {
+      fallBackToLastConfirmedOwner();
+      fallbackOwner = useDeviceOwner.getState().owner;
+    });
+
+    await claimDevice(queryClient, bob);
+
+    expect(fallbackOwner).toBe(bob);
+  });
+
   it("loads the last confirmed user's data offline, unverified", async () => {
     await claimDevice(queryClient, alice);
     useDeviceOwner.setState({ owner: undefined, verified: false });
