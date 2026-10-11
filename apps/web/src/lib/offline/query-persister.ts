@@ -28,15 +28,16 @@ export function createQueryPersister() {
   });
 }
 
+const CACHE_OWNER_KEY = "baby-atlas-cache-owner";
+
 /**
- * Signs out and removes this user's data from the device: saved queries and
- * the pages the service worker cached. Queued quick actions stay, so nothing
- * logged offline is lost if the same person signs in again. Rejects when
- * the sign-out request fails (offline), and then nothing is cleared.
+ * Removes the signed-in user's data from the device: saved queries and the
+ * pages the service worker cached. Queued quick actions stay, so nothing
+ * logged offline is lost if the same person signs in again.
  */
-export async function signOutAndClearDevice(queryClient: QueryClient) {
-  await signOut({ redirect: false });
+export async function clearDeviceData(queryClient: QueryClient) {
   queryClient.clear();
+  localStorage.removeItem(CACHE_OWNER_KEY);
   await Promise.allSettled([
     del(PERSIST_KEY),
     typeof caches === "undefined"
@@ -45,5 +46,22 @@ export async function signOutAndClearDevice(queryClient: QueryClient) {
           Promise.all(keys.filter((key) => key.startsWith("pages-")).map((key) => caches.delete(key)))
         ),
   ]);
+}
+
+/**
+ * Called with the user the server just confirmed. If the saved data belongs
+ * to someone else (a session expired and another person signed in on this
+ * phone), it is cleared before it can be shown or acted on.
+ */
+export async function claimDeviceData(queryClient: QueryClient, userId: string) {
+  const owner = localStorage.getItem(CACHE_OWNER_KEY);
+  if (owner && owner !== userId) await clearDeviceData(queryClient);
+  localStorage.setItem(CACHE_OWNER_KEY, userId);
+}
+
+/** Signs out, then clears. Rejects when the sign-out request fails (offline), and then nothing is cleared. */
+export async function signOutAndClearDevice(queryClient: QueryClient) {
+  await signOut({ redirect: false });
+  await clearDeviceData(queryClient);
   window.location.assign("/");
 }
