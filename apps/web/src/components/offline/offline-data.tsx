@@ -72,7 +72,7 @@ export function OfflineData() {
     if (!owner) return;
     const [unsubscribe] = persistQueryClient({
       queryClient,
-      persister: createQueryPersister(owner),
+      persister: createQueryPersister(owner, (id) => useDeviceOwner.getState().owner === id),
       maxAge: OFFLINE_DATA_MAX_AGE_MS,
       buster: QUERY_CACHE_BUSTER,
     });

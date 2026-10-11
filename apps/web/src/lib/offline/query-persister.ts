@@ -1,4 +1,5 @@
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import type { Persister } from "@tanstack/react-query-persist-client";
 import { del, get, keys, set } from "idb-keyval";
 import SuperJSON from "superjson";
 
@@ -11,9 +12,13 @@ export const OFFLINE_DATA_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 // Bump when a stored query shape changes in a way old data would break
 export const QUERY_CACHE_BUSTER = "1";
 
-/** Saved under the owner's id, so one user's cache can never load for another. */
-export function createQueryPersister(ownerId: string) {
-  return createAsyncStoragePersister({
+/**
+ * Saved under the owner's id, so one user's cache can never load for another.
+ * isCurrentOwner is asked again after the read: the server may have confirmed
+ * someone else while it ran, and then the data is dropped.
+ */
+export function createQueryPersister(ownerId: string, isCurrentOwner: (ownerId: string) => boolean): Persister {
+  const persister = createAsyncStoragePersister({
     key: `${PERSIST_KEY_PREFIX}${ownerId}`,
     storage: {
       getItem: (key: string) => get<string>(key).then((value) => value ?? null),
@@ -23,6 +28,13 @@ export function createQueryPersister(ownerId: string) {
     serialize: (client) => SuperJSON.stringify(client),
     deserialize: (raw) => SuperJSON.parse(raw),
   });
+  return {
+    ...persister,
+    restoreClient: async () => {
+      const client = await persister.restoreClient();
+      return isCurrentOwner(ownerId) ? client : undefined;
+    },
+  };
 }
 
 /** Deletes every saved query cache and the pages the service worker cached. */
