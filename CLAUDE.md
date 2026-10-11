@@ -21,7 +21,8 @@ Baby Atlas is a baby and toddler tracker (0 to 3 years) for Norwegian parents. I
 - **Framework**: Next.js 15 (App Router) with React 19
 - **Language**: TypeScript (strict mode)
 - **API**: tRPC v11 with SuperJSON transformer
-- **Database**: PostgreSQL via Supabase
+- **Database**: PostgreSQL (Neon in production, Docker Postgres locally)
+- **Hosting**: Vercel, with private Vercel Blob for journal photos (see "Production" below)
 - **ORM**: Prisma 6
 - **Auth**: NextAuth.js v5 (email magic link + Google OAuth)
 - **Styling**: Tailwind CSS 4 + shadcn/ui components
@@ -95,6 +96,11 @@ pnpm type-check             # Run TypeScript checks
 # The web app imports from @baby-atlas/mcp-server/tools which requires the dist folder.
 # On a fresh clone or worktree, build the MCP server first:
 pnpm --filter @baby-atlas/mcp-server build
+
+# Local database (Docker). Point DATABASE_URL and DIRECT_URL in apps/web/.env.local at
+# postgresql://postgres:pg@localhost:55432/postgres, then run prisma migrate deploy
+docker run -d --name ba-pg -e POSTGRES_PASSWORD=pg -p 55432:5432 postgres:16
+# Local sign-in without email: set DEV_LOGIN_EMAIL, open /api/dev/login (?as=other@x for a second user)
 
 # Database
 pnpm db:generate            # Generate Prisma client
@@ -418,18 +424,29 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 
 ### API Timeout Configuration
 
-The AI chat feature uses streaming responses that may require longer timeouts. The timeout is configured in `apps/web/src/app/api/chat/route.ts` via the `maxDuration` export. Adjust based on your Vercel plan:
+The AI chat route sets `maxDuration = 60` (`apps/web/src/app/api/chat/route.ts`). The project runs on Fluid compute, where Hobby allows up to 300 seconds, so 60 works on every plan.
 
-| Plan | Max Duration |
-|------|--------------|
-| Hobby (free) | 10 seconds |
-| Pro | 60 seconds |
-| Enterprise | 900 seconds |
+### Production (current setup)
 
-The default is set to 60 seconds (Pro plan). For Hobby plan, change `maxDuration` to `10`.
+- URL: https://baby-atlas.vercel.app. Vercel project `baby-atlas` in team `jeylohs-projects` (Hobby plan, which is for non-commercial use: move to Pro before taking payments).
+- Deploys: Vercel's GitHub integration builds every push to `main` as production and other branches as previews. `gh` on this machine is logged in with a work (Enterprise Managed) account that cannot open PRs on `Jeyloh/baby-atlas`, so changes go to `main` with `git push` (SSH remote `github-personal`).
+- Database: Neon `baby-atlas-db` (free plan, `fra1`), connected through the Vercel Marketplace. Blob: private store `baby-atlas-photos` (`fra1`). Functions run in `fra1` (`apps/web/vercel.json`).
+- Env vars set in production and preview: the Neon and Blob ones injected by Vercel, plus `DIRECT_URL`, `AUTH_SECRET`, `STORAGE_DRIVER=vercel-blob`, `PREMIUM_EMAILS`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Not set yet: `ANTHROPIC_API_KEY` (AI chat and insights fail without it), `EMAIL_SERVER`/`EMAIL_FROM` (magic links), `AUTH_URL` (not needed on `*.vercel.app`).
+- Google OAuth: Google Cloud project `baby-atlas-511310`, web client "Baby Atlas Oauth", redirect URI `https://baby-atlas.vercel.app/api/auth/callback/google`. The consent screen is in testing mode, so only listed test users can sign in until it is published. A custom domain needs a new redirect URI there.
+- Migrations: run from your machine against the unpooled URL. `vercel env pull` (from the repo root, linked through `.vercel/`) writes the values to `.env.local`, then run `DATABASE_URL=$DATABASE_URL_UNPOOLED DIRECT_URL=$DATABASE_URL_UNPOOLED pnpm --filter @baby-atlas/db exec prisma migrate deploy`. Vercel builds never migrate.
+- Logs: `npx vercel logs baby-atlas.vercel.app --since 15m --level error`.
+
+### Deploy gotchas
+
+- `apps/web` must list `@prisma/client` as its own dependency. Without it pnpm hides the package from Next, which then bundles Prisma instead of keeping it external, and the query engine file is never traced into the functions ("Prisma Client could not locate the Query Engine for runtime rhel-openssl-3.0.x"). Check a build with `rg -l libquery_engine apps/web/.next/server --glob '*.nft.json'` (must find files).
+- Never set `trustHost: false` in `auth.ts`. Auth.js only fills in its default when the option is unset, and `false` rejects every request in production (shows "Det er et problem med serverkonfigurasjonen").
+- Turborepo strict env mode hides undeclared variables during the Vercel build. New build-time env vars go in `turbo.json` (`env` for `NEXT_PUBLIC_*`, `passThroughEnv` for the rest).
+- The Vercel CLI edits the repo when it links or installs integrations: it appends `.env*` to `.gitignore` (which would ignore `.env.example`) and writes agent skill files (`.agents/`, `.claude/skills/`, `skills-lock.json`). Do not commit these.
+- Supabase Realtime is not configured in production (`NEXT_PUBLIC_SUPABASE_*` unset). The main screens poll instead.
 
 ## Known Limitations / TODOs
 
+- No privacy policy or GDPR text yet. The app stores children's health data, so write these before inviting other families.
 - No photo upload for children yet
 - Growth charts with percentiles not implemented
 - No data export (CSV/JSON) UI yet
