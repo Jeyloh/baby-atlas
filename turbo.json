@@ -5,7 +5,22 @@
     "build": {
       "dependsOn": ["^build", "^db:generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["NEXT_PUBLIC_*"],
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "DATABASE_URL_UNPOOLED",
+        "DIRECT_URL",
+        "AUTH_*",
+        "GOOGLE_CLIENT_*",
+        "EMAIL_*",
+        "ANTHROPIC_API_KEY",
+        "PREMIUM_EMAILS",
+        "STORAGE_*",
+        "BLOB_READ_WRITE_TOKEN",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "VERCEL_*"
+      ]
     },
     "dev": {
       "cache": false,

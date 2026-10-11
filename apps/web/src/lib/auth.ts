@@ -47,9 +47,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "database",
   },
-  // Only trust Host header in development for convenience
-  // In production, NEXTAUTH_URL must be explicitly set for security
-  trustHost: process.env.NODE_ENV === "development",
+  // trustHost is left unset on purpose: Auth.js then trusts the host in
+  // development, on Vercel and when AUTH_URL is set. An explicit `false`
+  // would reject every production request, AUTH_URL or not.
 });
 
 export type Session = Awaited<ReturnType<typeof auth>>;

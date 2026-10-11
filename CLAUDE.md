@@ -235,7 +235,7 @@ A shared journal per child (`/dashboard/[childId]/journal`): text, up to 6 photo
 - tRPC `journal` router (`packages/api/src/routers/journal.ts`): `list` (cursor pagination, `tags` filter matches any selected tag, never returns storage keys), `create`, `update`, `delete`, `deletePhoto`, `reorderPhotos`. `journalEntry` and `journalPhoto` are in `recordProcedure`'s resolvers. Deleting removes the stored files through `ctx.storage` (a failure is logged, not thrown).
 - Photos are private family data and never have public URLs. Upload: `POST /api/journal/photos` (multipart `entryId` + `file`, one photo per request). It needs a session and edit rights on the entry, checks magic bytes (jpeg, png, webp, heic/heif), allows at most 6 photos per entry, then `sharp` auto-rotates, strips all metadata including GPS, resizes to 2048 px and writes WebP plus a 400 px thumbnail. Serve: `GET /api/journal/photos/[photoId]?size=thumb|full` checks household membership and answers 404 (not 403) for anything the user may not see.
 - sharp's prebuilt libvips reads AVIF but not HEVC, so a raw HEIC upload answers 415 `heic_unsupported`. The client converts through a canvas first (`downscaleImage` in `lib/chat/downscale-image.ts`, shared with chat), which works where the browser can decode HEIC (Safari and iOS).
-- Storage (`apps/web/src/lib/storage/`): `put(key, bytes, mimeType)`, `get(key)` returning a stream plus mimeType, `delete(key)`. Keys are `journal/{childId}/{entryId}/{photoId}.webp` and `...{photoId}.thumb.webp`. `STORAGE_DRIVER=local` (default in development) writes to `apps/web/.uploads/` (git-ignored, `STORAGE_LOCAL_DIR` overrides). `STORAGE_DRIVER=supabase` uses the private bucket `journal` through `SUPABASE_SERVICE_ROLE_KEY`, server side only. Production must use `supabase`. Vercel limits a request body to 4.5 MB, so the client downscales before upload.
+- Storage (`apps/web/src/lib/storage/`): `put(key, bytes, mimeType)`, `get(key)` returning a stream plus mimeType, `delete(key)`. Keys are `journal/{childId}/{entryId}/{photoId}.webp` and `...{photoId}.thumb.webp`. `STORAGE_DRIVER=local` (default in development) writes to `apps/web/.uploads/` (git-ignored, `STORAGE_LOCAL_DIR` overrides). `STORAGE_DRIVER=vercel-blob` uses a private Vercel Blob store through `BLOB_READ_WRITE_TOKEN` (production uses this). `STORAGE_DRIVER=supabase` uses the private bucket `journal` through `SUPABASE_SERVICE_ROLE_KEY`. Both are server side only. Vercel limits a request body to 4.5 MB, so the client downscales before upload.
 - UI in `components/journal/`; tag colours in `lib/journal-tags.ts`.
 
 ### Timeline Views
@@ -354,7 +354,8 @@ GOOGLE_CLIENT_SECRET=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=  # Server-side Supabase access (also the journal photo bucket)
-STORAGE_DRIVER=          # "local" (default in dev, apps/web/.uploads) or "supabase" (private bucket "journal")
+STORAGE_DRIVER=          # "local" (default in dev, apps/web/.uploads), "vercel-blob" or "supabase"
+BLOB_READ_WRITE_TOKEN=   # For STORAGE_DRIVER=vercel-blob
 STORAGE_LOCAL_DIR=       # Optional: replaces apps/web/.uploads for the local driver
 EMAIL_SERVER=            # SMTP connection string for magic links
 EMAIL_FROM=              # Sender email address
@@ -383,18 +384,21 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 ### Setup
 
 1. Import your repository in the Vercel dashboard
-2. Set **Root Directory** to `apps/web`
-3. Configure the required environment variables (see below)
-4. Deploy
+2. Set **Root Directory** to `apps/web`. `apps/web/vercel.json` builds through Turborepo from the repo root (so Prisma generates and the MCP server builds first) and pins functions to `fra1`.
+3. Connect Neon (Postgres, Frankfurt) and a private Blob store from the Storage tab. They inject `DATABASE_URL`, `DATABASE_URL_UNPOOLED` and `BLOB_READ_WRITE_TOKEN`.
+4. Configure the other environment variables (see below). New env vars a build needs must also be listed in `turbo.json` (`env` or `passThroughEnv`), because Turborepo hides undeclared variables on Vercel.
+5. Run migrations from your machine: `DATABASE_URL=<unpooled> DIRECT_URL=<unpooled> pnpm --filter @baby-atlas/db exec prisma migrate deploy`
+6. Deploy
 
 ### Required Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | Supabase PostgreSQL pooler connection string |
-| `DIRECT_URL` | Supabase direct connection (for migrations) |
+| `DATABASE_URL` | Pooled Postgres connection (set by the Neon integration) |
+| `DIRECT_URL` | Direct connection, the same value as `DATABASE_URL_UNPOOLED` |
 | `AUTH_SECRET` | Generate with: `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Your deployment URL |
+| `AUTH_URL` | Your production URL. Auth.js trusts the host on Vercel without it, but set it for a fixed domain |
+| `STORAGE_DRIVER` | `vercel-blob` (needs `BLOB_READ_WRITE_TOKEN`) or `supabase`. The local driver has no writable disk on Vercel |
 
 ### Optional Environment Variables
 
@@ -409,7 +413,7 @@ ANTHROPIC_API_KEY=       # For AI Chat feature (sk-ant-...)
 | `ANTHROPIC_API_KEY` | Anthropic API key for AI chat and insights |
 | `PREMIUM_EMAILS` | Comma-separated emails treated as premium (until payments exist) |
 | `CAP_SERVER_URL` | URL the iOS shell loads (Capacitor) |
-| `STORAGE_DRIVER` | Set to `supabase` in production for journal photos (the local driver has no writable disk on Vercel) |
+| `BLOB_READ_WRITE_TOKEN` | Needed when `STORAGE_DRIVER=vercel-blob`. Set by Vercel. Server only |
 | `SUPABASE_SERVICE_ROLE_KEY` | Needed when `STORAGE_DRIVER=supabase`. Server only |
 
 ### API Timeout Configuration
