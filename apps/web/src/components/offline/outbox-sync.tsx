@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { TRPCClientError } from "@trpc/client";
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { claimDeviceData, clearDeviceData } from "@/lib/offline/query-persister";
+import { useDeviceOwner } from "@/lib/offline/device-owner";
 import { trpc } from "@/lib/trpc/provider";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -40,59 +38,16 @@ function send(client: Client, op: OutboxOp): Promise<unknown> {
 const MAX_RETRY_DELAY_MS = 60_000;
 
 /**
- * The user the server confirms for the current session, asked directly and
- * never taken from the saved cache, which may belong to someone else. Saved
- * data of another user, or of a session that has ended, is cleared here.
- * Undefined while offline: nothing can be sent then anyway.
- */
-function useVerifiedUserId(utils: ReturnType<typeof trpc.useUtils>) {
-  const queryClient = useQueryClient();
-  const [userId, setUserId] = useState<string>();
-
-  useEffect(() => {
-    let stopped = false;
-    const verify = async () => {
-      try {
-        const user = await utils.client.user.get.query();
-        if (stopped || !user) return;
-        await claimDeviceData(queryClient, user.id);
-        setUserId(user.id);
-      } catch (error) {
-        if (stopped) return;
-        const code = error instanceof TRPCClientError ? error.data?.code : undefined;
-        if (code === "UNAUTHORIZED") {
-          await clearDeviceData(queryClient);
-          setUserId(undefined);
-        }
-      }
-    };
-    const onVisible = () => {
-      if (document.visibilityState === "visible") void verify();
-    };
-
-    void verify();
-    window.addEventListener("online", verify);
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      stopped = true;
-      window.removeEventListener("online", verify);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [utils, queryClient]);
-
-  return userId;
-}
-
-/**
  * Sends queued quick actions: right after they are queued, when the device
  * comes back online or to the foreground, and on a growing delay while the
- * server cannot be reached.
+ * server cannot be reached. Only for the user the server has confirmed in
+ * this app session (see OfflineData), never one taken from saved data.
  */
 export function OutboxSync() {
   const t = useTranslations("quickActions");
   const { toast } = useToast();
   const utils = trpc.useUtils();
-  const userId = useVerifiedUserId(utils);
+  const userId = useDeviceOwner((state) => (state.verified ? state.owner : undefined));
 
   useEffect(() => {
     if (!userId) return;
