@@ -6,6 +6,9 @@ export const HANDOVER_MIN_GAP_MS = 2 * 60 * 60 * 1000;
 /** The summary never looks further back than this, however long the absence. */
 export const HANDOVER_MAX_WINDOW_MS = 24 * 60 * 60 * 1000;
 
+/** Open timers older than this are treated as forgotten and left out. */
+export const HANDOVER_MAX_RUNNING_MS = 72 * 60 * 60 * 1000;
+
 const childInput = z.object({ childId: z.string().cuid() });
 
 export const handoverRouter = createTRPCRouter({
@@ -29,8 +32,10 @@ export const handoverRouter = createTRPCRouter({
     );
     const { childId } = input;
     const inWindow = { gte: windowStart, lte: now };
+    // A timer left running for longer than this is forgotten, not "running now"
+    const runningFloor = new Date(now.getTime() - HANDOVER_MAX_RUNNING_MS);
 
-    const [feeds, sleeps, diapers, doses, temperatures, runningFeeds, runningPumping, runningActivity] =
+    const [feeds, sleeps, diapers, doses, temperatures, runningFeeds, pumpingRows, activityRows] =
       await Promise.all([
         ctx.prisma.feedingRecord.findMany({
           where: { childId, startTime: inWindow },
@@ -67,22 +72,39 @@ export const handoverRouter = createTRPCRouter({
           select: { time: true, temperatureCelsius: true },
         }),
         ctx.prisma.feedingRecord.findMany({
-          where: { childId, endTime: null, startTime: { lte: now, gte: windowStart } },
+          where: { childId, endTime: null, startTime: { lte: now, gte: runningFloor } },
           select: { feedingType: true, startTime: true },
         }),
+        // Finished in the window, or still running (a timer may predate the window)
         ctx.prisma.pumpingRecord.findMany({
-          where: { childId, endTime: null, startTime: { lte: now, gte: windowStart } },
-          select: { startTime: true },
+          where: {
+            childId,
+            OR: [
+              { startTime: inWindow },
+              { endTime: null, startTime: { lte: now, gte: runningFloor } },
+            ],
+          },
+          take: 50,
+          select: { startTime: true, endTime: true },
         }),
         ctx.prisma.activityRecord.findMany({
-          where: { childId, endTime: null, startTime: { lte: now, gte: windowStart } },
-          select: { activityType: true, startTime: true },
+          where: {
+            childId,
+            OR: [
+              { startTime: inWindow },
+              { endTime: null, startTime: { lte: now, gte: runningFloor } },
+            ],
+          },
+          take: 50,
+          select: { startTime: true, endTime: true },
         }),
       ]);
 
     let sleepMs = 0;
     let sleepingSince: Date | null = null;
-    for (const s of sleeps) {
+    // Forgotten open sleeps are neither running nor part of the total
+    const sleepsInScope = sleeps.filter((s) => s.endTime || s.startTime >= runningFloor);
+    for (const s of sleepsInScope) {
       const start = Math.max(s.startTime.getTime(), windowStart.getTime());
       const end = Math.min((s.endTime ?? now).getTime(), now.getTime());
       if (end > start) sleepMs += end - start;
@@ -122,6 +144,7 @@ export const handoverRouter = createTRPCRouter({
       diapers: {
         wet: diapers.filter((d) => d.diaperType === "WET" || d.diaperType === "BOTH").length,
         dirty: diapers.filter((d) => d.diaperType === "DIRTY" || d.diaperType === "BOTH").length,
+        dry: diapers.filter((d) => d.diaperType === "DRY").length,
         latestTime: diapers[0]?.time ?? null,
       },
       medicine: {
@@ -140,8 +163,10 @@ export const handoverRouter = createTRPCRouter({
           ? { celsius: latestTemperature.temperatureCelsius, time: latestTemperature.time }
           : null,
       },
+      pumping: { count: pumpingRows.filter((p) => p.endTime).length },
+      activities: { count: activityRows.filter((a) => a.endTime).length },
       running: [
-        ...sleeps
+        ...sleepsInScope
           .filter((s) => !s.endTime)
           .map((s) => ({
             type: s.sleepType === "NIGHT" ? ("sleepNight" as const) : ("sleepNap" as const),
@@ -151,8 +176,12 @@ export const handoverRouter = createTRPCRouter({
           type: `feeding${f.feedingType}` as "feedingBREAST" | "feedingBOTTLE" | "feedingSOLIDS",
           startTime: f.startTime,
         })),
-        ...runningPumping.map((p) => ({ type: "pumping" as const, startTime: p.startTime })),
-        ...runningActivity.map((a) => ({ type: "activity" as const, startTime: a.startTime })),
+        ...pumpingRows
+          .filter((p) => !p.endTime)
+          .map((p) => ({ type: "pumping" as const, startTime: p.startTime })),
+        ...activityRows
+          .filter((a) => !a.endTime)
+          .map((a) => ({ type: "activity" as const, startTime: a.startTime })),
       ],
     };
   }),

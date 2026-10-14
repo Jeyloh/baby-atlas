@@ -2,36 +2,78 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { isToday } from "date-fns";
 import { X } from "lucide-react";
+import { create } from "zustand";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@baby-atlas/api";
 import { trpc } from "@/lib/trpc/provider";
 import { useFormatters } from "@/lib/format";
 import type { SupportCardProps } from "./types";
 
-/** How long the home view must be visible before the visit counts as seen. */
+type Summary = NonNullable<inferRouterOutputs<AppRouter>["handover"]["summary"]>;
+
+/** How long the card must be on screen before the visit counts as seen. */
 const SEEN_AFTER_MS = 5000;
 /** Coming back to a hidden tab after this long starts a new visit. */
 const NEW_VISIT_AFTER_HIDDEN_MS = 2 * 60 * 60 * 1000;
 
+interface VisitState {
+  /** The summary for this visit; null means there is nothing to show */
+  snapshot: Summary | null;
+  dismissed: boolean;
+  marked: boolean;
+}
+
+/**
+ * The visit per child for the app session. The home tab unmounts when the
+ * user opens Reports, so the card they were reading must survive that, and
+ * the visit must not be marked a second time.
+ */
+const useVisits = create<{ byChild: Record<string, VisitState | undefined> }>(() => ({
+  byChild: {},
+}));
+
+function patchVisit(childId: string, patch: Partial<VisitState>) {
+  useVisits.setState((s) => {
+    const current = s.byChild[childId];
+    return current ? { byChild: { ...s.byChild, [childId]: { ...current, ...patch } } } : s;
+  });
+}
+
+function usePageVisible() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const update = () => setVisible(document.visibilityState === "visible");
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
+  return visible;
+}
+
 /**
  * "Since you were last here": what happened while the user was away. Shown
  * once per visit. The visit is marked seen when the card is dismissed or after
- * the home view has been visible for a few seconds, which also starts the
+ * the card has been on screen for a few seconds, which also starts the
  * tracking on a first ever visit (no card then). Marking is best effort: when
  * it fails offline it is ignored and tried again on the next visit.
  */
 export function HandoverCard({ childId }: SupportCardProps) {
-  const [visit, setVisit] = useState(0);
-  const [dismissed, setDismissed] = useState(false);
+  const visit = useVisits((s) => s.byChild[childId]);
   const mountedAt = useRef(Date.now());
+  const pageVisible = usePageVisible();
+  const [onScreen, setOnScreen] = useState(false);
+  const rootRef = useRef<HTMLElement | null>(null);
   const { mutate } = trpc.handover.markSeen.useMutation({ onError: () => undefined });
 
-  // Never refetched while the page is open, or the summary would vanish the
-  // moment the visit is marked. A saved copy from an earlier session is ignored.
+  // Fetched once per visit, never refetched while the page is open, or the
+  // summary would vanish the moment the visit is marked. A saved copy from an
+  // earlier session is ignored.
   const query = trpc.handover.summary.useQuery(
     { childId },
     {
+      enabled: !visit,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       refetchInterval: false,
@@ -41,24 +83,45 @@ export function HandoverCard({ childId }: SupportCardProps) {
     }
   );
   const { refetch, data, dataUpdatedAt, isSuccess } = query;
-  const fresh = isSuccess && dataUpdatedAt >= mountedAt.current;
 
-  // Snapshot of the summary for this visit, so a refetch cannot change it
-  const [snapshot, setSnapshot] = useState<typeof data | undefined>(undefined);
   useEffect(() => {
-    if (fresh && snapshot === undefined) setSnapshot(data ?? null);
-  }, [fresh, data, snapshot]);
+    if (!visit && isSuccess && dataUpdatedAt >= mountedAt.current) {
+      useVisits.setState((s) => ({
+        byChild: {
+          ...s.byChild,
+          [childId]: { snapshot: data ?? null, dismissed: false, marked: false },
+        },
+      }));
+    }
+  }, [visit, isSuccess, dataUpdatedAt, data, childId]);
 
-  const markNow = useCallback(() => mutate({ childId }), [mutate, childId]);
+  const hasCard = !!visit?.snapshot && !visit.dismissed;
 
-  // Mark the visit seen once the view has been visible for a while
+  // Observe the card itself; with no card the home view being visible is enough
+  const setRoot = useCallback((node: HTMLElement | null) => {
+    rootRef.current = node;
+    if (!node) setOnScreen(false);
+  }, []);
   useEffect(() => {
-    if (snapshot === undefined || dismissed) return;
+    const node = rootRef.current;
+    if (!hasCard || !node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setOnScreen(!!entry?.isIntersecting),
+      { threshold: 0.5 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasCard]);
+
+  const shouldTime = !!visit && !visit.marked && pageVisible && (!hasCard || onScreen);
+  useEffect(() => {
+    if (!shouldTime) return;
     const timer = window.setTimeout(() => {
-      if (document.visibilityState === "visible") markNow();
+      patchVisit(childId, { marked: true });
+      mutate({ childId });
     }, SEEN_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [snapshot, dismissed, markNow, visit]);
+  }, [shouldTime, childId, mutate]);
 
   // An installed app can stay open for hours: a long absence starts a new visit
   useEffect(() => {
@@ -70,37 +133,45 @@ export function HandoverCard({ childId }: SupportCardProps) {
       }
       if (hiddenAt !== null && Date.now() - hiddenAt >= NEW_VISIT_AFTER_HIDDEN_MS) {
         mountedAt.current = Date.now();
-        setSnapshot(undefined);
-        setDismissed(false);
-        setVisit((v) => v + 1);
+        useVisits.setState((s) => ({ byChild: { ...s.byChild, [childId]: undefined } }));
         void refetch();
       }
       hiddenAt = null;
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, [refetch]);
+  }, [refetch, childId]);
 
-  if (!snapshot || dismissed) return null;
+  if (!visit?.snapshot || visit.dismissed) return null;
 
   return (
     <HandoverSummary
-      summary={snapshot}
+      ref={setRoot}
+      summary={visit.snapshot}
       onDismiss={() => {
-        setDismissed(true);
-        markNow();
+        patchVisit(childId, { dismissed: true, marked: true });
+        if (!visit.marked) mutate({ childId });
       }}
     />
   );
 }
 
-type Summary = NonNullable<inferRouterOutputs<AppRouter>["handover"]["summary"]>;
-
-function HandoverSummary({ summary, onDismiss }: { summary: Summary; onDismiss: () => void }) {
+function HandoverSummary({
+  summary,
+  onDismiss,
+  ref,
+}: {
+  summary: Summary;
+  onDismiss: () => void;
+  ref: (node: HTMLElement | null) => void;
+}) {
   const t = useTranslations("support.handover");
-  const tCommon = useTranslations("enums");
+  const tEnums = useTranslations("enums");
   const tFormat = useTranslations("format");
   const f = useFormatters();
+
+  /** The time alone for today, otherwise with the day */
+  const when = (d: Date) => (isToday(d) ? f.time(d) : f.dateTime(d));
 
   const lines: string[] = [];
 
@@ -110,19 +181,25 @@ function HandoverSummary({ summary, onDismiss }: { summary: Summary; onDismiss: 
 
   if (summary.feeds.count > 0 && summary.feeds.latest) {
     const latest = summary.feeds.latest;
-    let detail = tCommon(`feedingType.${latest.type}`).toLowerCase();
+    let detail = tEnums(`feedingType.${latest.type}`).toLowerCase();
     if (latest.amountMl) {
       detail += ` ${tFormat("units.ml", { value: latest.amountMl })}`;
     } else if (latest.side) {
       detail += ` (${t(`side.${latest.side}`)})`;
     }
-    lines.push(
-      t("feeds", { count: summary.feeds.count, detail, time: f.time(latest.time) })
-    );
+    lines.push(t("feeds", { count: summary.feeds.count, detail, time: when(latest.time) }));
   }
 
   if (summary.diapers.wet + summary.diapers.dirty > 0) {
     lines.push(t("diapers", { wet: summary.diapers.wet, dirty: summary.diapers.dirty }));
+  }
+  if (summary.diapers.dry > 0) {
+    lines.push(t("dryDiapers", { count: summary.diapers.dry }));
+  }
+
+  if (summary.pumping.count > 0) lines.push(t("pumping", { count: summary.pumping.count }));
+  if (summary.activities.count > 0) {
+    lines.push(t("activities", { count: summary.activities.count }));
   }
 
   if (summary.medicine.count > 0 && summary.medicine.latest) {
@@ -130,7 +207,7 @@ function HandoverSummary({ summary, onDismiss }: { summary: Summary; onDismiss: 
       t("medicine", {
         count: summary.medicine.count,
         name: summary.medicine.latest.name,
-        time: f.time(summary.medicine.latest.time),
+        time: when(summary.medicine.latest.time),
       })
     );
   }
@@ -139,7 +216,7 @@ function HandoverSummary({ summary, onDismiss }: { summary: Summary; onDismiss: 
     lines.push(
       t("temperature", {
         value: tFormat("units.celsius", { value: f.number(summary.temperature.latest.celsius) }),
-        time: f.time(summary.temperature.latest.time),
+        time: when(summary.temperature.latest.time),
       })
     );
   }
@@ -149,20 +226,26 @@ function HandoverSummary({ summary, onDismiss }: { summary: Summary; onDismiss: 
       t("running", {
         items: summary.running
           .map((r) =>
-            t("runningItem", { label: t(`runningType.${r.type}`), time: f.time(r.startTime) })
+            t("runningItem", { label: t(`runningType.${r.type}`), time: when(r.startTime) })
           )
           .join(", "),
       })
     );
   }
 
+  // The data covers at most the last 24 hours, whatever the absence
+  const clipped = summary.since.getTime() < summary.windowStart.getTime();
+
   return (
     <section
+      ref={ref}
       aria-labelledby="handover-title"
       className="relative rounded-lg border bg-card p-4 pr-12 text-card-foreground"
     >
       <h2 id="handover-title" className="font-display text-base font-semibold leading-tight">
-        {t("title", { when: f.dateTime(summary.since) })}
+        {clipped
+          ? t("titleClipped", { when: f.dateTime(summary.since) })
+          : t("title", { when: f.dateTime(summary.since) })}
       </h2>
       {lines.length > 0 ? (
         <ul className="mt-2 space-y-1 text-sm text-muted-foreground">

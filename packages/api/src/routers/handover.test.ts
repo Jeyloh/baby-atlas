@@ -105,6 +105,79 @@ describe("handoverRouter", () => {
       expect(result?.running).toEqual([{ type: "sleepNap", startTime: hoursAgo(1) }]);
     });
 
+    it("lists running feeding, pumping and activity timers, even from before the window", async () => {
+      prismaMock.childVisit.findUnique.mockResolvedValue({
+        userId: TEST_IDS.userId,
+        childId,
+        lastSeenAt: hoursAgo(3),
+      } as never);
+      prismaMock.feedingRecord.findMany
+        .mockResolvedValueOnce([] as never)
+        .mockResolvedValueOnce([{ feedingType: "BREAST", startTime: hoursAgo(4) }] as never);
+      prismaMock.pumpingRecord.findMany.mockResolvedValue([
+        { startTime: hoursAgo(5), endTime: null },
+        { startTime: hoursAgo(2), endTime: hoursAgo(1.5) },
+      ] as never);
+      prismaMock.activityRecord.findMany.mockResolvedValue([
+        { startTime: hoursAgo(1), endTime: null },
+        { startTime: hoursAgo(2), endTime: hoursAgo(1.5) },
+      ] as never);
+
+      const result = await createCaller(createTestContext()).summary({ childId });
+
+      expect(result?.running).toEqual([
+        { type: "feedingBREAST", startTime: hoursAgo(4) },
+        { type: "pumping", startTime: hoursAgo(5) },
+        { type: "activity", startTime: hoursAgo(1) },
+      ]);
+      expect(result?.pumping.count).toBe(1);
+      expect(result?.activities.count).toBe(1);
+      // The running-timer queries bound the start at 72 hours
+      expect(prismaMock.feedingRecord.findMany).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          where: { childId, endTime: null, startTime: { lte: NOW, gte: hoursAgo(72) } },
+        })
+      );
+    });
+
+    it("includes a sleep that started before the window and drops a forgotten one", async () => {
+      prismaMock.childVisit.findUnique.mockResolvedValue({
+        userId: TEST_IDS.userId,
+        childId,
+        lastSeenAt: hoursAgo(3),
+      } as never);
+      prismaMock.sleepRecord.findMany.mockResolvedValue([
+        { startTime: hoursAgo(5), endTime: null, sleepType: "NIGHT" },
+        { startTime: hoursAgo(100), endTime: null, sleepType: "NAP" },
+      ] as never);
+
+      const result = await createCaller(createTestContext()).summary({ childId });
+
+      // Only the 3 hours inside the window count
+      expect(result?.sleep.totalMinutes).toBe(180);
+      expect(result?.running).toEqual([{ type: "sleepNight", startTime: hoursAgo(5) }]);
+    });
+
+    it("counts dry diapers and leaves skipped medicine out of the query", async () => {
+      prismaMock.childVisit.findUnique.mockResolvedValue({
+        userId: TEST_IDS.userId,
+        childId,
+        lastSeenAt: hoursAgo(3),
+      } as never);
+      prismaMock.diaperRecord.findMany.mockResolvedValue([
+        { diaperType: "DRY", time: hoursAgo(1) },
+      ] as never);
+
+      const result = await createCaller(createTestContext()).summary({ childId });
+
+      expect(result?.diapers).toMatchObject({ wet: 0, dirty: 0, dry: 1 });
+      expect(prismaMock.medicineRecord.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ skipped: false }),
+        })
+      );
+    });
+
     it("never looks back further than 24 hours", async () => {
       prismaMock.childVisit.findUnique.mockResolvedValue({
         userId: TEST_IDS.userId,
@@ -140,6 +213,15 @@ describe("handoverRouter", () => {
         create: { userId: TEST_IDS.userId, childId, lastSeenAt: NOW },
         update: { lastSeenAt: NOW },
       });
+    });
+
+    it("lets a VIEWER mark their own visit", async () => {
+      prismaMock.householdMember.findUnique.mockResolvedValue(
+        createTestMembership({ role: "VIEWER" }) as never
+      );
+      prismaMock.childVisit.upsert.mockResolvedValue({} as never);
+      await createCaller(createTestContext()).markSeen({ childId });
+      expect(prismaMock.childVisit.upsert).toHaveBeenCalled();
     });
 
     it("denies a user outside the household", async () => {

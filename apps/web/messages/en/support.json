@@ -38,7 +38,10 @@
     "nothing": "Nothing has been logged since then.",
     "sleepTotal": "Sleep: {duration} in total",
     "feeds": "Feeds: {count, plural, one {# feed} other {# feeds}}, last {detail} at {time}",
-    "feedsNoDetail": "Feeds: {count, plural, one {# feed} other {# feeds}}",
+    "titleClipped": "Last 24 hours (you were last here {when})",
+    "dryDiapers": "Diapers: {count, plural, one {# dry diaper} other {# dry diapers}}",
+    "pumping": "Pumping: {count, plural, one {# session} other {# sessions}}",
+    "activities": "Activities: {count, plural, one {# logged} other {# logged}}",
     "side": {
       "LEFT": "left side",
       "RIGHT": "right side",

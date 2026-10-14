@@ -14,14 +14,15 @@
     "sleepLabel": "Timer søvn i natt (valgfritt)",
     "saved": "Lagret",
     "saveFailed": "Kunne ikke lagre. Prøv igjen når du er på nett.",
-    "hide": "Skjul for alltid"
+    "hide": "Skjul for alltid",
+    "show": "Vis dagsform-kortet igjen"
   },
   "support": {
     "title": "Det har vært tungt en stund",
-    "body": "Du har hatt flere tunge dager på rad. Det er vanlig å streve i en hektisk tid med baby, og du trenger ikke å stå i det alene. Det hjelper ofte å snakke med noen.",
+    "body": "Du har hatt flere tunge dager den siste uka. Det er vanlig å streve i en hektisk tid med baby, og du trenger ikke å stå i det alene. Det hjelper ofte å snakke med noen.",
     "helsestasjon": "Snakk med helsestasjonen eller fastlegen din. De har tid til å lytte, også til deg.",
     "mentalHelp": "Mental Helse hjelpetelefon: <helpline>116 123</helpline> (åpen hele døgnet)",
-    "urgent": "Er det akutt, eller tenker du på å skade deg selv? Ring <emergency>113</emergency> med en gang.",
+    "urgent": "Trenger du hjelp raskt, ring legevakten på <legevakt>116 117</legevakt>. Ved fare for liv, ring <emergency>113</emergency>.",
     "dismiss": "Skjul til i morgen"
   }
 }

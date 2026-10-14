@@ -38,7 +38,10 @@
     "nothing": "Ingenting er registrert siden da.",
     "sleepTotal": "Søvn: {duration} til sammen",
     "feeds": "Mat: {count, plural, one {# måltid} other {# måltider}}, sist {detail} kl. {time}",
-    "feedsNoDetail": "Mat: {count, plural, one {# måltid} other {# måltider}}",
+    "titleClipped": "Siste 24 timer (du var her sist {when})",
+    "dryDiapers": "Bleier: {count, plural, one {# tørr bleie} other {# tørre bleier}}",
+    "pumping": "Pumping: {count, plural, one {# økt} other {# økter}}",
+    "activities": "Aktiviteter: {count, plural, one {# registrert} other {# registrerte}}",
     "side": {
       "LEFT": "venstre side",
       "RIGHT": "høyre side",
