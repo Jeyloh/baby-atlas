@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ExternalLink, Lightbulb, X } from "lucide-react";
 import { tipKeyForAge } from "@baby-atlas/utils";
@@ -13,7 +13,7 @@ export function tipDismissKey(childId: string, tipKey: string): string {
 
 export function WeeklyTipCard({ childId, birthDate }: SupportCardProps) {
   const t = useTranslations("tips");
-  const tCommon = useTranslations("common");
+  const headingId = useId();
   // Decided after mount: the saved dismissal only exists in the browser
   const [state, setState] = useState<{ tipKey: string; dismissed: boolean } | null>(null);
 
@@ -51,7 +51,7 @@ export function WeeklyTipCard({ childId, birthDate }: SupportCardProps) {
 
   return (
     <aside
-      aria-labelledby="weekly-tip-title"
+      aria-labelledby={headingId}
       className="flex items-start gap-3 rounded-2xl border bg-card p-4 text-card-foreground"
     >
       <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" aria-hidden="true" />
@@ -59,7 +59,7 @@ export function WeeklyTipCard({ childId, birthDate }: SupportCardProps) {
         <p className="text-xs font-medium text-muted-foreground">
           {t("card.label")} · {age}
         </p>
-        <h2 id="weekly-tip-title" className="font-semibold leading-tight">
+        <h2 id={headingId} className="font-semibold leading-tight">
           {text(`${tipKey}.title`)}
         </h2>
         <p className="text-sm text-muted-foreground">{text(`${tipKey}.body`)}</p>
@@ -77,7 +77,7 @@ export function WeeklyTipCard({ childId, birthDate }: SupportCardProps) {
         type="button"
         onClick={dismiss}
         aria-label={t("card.dismiss")}
-        title={tCommon("close")}
+        title={t("card.dismiss")}
         className="-mr-2 -mt-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <X className="h-5 w-5" />

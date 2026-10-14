@@ -63,6 +63,21 @@ describe("tip push texts", () => {
   });
 });
 
+describe("translatePush params", () => {
+  it("keeps plain strings literal, even when they look like a reference", () => {
+    const name = "@tips:week.1.body";
+    expect(translatePush("nb", "push.weeklyTip.title", { tip: name })).toBe(`Nytt tips: ${name}`);
+  });
+
+  it("rejects refs to keys outside the allowlist", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(translatePush("nb", "push.weeklyTip.title", { tip: { ref: "tips", key: "card.readMore" } })).toBe(
+      "Nytt tips: "
+    );
+    spy.mockRestore();
+  });
+});
+
 describe("tips content", () => {
   it("covers weeks 0-52 and months 13-36 in both languages with a helsenorge link", () => {
     for (const catalog of [nb, en]) {

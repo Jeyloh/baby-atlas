@@ -1,5 +1,5 @@
 import { osloMinutesOfDay, tipPositionForAge } from "@baby-atlas/utils";
-import type { Evaluate, Candidate } from "../types";
+import type { Evaluate, Candidate, MessageRef } from "../types";
 
 /** Tips go out from 10:00 Oslo on the day a new week or month starts. */
 export const TIP_START_MINUTE = 10 * 60;
@@ -8,13 +8,9 @@ export const MAX_DAYS_LATE = 3;
 /** Youngest-to-oldest range with tips is under 37 months; this bounds the query. */
 const MAX_AGE_DAYS = 37 * 31;
 
-/**
- * Message params are translated server-side: a value of the form
- * `@<namespace>:<key>` is replaced by that message in the recipient's locale
- * (see translatePush). The tip title and text come from the `tips` namespace.
- */
-export function tipRef(tipKey: string, field: "title" | "body"): string {
-  return `@tips:${tipKey}.${field}`;
+/** The tip title or text, translated per recipient from the `tips` namespace. */
+export function tipRef(tipKey: string, field: "title" | "body"): MessageRef {
+  return { ref: "tips", key: `${tipKey}.${field}` };
 }
 
 export const evaluate: Evaluate = async ({ prisma, now }) => {

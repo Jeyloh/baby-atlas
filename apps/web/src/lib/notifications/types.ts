@@ -8,6 +8,15 @@ export type { NotificationKind };
  * candidates for every notice that is relevant right now; the dispatcher
  * decides who gets it and makes sure each person gets it only once.
  */
+/**
+ * A param whose text is a message from another namespace, translated per
+ * recipient. Plain strings are always literal.
+ */
+export interface MessageRef {
+  ref: "tips";
+  key: string;
+}
+
 export interface Candidate {
   kind: NotificationKind;
   childId: string;
@@ -23,7 +32,7 @@ export interface Candidate {
   titleKey: string;
   bodyKey: string;
   /** ICU parameters for the two messages */
-  params: Record<string, string | number>;
+  params: Record<string, string | number | MessageRef>;
   /**
    * Notices with the same replaceKey replace each other on the device while
    * unread (for example both tiers of one forgotten timer). Default: dedupeKey.
