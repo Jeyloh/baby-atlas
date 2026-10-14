@@ -10,3 +10,5 @@ export * from "./tips";
 export * from "./wellbeing";
 export * from "./medicine";
 export * from "./digest-week";
+export * from "./predictions";
+export * from "./health-hints";

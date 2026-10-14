@@ -3,6 +3,7 @@ import {
   getDayTimelineSchema,
   getWeekTimelineSchema,
   getListTimelineSchema,
+  getRecentActivitySchema,
 } from "@baby-atlas/schemas";
 import {
   startOfDay,
@@ -689,5 +690,50 @@ export const timelineRouter = createTRPCRouter({
         activities: allActivities,
         groupedByDate,
       };
+    }),
+
+  /**
+   * Recent records the "what's next" and health hint cards work from: breast
+   * and bottle feeds (48 h), sleeps (72 h), diapers (24 h) and temperature
+   * readings (5 days). Read only and bounded in time.
+   */
+  getRecentActivity: householdProcedure
+    .input(getRecentActivitySchema)
+    .query(async ({ ctx, input }) => {
+      const now = Date.now();
+      const hoursAgo = (h: number) => new Date(now - h * 60 * 60 * 1000);
+
+      const [feeds, sleeps, diapers, temperatures] = await Promise.all([
+        ctx.prisma.feedingRecord.findMany({
+          where: {
+            childId: input.childId,
+            feedingType: { in: ["BREAST", "BOTTLE"] },
+            startTime: { gte: hoursAgo(48) },
+          },
+          select: { id: true, feedingType: true, startTime: true, endTime: true },
+          orderBy: { startTime: "desc" },
+          take: 100,
+        }),
+        ctx.prisma.sleepRecord.findMany({
+          where: { childId: input.childId, startTime: { gte: hoursAgo(72) } },
+          select: { id: true, sleepType: true, startTime: true, endTime: true },
+          orderBy: { startTime: "desc" },
+          take: 60,
+        }),
+        ctx.prisma.diaperRecord.findMany({
+          where: { childId: input.childId, time: { gte: hoursAgo(24) } },
+          select: { id: true, diaperType: true, time: true },
+          orderBy: { time: "desc" },
+          take: 60,
+        }),
+        ctx.prisma.temperatureRecord.findMany({
+          where: { childId: input.childId, time: { gte: hoursAgo(5 * 24) } },
+          select: { id: true, temperatureCelsius: true, time: true },
+          orderBy: { time: "desc" },
+          take: 60,
+        }),
+      ]);
+
+      return { feeds, sleeps, diapers, temperatures };
     }),
 });

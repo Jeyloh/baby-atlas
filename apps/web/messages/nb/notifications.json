@@ -21,6 +21,14 @@
     "weeklyDigest": {
       "title": "Uke {week} for {name} er klar",
       "body": "Se hvordan søvn, mating og bleier gikk denne uken, sammenlignet med uken før."
+    },
+    "feedDue": {
+      "title": "{name}: snart tid for mat?",
+      "body": "Ut fra tidligere måltider er neste ventet rundt kl. {time}."
+    },
+    "napDue": {
+      "title": "{name}: snart tid for lur?",
+      "body": "Ut fra hvor lenge {name} har vært våken, er neste lur ventet rundt kl. {time}."
     }
   },
   "settings": {

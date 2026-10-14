@@ -34,3 +34,8 @@ export const timelineActivityTypeSchema = z.enum([
   "DIAPER",
 ]);
 export type TimelineActivityType = z.infer<typeof timelineActivityTypeSchema>;
+
+export const getRecentActivitySchema = z.object({
+  childId: idSchema,
+});
+export type GetRecentActivityInput = z.infer<typeof getRecentActivitySchema>;
