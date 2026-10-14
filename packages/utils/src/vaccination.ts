@@ -12,11 +12,16 @@ export interface VaccineDose {
   vaccine: VaccineId;
   dose: number;
   due: { weeks: number } | { months: number };
+  /**
+   * Last age in days at which the dose can still be given, when the vaccine has
+   * an upper age limit (rotavirus: dose 1 before 12 weeks, dose 2 before 16 weeks).
+   */
+  maxAgeDays?: number;
 }
 
 export const NORWEGIAN_VACCINE_PROGRAMME: VaccineDose[] = [
-  { key: "rotavirus-1", vaccine: "rotavirus", dose: 1, due: { weeks: 6 } },
-  { key: "rotavirus-2", vaccine: "rotavirus", dose: 2, due: { months: 3 } },
+  { key: "rotavirus-1", vaccine: "rotavirus", dose: 1, due: { weeks: 6 }, maxAgeDays: 84 },
+  { key: "rotavirus-2", vaccine: "rotavirus", dose: 2, due: { months: 3 }, maxAgeDays: 112 },
   { key: "six-in-one-1", vaccine: "sixInOne", dose: 1, due: { months: 3 } },
   { key: "pneumococcal-1", vaccine: "pneumococcal", dose: 1, due: { months: 3 } },
   { key: "six-in-one-2", vaccine: "sixInOne", dose: 2, due: { months: 5 } },

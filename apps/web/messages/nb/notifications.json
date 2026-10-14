@@ -32,12 +32,16 @@
     },
     "checkupReminder": {
       "book": {
-        "title": "På tide å bestille time?",
-        "body": "Nå er det vanligvis tid for neste time på helsestasjonen for {child}. Bestill time hvis dere ikke har gjort det."
+        "title": "Snart tid for helsestasjonen?",
+        "body": "Nå er det vanligvis tid for neste time på helsestasjonen for {child}. Har dere ikke fått innkalling, kan dere ta kontakt med helsestasjonen."
       },
       "booked": {
         "title": "Time på helsestasjonen i morgen",
         "body": "{child} har time på helsestasjonen i morgen kl. {time}."
+      },
+      "today": {
+        "title": "Time på helsestasjonen i dag",
+        "body": "{child} har time på helsestasjonen i dag kl. {time}."
       }
     },
     "vaccineReminder": {
@@ -46,7 +50,8 @@
         "mmr": "{child} har nådd alderen for MMR-vaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
         "pneumococcal": "{child} har nådd alderen for pneumokokkvaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
         "rotavirus": "{child} har nådd alderen for rotavirusvaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
-        "sixInOne": "{child} har nådd alderen for den seksvalente vaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt."
+        "sixInOne": "{child} har nådd alderen for den seksvalente vaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
+        "several": "{child} har nådd alderen for flere vaksiner ({count}). Sjekk at timen er avtalt med helsestasjonen, og marker dem som gitt når de er tatt."
       }
     }
   },

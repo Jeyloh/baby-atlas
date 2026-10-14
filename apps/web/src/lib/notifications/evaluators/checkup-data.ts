@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@baby-atlas/db";
 
 /** Only the first three years matter, plus a margin for the last window. */
-const MAX_AGE_DAYS = 3 * 365 + 60;
+const MAX_AGE_DAYS = 800;
 
 /**
  * Children up to about three years old that belong to a household where at

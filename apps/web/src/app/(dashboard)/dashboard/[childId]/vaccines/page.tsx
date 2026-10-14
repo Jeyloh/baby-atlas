@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, use, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { nextCheckup } from "@baby-atlas/utils";
 import { trpc } from "@/lib/trpc/provider";
@@ -31,12 +31,21 @@ type TabId = "checkups" | "vaccines";
 function HealthContent({ child }: { child: ToddlerChild }) {
   const t = useTranslations("checkups");
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [tab, setTab] = useState<TabId>(
     searchParams.get("tab") === "vaccines" ? "vaccines" : "checkups"
   );
 
+  const changeTab = (value: string) => {
+    const next: TabId = value === "vaccines" ? "vaccines" : "checkups";
+    setTab(next);
+    // Keep the address in step so a reload or a shared link opens the same tab
+    router.replace(`${pathname}?tab=${next}` as never, { scroll: false });
+  };
+
   return (
-    <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="space-y-5">
+    <Tabs value={tab} onValueChange={changeTab} className="space-y-5">
       <TabsList className="grid w-full grid-cols-2" aria-label={t("tabs.label")}>
         <TabsTrigger value="checkups">{t("tabs.checkups")}</TabsTrigger>
         <TabsTrigger value="vaccines">{t("tabs.vaccines")}</TabsTrigger>
@@ -66,21 +75,22 @@ function CheckupsSection({ child }: { child: ToddlerChild }) {
 
   if (isLoading || !data) return <Loading />;
 
-  const done = data.filter((i) => i.status === "done").length;
-  const next = nextCheckup(data);
+  const { items, canEdit } = data;
+  const done = items.filter((i) => i.status === "done").length;
+  const next = nextCheckup(items);
 
   return (
     <div className="space-y-5">
       <p className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">{t("intro")}</p>
       <div>
-        <p className="text-base font-medium">{t("progress", { done, total: data.length })}</p>
+        <p className="text-base font-medium">{t("progress", { done, total: items.length })}</p>
         {next && (
           <p className="text-sm text-muted-foreground">
             {t("next", { title: t(`items.${next.contact.key}.title`) })}
           </p>
         )}
       </div>
-      <CheckupTimeline childId={child.id} items={data} />
+      <CheckupTimeline childId={child.id} items={items} canEdit={canEdit} />
       <p className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">{t("footer")}</p>
     </div>
   );

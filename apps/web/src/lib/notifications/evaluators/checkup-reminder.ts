@@ -2,6 +2,7 @@ import {
   HELSESTASJON_PROGRAMME,
   formatOsloTime,
   isBookedReminderDue,
+  isSameDayReminderDue,
   isTimeToBook,
 } from "@baby-atlas/utils";
 import type { Candidate, EvaluatorContext } from "../types";
@@ -21,17 +22,25 @@ export function checkupCandidates(child: ChildRow, now: Date): Candidate[] {
   for (const contact of HELSESTASJON_PROGRAMME) {
     const record = child.checkupRecords.find((r) => r.checkupKey === contact.key);
 
-    if (record?.scheduledAt && !record.completedAt && isBookedReminderDue(record.scheduledAt, now)) {
-      candidates.push({
-        kind: "CHECKUP_REMINDER",
-        childId: child.id,
-        dedupeKey: `checkup:booked:${child.id}:${contact.key}:${record.scheduledAt.getTime()}`,
-        url,
-        titleKey: "push.checkupReminder.booked.title",
-        bodyKey: "push.checkupReminder.booked.body",
-        params: { child: child.name, time: formatOsloTime(record.scheduledAt) },
-        replaceKey: `checkup:${child.id}:${contact.key}`,
-      });
+    const scheduledAt = record?.scheduledAt;
+    if (scheduledAt && !record.completedAt) {
+      // One notice per booked time: the evening before, or on the day itself
+      // when that one was missed. Both share a dedupeKey.
+      const evening = isBookedReminderDue(scheduledAt, now);
+      if (evening || isSameDayReminderDue(scheduledAt, now)) {
+        candidates.push({
+          kind: "CHECKUP_REMINDER",
+          childId: child.id,
+          dedupeKey: `checkup:booked:${child.id}:${contact.key}:${scheduledAt.getTime()}`,
+          url,
+          titleKey: evening
+            ? "push.checkupReminder.booked.title"
+            : "push.checkupReminder.today.title",
+          bodyKey: evening ? "push.checkupReminder.booked.body" : "push.checkupReminder.today.body",
+          params: { child: child.name, time: formatOsloTime(scheduledAt) },
+          replaceKey: `checkup:${child.id}:${contact.key}`,
+        });
+      }
     } else if (isTimeToBook(contact, child.birthDate, record, now)) {
       candidates.push({
         kind: "CHECKUP_REMINDER",

@@ -31,7 +31,7 @@
     "description": "Guidance: {window}",
     "bookTitle": "Health station appointment",
     "dateLabel": "Date",
-    "timeLabel": "Time",
+    "timeLabel": "Time (Norwegian time)",
     "saveBooking": "Save appointment",
     "removeBooking": "Remove appointment",
     "bookingSaved": "Appointment saved",
@@ -61,7 +61,7 @@
     },
     "week_6": {
       "title": "6 weeks",
-      "description": "Doctor's examination and talk about feeding, development and safety. The baby is weighed and measured. The first rotavirus dose (oral) is given and you get information about vaccines."
+      "description": "Doctor's examination and talk about feeding, development and safety. The baby is weighed and measured. The first rotavirus dose (oral) is given and you get information about vaccines. From 2027 the rotavirus vaccine is given in three doses (6 weeks, 3 and 5 months)."
     },
     "month_3": {
       "title": "3 months",
@@ -69,7 +69,7 @@
     },
     "month_4": {
       "title": "4 months (group consultation)",
-      "description": "Talk about feeding and starting solid food, sleep, safety and starting daycare. No vaccines."
+      "description": "Talk about feeding and when it suits to start tasting small portions (usually around 6 months), sleep and safety. No vaccines."
     },
     "month_5": {
       "title": "5 months",

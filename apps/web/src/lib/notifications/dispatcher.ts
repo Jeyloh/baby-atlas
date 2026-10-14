@@ -18,8 +18,12 @@ import { toLocale } from "@/i18n/config";
 import { translatePush } from "./translate";
 import type { Candidate, Evaluate, NotificationKind } from "./types";
 
-/** Sent notices are remembered this long (longer than any evaluator window). */
-export const LOG_RETENTION_DAYS = 60;
+/**
+ * Sent notices are remembered this long. Longer than any evaluator window, and
+ * long enough that once-only notices (vaccine and checkup reminders, relevant
+ * for weeks to months) are not sent again.
+ */
+export const LOG_RETENTION_DAYS = 400;
 /** Stop starting new sends after this long so the run ends within maxDuration. */
 export const DEFAULT_TIME_BUDGET_MS = 45_000;
 /** Deliveries sent at the same time */

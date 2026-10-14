@@ -54,9 +54,11 @@ function useDateFormatters() {
 export function CheckupTimeline({
   childId,
   items,
+  canEdit,
 }: {
   childId: string;
   items: CheckupListItem[];
+  canEdit: boolean;
 }) {
   const t = useTranslations("checkups");
   const fmt = useDateFormatters();
@@ -119,6 +121,7 @@ export function CheckupTimeline({
           key={selected.contact.key}
           childId={childId}
           item={selected}
+          canEdit={canEdit}
           onClose={() => setSelectedKey(null)}
         />
       )}
@@ -129,10 +132,12 @@ export function CheckupTimeline({
 function CheckupDialog({
   childId,
   item,
+  canEdit,
   onClose,
 }: {
   childId: string;
   item: CheckupListItem;
+  canEdit: boolean;
   onClose: () => void;
 }) {
   const t = useTranslations("checkups");
@@ -213,7 +218,7 @@ function CheckupDialog({
           )}
         </div>
 
-        {!contact.arrangedByNurse && (
+        {canEdit && !contact.arrangedByNurse && (
           <section className="space-y-2" aria-labelledby="checkup-book-title">
             <h3 id="checkup-book-title" className="text-sm font-semibold">
               {t("dialog.bookTitle")}
@@ -225,6 +230,7 @@ function CheckupDialog({
                   id="checkup-book-date"
                   type="date"
                   value={bookDate}
+                  min={todayInputValue()}
                   onChange={(e) => setBookDate(e.target.value)}
                   className="h-12"
                 />
@@ -270,6 +276,7 @@ function CheckupDialog({
           </section>
         )}
 
+        {canEdit && (
         <section className="space-y-2" aria-labelledby="checkup-done-title">
           <h3 id="checkup-done-title" className="text-sm font-semibold">
             {t("dialog.doneTitle")}
@@ -311,7 +318,9 @@ function CheckupDialog({
             )}
           </div>
         </section>
+        )}
 
+        {(canEdit || item.notes) && (
         <section className="space-y-2">
           <Label htmlFor="checkup-notes">{t("dialog.notesLabel")}</Label>
           <Textarea
@@ -319,17 +328,21 @@ function CheckupDialog({
             value={notes}
             maxLength={1000}
             placeholder={t("dialog.notesPlaceholder")}
+            readOnly={!canEdit}
             onChange={(e) => setNotes(e.target.value)}
           />
-          <Button
-            variant="outline"
-            className="min-h-12"
-            disabled={pending || notes === (item.notes ?? "")}
-            onClick={() => saveNotes.mutate({ childId, checkupKey: contact.key, notes })}
-          >
-            {t("dialog.saveNotes")}
-          </Button>
+          {canEdit && (
+            <Button
+              variant="outline"
+              className="min-h-12"
+              disabled={pending || notes === (item.notes ?? "")}
+              onClick={() => saveNotes.mutate({ childId, checkupKey: contact.key, notes })}
+            >
+              {t("dialog.saveNotes")}
+            </Button>
+          )}
         </section>
+        )}
 
         <div className="text-xs text-muted-foreground">
           <p className="font-medium">{t("dialog.sources")}</p>
