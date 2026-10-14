@@ -29,6 +29,25 @@
     "napDue": {
       "title": "{name}: nap coming up?",
       "body": "Based on how long {name} has been awake, the next nap is expected around {time}."
+    },
+    "checkupReminder": {
+      "book": {
+        "title": "Time to book a visit?",
+        "body": "It is usually time for {child}'s next visit at the health station. Book a time if you have not already."
+      },
+      "booked": {
+        "title": "Health station visit tomorrow",
+        "body": "{child} has an appointment at the health station tomorrow at {time}."
+      }
+    },
+    "vaccineReminder": {
+      "title": "Vaccine for {child}",
+      "body": {
+        "mmr": "{child} has reached the age for the MMR vaccine. Check that it is booked with the health station and mark it as given when done.",
+        "pneumococcal": "{child} has reached the age for the pneumococcal vaccine. Check that it is booked with the health station and mark it as given when done.",
+        "rotavirus": "{child} has reached the age for the rotavirus vaccine. Check that it is booked with the health station and mark it as given when done.",
+        "sixInOne": "{child} has reached the age for the 6-in-1 vaccine. Check that it is booked with the health station and mark it as given when done."
+      }
     }
   },
   "settings": {

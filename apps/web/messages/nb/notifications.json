@@ -29,6 +29,25 @@
     "napDue": {
       "title": "{name}: snart tid for lur?",
       "body": "Ut fra hvor lenge {name} har vært våken, er neste lur ventet rundt kl. {time}."
+    },
+    "checkupReminder": {
+      "book": {
+        "title": "På tide å bestille time?",
+        "body": "Nå er det vanligvis tid for neste time på helsestasjonen for {child}. Bestill time hvis dere ikke har gjort det."
+      },
+      "booked": {
+        "title": "Time på helsestasjonen i morgen",
+        "body": "{child} har time på helsestasjonen i morgen kl. {time}."
+      }
+    },
+    "vaccineReminder": {
+      "title": "Vaksine for {child}",
+      "body": {
+        "mmr": "{child} har nådd alderen for MMR-vaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
+        "pneumococcal": "{child} har nådd alderen for pneumokokkvaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
+        "rotavirus": "{child} har nådd alderen for rotavirusvaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
+        "sixInOne": "{child} har nådd alderen for den seksvalente vaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt."
+      }
     }
   },
   "settings": {

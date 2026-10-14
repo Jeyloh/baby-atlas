@@ -12,3 +12,4 @@ export * from "./medicine";
 export * from "./digest-week";
 export * from "./predictions";
 export * from "./health-hints";
+export * from "./helsestasjon";

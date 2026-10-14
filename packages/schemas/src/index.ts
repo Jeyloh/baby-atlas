@@ -16,3 +16,4 @@ export * from "./vaccination";
 export * from "./journal";
 export * from "./notification";
 export * from "./common";
+export * from "./checkup";
