@@ -1,1 +1,108 @@
-{}
+{
+  "title": "Health station",
+  "intro": "The health station (helsestasjon) follows your child from birth to school age. The times below are guidance (\"usually around\"). The municipality decides the exact timing, and you normally get an invitation from them.",
+  "tabs": {
+    "checkups": "Health station",
+    "vaccines": "Vaccines",
+    "label": "View"
+  },
+  "progress": "{done} of {total} visits marked as done",
+  "next": "Next: {title}",
+  "usually": "Usually around {date}",
+  "usuallyRange": "Usually between {start} and {end}",
+  "booked": "Booked {date} at {time}",
+  "doneOn": "Done {date}",
+  "withWhom": "You meet: {who}",
+  "who": {
+    "nurse": "Health nurse",
+    "nurseDoctor": "Health nurse and doctor"
+  },
+  "group": "Often a group consultation",
+  "vaccinesAtVisit": "Vaccines at this visit",
+  "notes": "Notes",
+  "status": {
+    "done": "Done",
+    "overdue": "Passed",
+    "due": "Now",
+    "upcoming": "Coming"
+  },
+  "homeVisitNote": "The health nurse usually contacts you herself.",
+  "dialog": {
+    "description": "Guidance: {window}",
+    "bookTitle": "Health station appointment",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
+    "saveBooking": "Save appointment",
+    "removeBooking": "Remove appointment",
+    "bookingSaved": "Appointment saved",
+    "bookingRemoved": "Appointment removed",
+    "doneTitle": "Mark as done",
+    "doneDateLabel": "Date of the visit",
+    "markDone": "Mark as done",
+    "undoDone": "Undo",
+    "doneSaved": "Marked as done",
+    "doneUndone": "The mark was removed",
+    "notesLabel": "Notes (for example weight and length)",
+    "notesPlaceholder": "Something to remember for next time",
+    "saveNotes": "Save note",
+    "notesSaved": "Note saved",
+    "sources": "Sources"
+  },
+  "errorTitle": "Something went wrong",
+  "footer": "This overview is based on the national guideline from the Norwegian Directorate of Health for the health station, ages 0-5. Your municipality may use slightly different times. Always check the invitation from the health station.",
+  "items": {
+    "home_visit": {
+      "title": "Home visit",
+      "description": "A health nurse visits your home, usually 7-10 days after birth. You talk about feeding, sleep, safety and how you are doing, and the baby is weighed."
+    },
+    "week_4": {
+      "title": "4 weeks (group consultation)",
+      "description": "Talk about feeding, crying, safety, infection prevention and parents' wellbeing. In many places this is a group session with other parents."
+    },
+    "week_6": {
+      "title": "6 weeks",
+      "description": "Doctor's examination and talk about feeding, development and safety. The baby is weighed and measured. The first rotavirus dose (oral) is given and you get information about vaccines."
+    },
+    "month_3": {
+      "title": "3 months",
+      "description": "Talk about feeding, development and language stimulation, weighing and measuring. The baby gets vaccines."
+    },
+    "month_4": {
+      "title": "4 months (group consultation)",
+      "description": "Talk about feeding and starting solid food, sleep, safety and starting daycare. No vaccines."
+    },
+    "month_5": {
+      "title": "5 months",
+      "description": "Talk about feeding and solid food, development and dental health. The baby is weighed and measured and gets vaccines."
+    },
+    "month_6": {
+      "title": "6 months",
+      "description": "Doctor's examination. Talk about diet and nutrition and how the baby is developing. No vaccines."
+    },
+    "month_8": {
+      "title": "8 months",
+      "description": "Talk about feeding, interaction, language and starting daycare. No vaccines."
+    },
+    "month_10": {
+      "title": "10 months",
+      "description": "Talk about feeding, development, sleep and safety. No vaccines."
+    },
+    "month_12": {
+      "title": "12 months (1 year)",
+      "description": "Doctor's examination. Talk about diet, vitamin D, dental health and development. The child gets vaccines."
+    },
+    "month_15": {
+      "title": "15 months",
+      "description": "Talk about diet, sleep, language, tooth brushing and safety. The child gets the MMR vaccine."
+    },
+    "month_18": {
+      "title": "17-18 months (group consultation)",
+      "description": "Talk about development, diet, sleep and parents' wellbeing. No vaccines."
+    },
+    "year_2": {
+      "title": "2 years",
+      "description": "Doctor's examination. Talk about diet, sleep, screen time and development. No vaccines."
+    }
+  },
+  "openItem": "Open {title}"
+}

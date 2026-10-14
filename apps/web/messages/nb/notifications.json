@@ -1,8 +1,27 @@
 {
   "push": {
+    "checkupReminder": {
+      "book": {
+        "title": "På tide å bestille time?",
+        "body": "Nå er det vanligvis tid for neste time på helsestasjonen for {child}. Bestill time hvis dere ikke har gjort det."
+      },
+      "booked": {
+        "title": "Time på helsestasjonen i morgen",
+        "body": "{child} har time på helsestasjonen i morgen kl. {time}."
+      }
+    },
     "test": {
       "title": "Testvarsel fra Baby Atlas",
       "body": "Varslene fungerer på denne enheten."
+    },
+    "vaccineReminder": {
+      "title": "Vaksine for {child}",
+      "body": {
+        "mmr": "{child} har nådd alderen for MMR-vaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
+        "pneumococcal": "{child} har nådd alderen for pneumokokkvaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
+        "rotavirus": "{child} har nådd alderen for rotavirusvaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt.",
+        "sixInOne": "{child} har nådd alderen for den seksvalente vaksinen. Sjekk at den er avtalt med helsestasjonen, og marker den som gitt når den er tatt."
+      }
     }
   },
   "settings": {

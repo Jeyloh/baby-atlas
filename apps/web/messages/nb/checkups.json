@@ -1,1 +1,108 @@
-{}
+{
+  "title": "Helsestasjon",
+  "intro": "Helsestasjonen følger barnet fra fødsel til skolestart. Tidspunktene under er veiledende (\"vanligvis rundt\"). Kommunen bestemmer eksakt tidspunkt, og du får vanligvis innkalling derfra.",
+  "tabs": {
+    "checkups": "Helsestasjon",
+    "vaccines": "Vaksiner",
+    "label": "Visning"
+  },
+  "progress": "{done} av {total} timer er markert som gjort",
+  "next": "Neste: {title}",
+  "usually": "Vanligvis rundt {date}",
+  "usuallyRange": "Vanligvis mellom {start} og {end}",
+  "booked": "Time {date} kl. {time}",
+  "doneOn": "Gjort {date}",
+  "withWhom": "Du møter: {who}",
+  "who": {
+    "nurse": "Helsesykepleier",
+    "nurseDoctor": "Helsesykepleier og lege"
+  },
+  "group": "Ofte gruppekonsultasjon",
+  "vaccinesAtVisit": "Vaksiner denne timen",
+  "notes": "Notater",
+  "status": {
+    "done": "Gjort",
+    "overdue": "Passert",
+    "due": "Nå",
+    "upcoming": "Kommer"
+  },
+  "homeVisitNote": "Helsesykepleier tar vanligvis kontakt selv.",
+  "dialog": {
+    "description": "Veiledende tidspunkt: {window}",
+    "bookTitle": "Time på helsestasjonen",
+    "dateLabel": "Dato",
+    "timeLabel": "Klokkeslett",
+    "saveBooking": "Lagre time",
+    "removeBooking": "Fjern time",
+    "bookingSaved": "Timen er lagret",
+    "bookingRemoved": "Timen er fjernet",
+    "doneTitle": "Marker som gjort",
+    "doneDateLabel": "Dato for timen",
+    "markDone": "Marker som gjort",
+    "undoDone": "Angre",
+    "doneSaved": "Markert som gjort",
+    "doneUndone": "Markeringen er fjernet",
+    "notesLabel": "Notater (for eksempel vekt og lengde)",
+    "notesPlaceholder": "Noe du vil huske til neste gang",
+    "saveNotes": "Lagre notat",
+    "notesSaved": "Notatet er lagret",
+    "sources": "Kilder"
+  },
+  "errorTitle": "Noe gikk galt",
+  "footer": "Oversikten bygger på Helsedirektoratets nasjonale faglige retningslinje for helsestasjon 0–5 år. Kommunen kan ha litt andre tidspunkt. Sjekk alltid innkallingen fra helsestasjonen.",
+  "items": {
+    "home_visit": {
+      "title": "Hjemmebesøk",
+      "description": "Helsesykepleier kommer hjem til dere, vanligvis 7–10 dager etter fødselen. Dere snakker om amming og mating, søvn, trygghet og hvordan dere har det, og barnet blir veid."
+    },
+    "week_4": {
+      "title": "4 uker (gruppekonsultasjon)",
+      "description": "Samtale om mating, gråt, trygghet, smittevern og hvordan foreldrene har det. Mange steder er dette en gruppekonsultasjon sammen med andre foreldre."
+    },
+    "week_6": {
+      "title": "6 uker",
+      "description": "Legeundersøkelse og samtale om mating, utvikling og trygghet. Barnet veies og måles. Første dose av rotavirusvaksinen gis (gis i munnen) og dere får informasjon om vaksinene."
+    },
+    "month_3": {
+      "title": "3 måneder",
+      "description": "Samtale om mating, utvikling og språkstimulering, veiing og måling. Barnet får vaksiner."
+    },
+    "month_4": {
+      "title": "4 måneder (gruppekonsultasjon)",
+      "description": "Samtale om mating og start med fast føde, søvn og trygghet, og om å begynne i barnehage. Ingen vaksiner."
+    },
+    "month_5": {
+      "title": "5 måneder",
+      "description": "Samtale om mating og fast føde, utvikling og tannhelse. Barnet veies og måles og får vaksiner."
+    },
+    "month_6": {
+      "title": "6 måneder",
+      "description": "Legeundersøkelse. Samtale om kosthold og ernæring og hvordan barnet utvikler seg. Ingen vaksiner."
+    },
+    "month_8": {
+      "title": "8 måneder",
+      "description": "Samtale om mating, samspill, språk og barnehagestart. Ingen vaksiner."
+    },
+    "month_10": {
+      "title": "10 måneder",
+      "description": "Samtale om mating, utvikling, søvn og trygghet. Ingen vaksiner."
+    },
+    "month_12": {
+      "title": "12 måneder (1 år)",
+      "description": "Legeundersøkelse. Samtale om kosthold, D-vitamin, tannhelse og utvikling. Barnet får vaksiner."
+    },
+    "month_15": {
+      "title": "15 måneder",
+      "description": "Samtale om kosthold, søvn, språk, tannpuss og trygghet. Barnet får MMR-vaksine."
+    },
+    "month_18": {
+      "title": "17–18 måneder (gruppekonsultasjon)",
+      "description": "Samtale om utvikling, kosthold, søvn og hvordan foreldrene har det. Ingen vaksiner."
+    },
+    "year_2": {
+      "title": "2 år",
+      "description": "Legeundersøkelse. Samtale om kosthold, søvn, skjermbruk og utvikling. Ingen vaksiner."
+    }
+  },
+  "openItem": "Åpne {title}"
+}
