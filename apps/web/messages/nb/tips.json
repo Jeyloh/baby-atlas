@@ -14,13 +14,13 @@
     },
     "1": {
       "title": "Mange små måltider",
-      "body": "De fleste nyfødte som får morsmelk, spiser minst 8–12 ganger i døgnet. Det er helt vanlig. Se etter tegn på sult, som at barnet smasker eller fører hånden til munnen.",
+      "body": "De fleste nyfødte som får morsmelk, spiser 8–12 ganger i døgnet eller oftere. Det er helt vanlig. Se etter tegn på sult, som at barnet smasker eller fører hånden til munnen.",
       "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/amming-og-morsmelk"
     },
     "2": {
-      "title": "Du trenger hvile også",
-      "body": "Mange foreldre blir lettere rørte og gråter mer de første ukene. Prøv å hvile når barnet sover, og si ja til hjelp. Snakk med helsesykepleier hvis du føler deg nedstemt over tid.",
-      "url": "https://www.helsenorge.no/etter-fodsel/"
+      "title": "D-vitamin",
+      "body": "Barn som ammes, trenger D-vitamindråper fra de er rundt én uke gamle. Får barnet også morsmelkerstatning, kan mengden reduseres. Spør helsestasjonen om dosen.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
     },
     "3": {
       "title": "Dag og natt er det samme",
@@ -33,7 +33,7 @@
       "url": "https://www.helsenorge.no/spedbarn/omsorgen-for-det-nyfodte-barnet"
     },
     "5": {
-      "title": "Gråting er kommunikasjon",
+      "title": "Gråt er kommunikasjon",
       "body": "Spedbarn gråter ofte mer de første ukene, og det kan være krevende. Prøv å bære, vugge eller gå rolig rundt. Rist aldri barnet. Legg det trygt ned og ta en pause hvis du blir sliten.",
       "url": "https://www.helsenorge.no/barn/0-2-ar/"
     },
@@ -68,7 +68,7 @@
       "url": "https://www.helsenorge.no/etter-fodsel/"
     },
     "12": {
-      "title": "Døgnrytmen våkner",
+      "title": "Døgnrytmen tar form",
       "body": "Rundt 3–4 måneder begynner døgnrytmen å falle på plass for mange barn. En fast rutine rundt leggetid, som bad og sang, kan gjøre det lettere å sovne. Rutinen trenger ikke være lang.",
       "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
     },
@@ -93,9 +93,9 @@
       "url": "https://www.helsenorge.no/sykdom/forstehjelp-og-skader/sikkerhet-for-sma-barn/"
     },
     "17": {
-      "title": "D-vitamin",
-      "body": "Barn som ammes trenger D-vitamintilskudd. Gjør det til en fast del av dagen, for eksempel ved morgenstellet. Spør helsestasjonen hvis du er usikker.",
-      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/amming-og-morsmelk"
+      "title": "Du trenger hvile også",
+      "body": "Mange foreldre blir lettere rørte og gråter mer de første ukene. Prøv å hvile når barnet sover, og si ja til hjelp. Snakk med helsesykepleier hvis du føler deg nedstemt over tid.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
     },
     "18": {
       "title": "Tid til dere to",
@@ -104,7 +104,7 @@
     },
     "19": {
       "title": "Latter og lek",
-      "body": "Mange barn begynner å le høyt og kvekke av glede. Prøv borte-titt-ei eller rolige kilelek. Følg barnets signaler og stopp når det vender seg bort.",
+      "body": "Mange barn begynner å le høyt og hyle av fryd. Prøv borte-titt-ei eller litt forsiktig kiling. Følg barnets signaler og stopp når det vender seg bort.",
       "url": "https://www.helsenorge.no/barn/0-2-ar/"
     },
     "20": {
@@ -119,32 +119,32 @@
     },
     "22": {
       "title": "Hvem er kjent?",
-      "body": "Mange barn kjenner igjen kjente ansikter og kan bli sjenerte med fremmede. Gi barnet tid og la det se på nye personer fra din favn.",
+      "body": "Mange barn kjenner igjen kjente ansikter og kan bli sjenerte med fremmede. Gi barnet tid og la det se på nye personer fra fanget ditt.",
       "url": "https://www.helsenorge.no/barn/0-2-ar/"
     },
     "23": {
       "title": "Klar for fast føde?",
       "body": "Mange starter med fast føde rundt 6 måneder, noen litt tidligere, men ikke før 4 måneder. Se etter tegn som god hodekontroll og at barnet kan sitte med støtte. Spør helsestasjonen om råd.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "24": {
       "title": "Første smaksprøver",
       "body": "De første måltidene kan være en teskje finmost mat. Morsmelk eller morsmelkerstatning er fortsatt hovedmaten. Ikke tving barnet til å spise.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "25": {
       "title": "Jern i maten",
       "body": "Fra rundt 6 måneder trenger barnet jern fra mat også. Kjøtt, fisk, egg, linser og grov grøt er gode kilder. Vitamin C i måltidet hjelper opptaket.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "26": {
       "title": "Unngå små, harde biter",
       "body": "Harde, små biter som nøtter og druer kan sette seg fast i halsen. Del eller mos maten, og la barnet sitte oppreist når det spiser. Vær alltid til stede under måltidet.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "27": {
       "title": "Å sovne selv",
-      "body": "Mange barn våkner fortsatt om natten, og det er normalt. Du kan av og til prøve å legge barnet i sengen døsig, men våken. Gjør det i ditt eget tempo.",
+      "body": "Mange barn våkner fortsatt om natten, og det er normalt. Du kan av og til prøve å legge barnet i sengen trøtt, men våken. Gjør det i ditt eget tempo.",
       "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
     },
     "28": {
@@ -155,7 +155,7 @@
     "29": {
       "title": "Svar på lydene",
       "body": "Barnet babler gjerne med lyder som «ba» og «da». Si lydene tilbake og kommenter det dere gjør sammen. Mye prat i hverdagen er nok.",
-      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
     },
     "30": {
       "title": "Sikre hjemmet",
@@ -169,17 +169,17 @@
     },
     "32": {
       "title": "Mer variasjon",
-      "body": "Barnet kan prøve mange slags mat. Tilby nye smaker mange ganger, også om de blir avvist. Unngå honning og salt, og ikke gi kumelk som drikke.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "body": "Barnet kan prøve mange slags mat. Tilby nye smaker mange ganger, også om de blir avvist. Ikke gi honning før 1 år, unngå salt, og vent med kumelk som drikke til barnet er 1 år.",
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "33": {
       "title": "Tenner på vei",
       "body": "Mange barn får første tann rundt denne tiden, og noen er urolige. Noe kaldt og trygt å tygge på kan hjelpe. Kontakt lege hvis barnet har høy feber eller virker sykt.",
-      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+      "url": "https://www.helsenorge.no/tannhelse/tenner-hos-barn/"
     },
     "34": {
       "title": "Første tannpuss",
-      "body": "Start tannpussen når den første tannen kommer. Bruk en liten, myk børste morgen og kveld. Gjør det til en hyggelig rutine.",
+      "body": "Start tannpussen når den første tannen kommer. Bruk en liten, myk børste med litt fluortannkrem morgen og kveld. Gjør det til en hyggelig rutine.",
       "url": "https://www.helsenorge.no/tannhelse/tannstell-hos-barn/"
     },
     "35": {
@@ -195,7 +195,7 @@
     "37": {
       "title": "Å spise selv",
       "body": "Mange vil gjerne gripe maten selv. Tilby myke biter som barnet kan holde i. Regn med litt søl, det er en del av læringen.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "38": {
       "title": "Våkner om natten",
@@ -225,7 +225,7 @@
     "43": {
       "title": "Familiemåltider",
       "body": "Barnet kan etter hvert spise det meste av familiens mat. Sitt sammen ved bordet og spis i rolig tempo. Unngå skjerm under måltidet.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "44": {
       "title": "Fastere døgnrytme",
@@ -260,7 +260,7 @@
     "50": {
       "title": "Drikke fra kopp",
       "body": "Mange barn øver på å drikke av kopp. Tilby vann i en liten kopp til måltidene. Morsmelk kan fortsatt gis så lenge dere ønsker.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "51": {
       "title": "Vær snill mot deg selv",
@@ -269,7 +269,7 @@
     },
     "52": {
       "title": "Ett år",
-      "body": "Barnet har vokst mye det første året. Se tilbake på notatene deres og legg merke til alt dere har mestret. Gratulerer med første året.",
+      "body": "Barnet har vokst mye det første året. Se tilbake på notatene deres og legg merke til alt dere har mestret. Gratulerer med ettårsdagen!",
       "url": "https://www.helsenorge.no/barn/"
     }
   },
@@ -282,7 +282,7 @@
     "14": {
       "title": "Små og store smaker",
       "body": "Matlysten varierer mye hos 1–2-åringer. Tilby variert mat og la barnet bestemme hvor mye det spiser. Sitt gjerne sammen med barnet.",
-      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/fast-fode-til-babyen/"
     },
     "15": {
       "title": "Én eller to lurer",
@@ -291,7 +291,7 @@
     },
     "16": {
       "title": "Tannpuss hver dag",
-      "body": "Puss tennene morgen og kveld. Ved 1 år passer en mengde tannkrem på størrelse med lillefingerneglen. Hjelp barnet og gjør det lekent.",
+      "body": "Puss tennene med fluortannkrem morgen og kveld. Bruk en mengde på størrelse med barnets lillefingernegl. Hjelp barnet og gjør det lekent.",
       "url": "https://www.helsenorge.no/tannhelse/tannstell-hos-barn/"
     },
     "17": {
@@ -301,7 +301,7 @@
     },
     "18": {
       "title": "Lek og bevegelse",
-      "body": "Barn på 1–2 år bør være allsidig aktive minst tre timer fordelt utover dagen. Gå tur, klatre lavt og dans. Lek er læring.",
+      "body": "Barn på 1–2 år bør være allsidig aktive minst tre timer fordelt utover dagen. Gå tur, klatre litt og dans. Lek er læring.",
       "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
     },
     "19": {
@@ -311,7 +311,7 @@
     },
     "20": {
       "title": "Skjerm og lek",
-      "body": "Det anbefales ikke skjerm for barn under 2 år. Hvis dere bruker skjerm, gjør det sammen med en voksen. Unngå skjerm nær leggetid.",
+      "body": "Barn under 2 år bør unngå skjerm. Brukes skjerm, hold det til maks 30 minutter av og til, sammen med en voksen.",
       "url": "https://www.helsenorge.no/skjermrad/skjermrad-for-barn-0-5-ar/"
     },
     "21": {
@@ -351,7 +351,7 @@
     },
     "28": {
       "title": "Fra tremmeseng til seng",
-      "body": "Noen barn går over til vanlig seng. Gjør overgangen rolig og forutsigbar. Det er vanlig at barn våkner av og til til de er rundt tre år.",
+      "body": "Noen barn går over til vanlig seng. Gjør overgangen rolig og forutsigbar. Mange barn våkner av og til om natten helt til de er rundt tre år.",
       "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
     },
     "29": {
@@ -376,23 +376,23 @@
     },
     "33": {
       "title": "Søvn og energi",
-      "body": "Mange barn trenger 10–13 timer søvn i døgnet. Noen slutter å sove på dagen. Rolig hvile kan være nok.",
+      "body": "Mange barn trenger 11–14 timer søvn i døgnet. Noen slutter å sove på dagen. Rolig hvile kan være nok.",
       "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
     },
     "34": {
       "title": "Ertstor tannkrem",
-      "body": "Fra 3 år kan du bruke en ertstor mengde tannkrem. Hjelp til med pussen til barnet mestrer det selv. Tannhelsetjenesten kaller inn til undersøkelse.",
+      "body": "Når barnet fyller 3 år, kan dere bruke en ertstor mengde tannkrem. Hjelp til med pussen til barnet mestrer det selv. Tannhelsetjenesten kaller inn til undersøkelse.",
       "url": "https://www.helsenorge.no/tannhelse/tannstell-hos-barn/"
     },
     "35": {
       "title": "Trygg ute",
-      "body": "Barnet er mer selvstendig ute. Vis trafikkreglene og hold i hånden. Bruk bilsete eller bilbelte tilpasset høyde og vekt.",
+      "body": "Barnet skal fortsatt sitte i godkjent bilstol, gjerne bakovervendt til rundt 4 år. Lær barnet om trafikk og hold i hånden nær vei.",
       "url": "https://www.helsenorge.no/sykdom/forstehjelp-og-skader/sikkerhet-for-sma-barn/"
     },
     "36": {
       "title": "Se tilbake",
       "body": "Du har gjort en stor jobb. Ta deg tid til å legge merke til det som fungerer. Snakk med helsestasjonen hvis du trenger støtte.",
-      "url": "https://www.helsenorge.no/etter-fodsel/"
+      "url": "https://www.helsenorge.no/barn/"
     }
   }
 }

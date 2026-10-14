@@ -25,11 +25,18 @@ describe("tipKeyForAge", () => {
     expect(tipKeyForAge(summer, new Date("2026-06-07T22:00:00Z"))).toBe("week.1");
   });
 
-  it("ends the weekly tips at week 52 and has none until month 13", () => {
-    expect(tipKeyForAge(birth, new Date("2027-01-10T12:00:00Z"))).toBe("week.52");
+  it("keeps the week 52 tip until month 13 starts", () => {
     expect(tipKeyForAge(birth, new Date("2027-01-15T12:00:00Z"))).toBe("week.52");
-    expect(tipKeyForAge(birth, new Date("2027-01-16T12:00:00Z"))).toBeNull();
-    expect(tipKeyForAge(birth, new Date("2027-02-09T12:00:00Z"))).toBeNull();
+    // day 371: the first day after week 52
+    expect(tipPositionForAge(birth, new Date("2027-01-16T12:00:00Z"))).toEqual({
+      key: "week.52",
+      daysIntoTip: 7,
+    });
+    // the day before month 13
+    expect(tipPositionForAge(birth, new Date("2027-02-09T12:00:00Z"))).toEqual({
+      key: "week.52",
+      daysIntoTip: 31,
+    });
   });
 
   it("starts month 13 on the 13-month birthday and runs to month 36", () => {
@@ -42,7 +49,7 @@ describe("tipKeyForAge", () => {
 
   it("clamps month starts for children born late in the month", () => {
     const late = new Date("2026-01-31T00:00:00.000Z");
-    expect(tipKeyForAge(late, new Date("2027-02-27T12:00:00Z"))).toBeNull();
+    expect(tipKeyForAge(late, new Date("2027-02-27T12:00:00Z"))).toBe("week.52");
     expect(tipKeyForAge(late, new Date("2027-03-30T12:00:00Z"))).toBe("month.13");
     expect(tipKeyForAge(late, new Date("2027-03-31T12:00:00Z"))).toBe("month.14");
     expect(tipKeyForAge(late, new Date("2027-04-29T12:00:00Z"))).toBe("month.14");

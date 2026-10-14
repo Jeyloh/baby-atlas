@@ -38,7 +38,8 @@ function monthStart([by, bm, bd]: Ymd, months: number): Ymd {
  * Which tip applies to a child, by calendar days in Europe/Oslo. `birthDate` is
  * a calendar date (the database stores it as midnight UTC), so its UTC date is
  * the birthday. Age in whole weeks for 0-52, else whole months for 13-36;
- * null before birth, between week 52 and month 13, and beyond month 36.
+ * null before birth and beyond month 36. Between week 52 and month 13 the
+ * week 52 tip stays.
  */
 export function tipPositionForAge(birthDate: Date, now: Date): TipPosition | null {
   const birth = parseDay(birthDate.toISOString().slice(0, 10));
@@ -51,7 +52,11 @@ export function tipPositionForAge(birthDate: Date, now: Date): TipPosition | nul
 
   let months = (today[0] - birth[0]) * 12 + (today[1] - birth[1]);
   if (dayNumber(today) < dayNumber(monthStart(birth, months))) months -= 1;
-  if (months < FIRST_TIP_MONTH || months > LAST_TIP_MONTH) return null;
+  if (months > LAST_TIP_MONTH) return null;
+  // Between week 52 and month 13 the last weekly tip stays
+  if (months < FIRST_TIP_MONTH) {
+    return { key: `week.${LAST_TIP_WEEK}`, daysIntoTip: days - LAST_TIP_WEEK * 7 };
+  }
   return {
     key: `month.${months}`,
     daysIntoTip: days - (dayNumber(monthStart(birth, months)) - dayNumber(birth)),
