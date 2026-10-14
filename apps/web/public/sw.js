@@ -2,8 +2,9 @@
 // Build assets are cached forever (their names change on every deploy). Pages
 // are fetched from the network first and fall back to the last copy. API calls
 // are never cached: queued quick actions and saved query data cover those.
+// The worker also shows push notifications and opens the app when one is tapped.
 
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `static-${VERSION}`;
 // Sign-out deletes caches starting with "pages-" (signOutAndClearDevice)
 const PAGE_CACHE = `pages-${VERSION}`;
@@ -38,6 +39,67 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   event.respondWith(networkFirst(request));
+});
+
+// The server sends JSON: { title, body, tag, url }. Only paths inside this app
+// are opened, so a notification can never send the user to another site.
+const NOTIFICATION_ICON = "/pwa-icon/192";
+
+function safeAppPath(url) {
+  if (typeof url !== "string") return "/dashboard";
+  if (!url.startsWith("/") || url.startsWith("//") || url.startsWith("/\\")) return "/dashboard";
+  return url;
+}
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      data = { body: event.data.text() };
+    }
+  }
+
+  const options = {
+    body: typeof data.body === "string" ? data.body : "",
+    icon: NOTIFICATION_ICON,
+    badge: NOTIFICATION_ICON,
+    data: { url: safeAppPath(data.url) },
+  };
+  if (typeof data.tag === "string" && data.tag) {
+    options.tag = data.tag;
+    options.renotify = true;
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(
+      typeof data.title === "string" && data.title ? data.title : "Baby Atlas",
+      options
+    )
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL(safeAppPath(event.notification.data && event.notification.data.url), self.location.origin);
+
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      for (const client of windows) {
+        if (new URL(client.url).origin !== self.location.origin) continue;
+        try {
+          await client.focus();
+          if ("navigate" in client) await client.navigate(target.href);
+          return;
+        } catch {
+          // Fall through to opening a new window
+        }
+      }
+      await self.clients.openWindow(target.href);
+    })()
+  );
 });
 
 async function cacheFirst(request) {

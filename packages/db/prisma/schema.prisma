@@ -60,6 +60,11 @@ model User {
   householdMemberships HouseholdMember[]
   sentInvites          HouseholdInvite[]
   journalEntries       JournalEntry[]
+  pushSubscriptions    PushSubscription[]
+  notificationSettings NotificationSettings?
+  notificationLogs     NotificationLog[]
+  childVisits          ChildVisit[]
+  parentCheckIns       ParentCheckIn[]
 
   @@map("users")
 }
@@ -159,6 +164,8 @@ model Child {
   pottyReadinessLogs PottyReadinessLog[]
   vaccinationRecords VaccinationRecord[]
   journalEntries     JournalEntry[]
+  checkupRecords     CheckupRecord[]
+  visits             ChildVisit[]
 
   @@map("children")
 }
@@ -401,15 +408,19 @@ model TemperatureRecord {
 // ============================================================================
 
 model Medicine {
-  id        String   @id @default(cuid())
-  childId   String   @map("child_id")
-  name      String
-  dosage    String
-  frequency String?
-  notes     String?
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id               String   @id @default(cuid())
+  childId          String   @map("child_id")
+  name             String
+  dosage           String
+  frequency        String?
+  notes            String?
+  isActive         Boolean  @default(true) @map("is_active")
+  // Optional dose guard rails the parent enters themselves (never advice from the app)
+  minIntervalHours Float?   @map("min_interval_hours")
+  maxDosesPer24h   Int?     @map("max_doses_per_24h")
+  remindNextDose   Boolean  @default(false) @map("remind_next_dose")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   child   Child            @relation(fields: [childId], references: [id], onDelete: Cascade)
   records MedicineRecord[]
@@ -553,4 +564,117 @@ model JournalPhoto {
 
   @@index([entryId, position])
   @@map("journal_photos")
+}
+
+// ============================================================================
+// Push notifications, health station calendar, handover and wellbeing
+// ============================================================================
+
+enum NotificationKind {
+  TIMER_RUNNING
+  MEDICINE_NEXT_DOSE
+  FEED_DUE
+  NAP_DUE
+  CHECKUP_REMINDER
+  VACCINE_REMINDER
+  WEEKLY_DIGEST
+  WEEKLY_TIP
+}
+
+model PushSubscription {
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  endpoint      String    @unique
+  p256dh        String
+  auth          String
+  userAgent     String?   @map("user_agent")
+  failureCount  Int       @default(0) @map("failure_count")
+  lastSuccessAt DateTime? @map("last_success_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model NotificationSettings {
+  userId          String             @id @map("user_id")
+  enabledKinds    NotificationKind[] @default([TIMER_RUNNING, MEDICINE_NEXT_DOSE, CHECKUP_REMINDER, VACCINE_REMINDER, WEEKLY_DIGEST, WEEKLY_TIP]) @map("enabled_kinds")
+  mutedChildIds   String[]           @default([]) @map("muted_child_ids")
+  // Quiet hours in minutes after midnight, Europe/Oslo (null = no quiet hours)
+  quietStart      Int?               @default(1320) @map("quiet_start")
+  quietEnd        Int?               @default(420) @map("quiet_end")
+  // Optional per-activity overrides of the forgotten timer thresholds, in minutes
+  timerThresholds Json?              @map("timer_thresholds")
+  locale          String             @default("nb")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_settings")
+}
+
+model NotificationLog {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  childId   String?          @map("child_id")
+  kind      NotificationKind
+  dedupeKey String           @map("dedupe_key")
+  sentAt    DateTime         @default(now()) @map("sent_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([sentAt])
+  @@map("notification_logs")
+}
+
+model CheckupRecord {
+  id          String    @id @default(cuid())
+  childId     String    @map("child_id")
+  // Key into the static health station programme in @baby-atlas/utils
+  checkupKey  String    @map("checkup_key")
+  // Booked appointment (date and time)
+  scheduledAt DateTime? @map("scheduled_at")
+  completedAt DateTime? @map("completed_at") @db.Date
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, checkupKey])
+  @@map("checkup_records")
+}
+
+// When a user last looked at a child, used by the handover summary
+model ChildVisit {
+  userId     String   @map("user_id")
+  childId    String   @map("child_id")
+  lastSeenAt DateTime @map("last_seen_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@id([userId, childId])
+  @@map("child_visits")
+}
+
+// Private to the user: never shown to other household members
+model ParentCheckIn {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  date       DateTime @db.Date
+  // 1 (low) to 5 (good)
+  mood       Int
+  sleepHours Float?   @map("sleep_hours")
+  note       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("parent_check_ins")
 }

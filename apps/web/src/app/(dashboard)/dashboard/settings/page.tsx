@@ -7,6 +7,7 @@ import { useSignOut } from "@/hooks/use-sign-out";
 import { setLocale } from "@/i18n/actions";
 import { locales, type Locale } from "@/i18n/config";
 import { trpc } from "@/lib/trpc/provider";
+import { NotificationSettings } from "@/components/notifications/notification-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +44,9 @@ export default function ProfileSettingsPage() {
   const signOut = useSignOut();
 
   const { data: user, isLoading } = trpc.user.get.useQuery();
+  const saveNotificationLocale = trpc.notifications.updateSettings.useMutation({
+    onSuccess: () => utils.notifications.getSettings.invalidate(),
+  });
 
   const [name, setName] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -59,6 +63,8 @@ export default function ProfileSettingsPage() {
     if (next === currentLocale) return;
     startLocaleTransition(async () => {
       await setLocale(next);
+      // Push notifications are written on the server in the user's language
+      saveNotificationLocale.mutate({ locale: next });
       router.refresh();
     });
   };
@@ -206,6 +212,8 @@ export default function ProfileSettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <NotificationSettings />
 
       <Card>
         <CardHeader>

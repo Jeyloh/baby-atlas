@@ -93,7 +93,7 @@ export default function ChildDashboardPage({
         </TabsList>
 
         <TabsContent value="home" className="mt-4">
-          <HomeView childId={childId} />
+          <HomeView childId={childId} birthDate={child.birthDate} />
         </TabsContent>
 
         <TabsContent value="reports" className="mt-4">

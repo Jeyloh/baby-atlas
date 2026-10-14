@@ -1,0 +1,85 @@
+{
+  "push": {
+    "test": {
+      "title": "Testvarsel fra Baby Atlas",
+      "body": "Varslene fungerer på denne enheten."
+    }
+  },
+  "settings": {
+    "title": "Varsler",
+    "description": "Få beskjed på denne enheten, for eksempel når en tidtaker har gått lenge. Varslene er personlige og gjelder bare deg.",
+    "status": {
+      "loading": "Sjekker varsler …",
+      "unsupported": "Denne nettleseren støtter ikke push-varsler.",
+      "noWorker": "Varsler krever at appen er installert som nettapp. Det er ikke aktivt i utviklingsmodus.",
+      "notConfigured": "Push-varsler er ikke satt opp på denne tjenesten ennå.",
+      "iosNeedsInstall": "På iPhone og iPad fungerer varsler bare når Baby Atlas er lagt til på Hjem-skjermen (iOS 16.4 eller nyere). Legg appen til, og åpne den derfra for å slå på varsler.",
+      "denied": "Varsler er blokkert for dette nettstedet. Tillat varsler i nettleserens eller telefonens innstillinger, og kom tilbake hit.",
+      "off": "Varsler er av på denne enheten.",
+      "on": "Varsler er på for denne enheten."
+    },
+    "actions": {
+      "enable": "Slå på varsler",
+      "disable": "Slå av varsler",
+      "test": "Send testvarsel",
+      "working": "Et øyeblikk …"
+    },
+    "toast": {
+      "enabled": "Varsler er slått på",
+      "disabled": "Varsler er slått av",
+      "testSent": "Testvarselet er sendt",
+      "testNoSubscription": "Denne enheten har ingen aktiv varselregistrering. Slå på varsler først.",
+      "testUnavailable": "Push-varsler er ikke satt opp på tjenesten ennå.",
+      "testFailed": "Varselet kom ikke frem. Prøv å slå varsler av og på igjen.",
+      "saveFailed": "Kunne ikke lagre varselinnstillingene",
+      "enableFailed": "Kunne ikke slå på varsler"
+    },
+    "kinds": {
+      "title": "Hva vil du få varsel om?",
+      "TIMER_RUNNING": {
+        "label": "Tidtaker som går lenge",
+        "description": "Når en søvn-, amme- eller annen tidtaker ser ut til å ha blitt glemt."
+      },
+      "MEDICINE_NEXT_DOSE": {
+        "label": "Medisin",
+        "description": "Når tidspunktet du har satt som tidligste neste dose er nådd."
+      },
+      "FEED_DUE": {
+        "label": "Snart tid for mat",
+        "description": "Et anslag ut fra tidligere måltider, litt før neste ventes."
+      },
+      "NAP_DUE": {
+        "label": "Snart tid for lur",
+        "description": "Et anslag ut fra alder og tidligere søvn, litt før neste lur ventes."
+      },
+      "CHECKUP_REMINDER": {
+        "label": "Helsestasjon",
+        "description": "Dagen før en avtale du har lagt inn, og når det er tid for å bestille time."
+      },
+      "VACCINE_REMINDER": {
+        "label": "Vaksiner",
+        "description": "Når en vaksine i barnevaksinasjonsprogrammet står for tur."
+      },
+      "WEEKLY_DIGEST": {
+        "label": "Ukesoppsummering",
+        "description": "Søndag kveld: hvordan uken var sammenlignet med uken før."
+      },
+      "WEEKLY_TIP": {
+        "label": "Ukens tips",
+        "description": "Ett kort tips som passer barnets alder."
+      }
+    },
+    "quiet": {
+      "title": "Stille timer",
+      "description": "Du får ikke varsler i dette tidsrommet. Varsler som fortsatt er aktuelle kommer etterpå.",
+      "toggle": "Bruk stille timer",
+      "from": "Fra",
+      "to": "Til"
+    },
+    "mute": {
+      "title": "Dempe barn",
+      "description": "Ingen varsler om barn du demper.",
+      "none": "Du har ingen barn å dempe ennå."
+    }
+  }
+}

@@ -14,4 +14,5 @@ export * from "./speech";
 export * from "./potty";
 export * from "./vaccination";
 export * from "./journal";
+export * from "./notification";
 export * from "./common";

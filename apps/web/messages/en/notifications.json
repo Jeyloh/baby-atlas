@@ -1,0 +1,85 @@
+{
+  "push": {
+    "test": {
+      "title": "Test notification from Baby Atlas",
+      "body": "Notifications work on this device."
+    }
+  },
+  "settings": {
+    "title": "Notifications",
+    "description": "Get alerts on this device, for example when a timer has been running for a long time. Notifications are personal and only apply to you.",
+    "status": {
+      "loading": "Checking notifications …",
+      "unsupported": "This browser does not support push notifications.",
+      "noWorker": "Notifications need the app to run as an installed web app. That is not active in development mode.",
+      "notConfigured": "Push notifications are not set up on this service yet.",
+      "iosNeedsInstall": "On iPhone and iPad, notifications only work when Baby Atlas is added to the Home Screen (iOS 16.4 or later). Add the app, and open it from there to turn notifications on.",
+      "denied": "Notifications are blocked for this site. Allow them in your browser or phone settings, then come back here.",
+      "off": "Notifications are off on this device.",
+      "on": "Notifications are on for this device."
+    },
+    "actions": {
+      "enable": "Turn on notifications",
+      "disable": "Turn off notifications",
+      "test": "Send test notification",
+      "working": "One moment …"
+    },
+    "toast": {
+      "enabled": "Notifications are on",
+      "disabled": "Notifications are off",
+      "testSent": "The test notification was sent",
+      "testNoSubscription": "This device has no active notification registration. Turn notifications on first.",
+      "testUnavailable": "Push notifications are not set up on the service yet.",
+      "testFailed": "The notification did not arrive. Try turning notifications off and on again.",
+      "saveFailed": "Could not save the notification settings",
+      "enableFailed": "Could not turn on notifications"
+    },
+    "kinds": {
+      "title": "What do you want to be notified about?",
+      "TIMER_RUNNING": {
+        "label": "Timer running for a long time",
+        "description": "When a sleep, nursing or other timer looks like it was forgotten."
+      },
+      "MEDICINE_NEXT_DOSE": {
+        "label": "Medicine",
+        "description": "When the earliest next dose time you have set is reached."
+      },
+      "FEED_DUE": {
+        "label": "Feed coming up",
+        "description": "An estimate based on earlier feeds, shortly before the next one is expected."
+      },
+      "NAP_DUE": {
+        "label": "Nap coming up",
+        "description": "An estimate based on age and earlier sleep, shortly before the next nap is expected."
+      },
+      "CHECKUP_REMINDER": {
+        "label": "Health station",
+        "description": "The day before an appointment you have added, and when it is time to book one."
+      },
+      "VACCINE_REMINDER": {
+        "label": "Vaccines",
+        "description": "When a vaccine in the childhood vaccination programme is due."
+      },
+      "WEEKLY_DIGEST": {
+        "label": "Weekly summary",
+        "description": "Sunday evening: how the week went compared with the week before."
+      },
+      "WEEKLY_TIP": {
+        "label": "Tip of the week",
+        "description": "One short tip that fits your child's age."
+      }
+    },
+    "quiet": {
+      "title": "Quiet hours",
+      "description": "You get no notifications during this time. Notifications that are still relevant arrive afterwards.",
+      "toggle": "Use quiet hours",
+      "from": "From",
+      "to": "To"
+    },
+    "mute": {
+      "title": "Mute children",
+      "description": "No notifications about children you mute.",
+      "none": "You have no children to mute yet."
+    }
+  }
+}

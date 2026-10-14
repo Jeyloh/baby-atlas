@@ -257,6 +257,15 @@ A shared journal per child (`/dashboard/[childId]/journal`): text, up to 6 photo
 - Storage (`apps/web/src/lib/storage/`): `put(key, bytes, mimeType)`, `get(key)` returning a stream plus mimeType, `delete(key)`. Keys are `journal/{childId}/{entryId}/{photoId}.webp` and `...{photoId}.thumb.webp`. `STORAGE_DRIVER=local` (default in development) writes to `apps/web/.uploads/` (git-ignored, `STORAGE_LOCAL_DIR` overrides). `STORAGE_DRIVER=vercel-blob` uses a private Vercel Blob store through `BLOB_READ_WRITE_TOKEN` (production uses this). `STORAGE_DRIVER=supabase` uses the private bucket `journal` through `SUPABASE_SERVICE_ROLE_KEY`. Both are server side only. Vercel limits a request body to 4.5 MB, so the client downscales before upload.
 - UI in `components/journal/`; tag colours in `lib/journal-tags.ts`.
 
+### Push notifications
+
+Web Push (VAPID, `web-push`), personal per user. Settings UI: "Varsler" card on the profile settings page (`components/notifications/notification-settings.tsx`, `hooks/use-push-subscription.ts`). tRPC `notifications` router stores settings and subscriptions; `POST /api/notifications/test` sends a test push (web-push lives in `apps/web`, not the API package).
+- Env: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:`), `CRON_SECRET`. Generate keys with `npx web-push generate-vapid-keys`. Missing keys disable push (UI says so, cron answers 503). `apps/web/.env.example` could not be updated by the agent (access denied), add these four there.
+- `GET /api/cron/notifications` (bearer `CRON_SECRET`, constant-time compare) runs `runDispatcher` (`lib/notifications/`): evaluators (`evaluators/<kind>.ts`, one per `NotificationKind`, registered in `evaluators/index.ts`) return `Candidate`s; `plan.ts` filters per recipient (enabled kind, muted child, quiet hours in Europe/Oslo, already logged); the dispatcher inserts the `NotificationLog` row first and sends only if the insert won, so concurrent runs never double-send. A notice held back by quiet hours is not logged, so it is re-evaluated next run. Dead subscriptions (404/410) are deleted, other failures count up to 5. Logs older than 60 days are pruned.
+- Call the endpoint every 5 minutes from cron-job.org; `apps/web/vercel.json` has a daily Vercel cron as a backstop (Hobby allows daily only).
+- Push texts live in `messages/{nb,en}/notifications.json` under `push.*` and are translated server-side in the recipient's `NotificationSettings.locale` (`translate.ts`). Keep `Candidate.titleKey/bodyKey` relative to the `notifications` namespace.
+- `public/sw.js` handles `push` and `notificationclick` (only same-origin paths are opened). The worker is production only; set `NEXT_PUBLIC_SW_IN_DEV=1` to test push locally. iOS needs the app on the Home Screen (16.4+).
+
 ### Timeline Views
 
 Reports section has three views, all showing all 8 activity types:

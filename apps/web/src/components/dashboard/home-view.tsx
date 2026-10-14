@@ -5,12 +5,14 @@ import { useLastActivities } from "@/hooks/use-last-activities";
 import { ActivityCard, useActivityDetails } from "@/components/dashboard/activity-card";
 import { QuickActionBar } from "@/components/dashboard/quick-action-bar";
 import { ModuleLinks } from "@/components/dashboard/module-links";
+import { SupportCards } from "@/components/support/support-cards";
 
 interface HomeViewProps {
   childId: string;
+  birthDate: Date;
 }
 
-export function HomeView({ childId }: HomeViewProps) {
+export function HomeView({ childId, birthDate }: HomeViewProps) {
   const t = useTranslations("dashboard.card");
   const tModules = useTranslations("dashboard.modules");
   const details = useActivityDetails();
@@ -63,6 +65,8 @@ export function HomeView({ childId }: HomeViewProps) {
   return (
     <div className="space-y-6">
       <QuickActionBar childId={childId} />
+
+      <SupportCards childId={childId} birthDate={birthDate} />
 
       <section aria-labelledby="latest-activity-title" className="space-y-2">
         <h2 id="latest-activity-title" className="font-display text-lg font-semibold tracking-tight">

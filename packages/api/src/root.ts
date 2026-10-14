@@ -16,9 +16,19 @@ import { pottyRouter } from "./routers/potty";
 import { vaccinationRouter } from "./routers/vaccination";
 import { statsRouter } from "./routers/stats";
 import { journalRouter } from "./routers/journal";
+import { notificationsRouter } from "./routers/notifications";
+import { checkupRouter } from "./routers/checkup";
+import { handoverRouter } from "./routers/handover";
+import { wellbeingRouter } from "./routers/wellbeing";
+import { digestRouter } from "./routers/digest";
 
 export const appRouter = createTRPCRouter({
   journal: journalRouter,
+  notifications: notificationsRouter,
+  checkup: checkupRouter,
+  handover: handoverRouter,
+  wellbeing: wellbeingRouter,
+  digest: digestRouter,
   speech: speechRouter,
   potty: pottyRouter,
   vaccination: vaccinationRouter,
