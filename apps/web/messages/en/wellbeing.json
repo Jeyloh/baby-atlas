@@ -14,14 +14,15 @@
     "sleepLabel": "Hours of sleep last night (optional)",
     "saved": "Saved",
     "saveFailed": "Could not save. Try again when you are online.",
-    "hide": "Hide for good"
+    "hide": "Hide for good",
+    "show": "Show the daily check-in card again"
   },
   "support": {
     "title": "It has been heavy for a while",
-    "body": "You have had several hard days in a row. Struggling is common in a busy time with a baby, and you do not have to carry it alone. Talking to someone often helps.",
+    "body": "You have had several hard days this past week. Struggling is common in a busy time with a baby, and you do not have to carry it alone. Talking to someone often helps.",
     "helsestasjon": "Talk to your health clinic (helsestasjon) or your GP. They have time to listen, to you as well.",
     "mentalHelp": "Mental Helse helpline: <helpline>116 123</helpline> (open around the clock)",
-    "urgent": "If it is urgent, or you are thinking of harming yourself, call <emergency>113</emergency> right away.",
+    "urgent": "If you need help quickly, call the out-of-hours doctor (legevakt) on <legevakt>116 117</legevakt>. If a life is in danger, call <emergency>113</emergency>.",
     "dismiss": "Hide until tomorrow"
   }
 }

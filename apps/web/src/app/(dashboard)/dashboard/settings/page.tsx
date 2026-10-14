@@ -7,6 +7,7 @@ import { useSignOut } from "@/hooks/use-sign-out";
 import { setLocale } from "@/i18n/actions";
 import { locales, type Locale } from "@/i18n/config";
 import { trpc } from "@/lib/trpc/provider";
+import { WellbeingToggle } from "@/components/support/wellbeing-card";
 import { NotificationSettings } from "@/components/notifications/notification-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -214,6 +215,8 @@ export default function ProfileSettingsPage() {
       </Card>
 
       <NotificationSettings />
+
+      <WellbeingToggle />
 
       <Card>
         <CardHeader>

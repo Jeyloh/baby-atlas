@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Annoyed, Frown, Laugh, Lock, Meh, Smile, X, type LucideIcon } from "lucide-react";
 import { osloDayKey, shouldShowSupport } from "@baby-atlas/utils";
 import { trpc } from "@/lib/trpc/provider";
 import { useToast } from "@/hooks/use-toast";
+import { useUserId } from "@/hooks/use-last-activities";
+import { wellbeingStorageKey } from "@/lib/wellbeing-storage";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { SupportCardProps } from "./types";
-
-/** localStorage keys. Private to this browser, like the check-in itself. */
-export const WELLBEING_HIDDEN_KEY = "baby-atlas-wellbeing-hidden";
-const SUPPORT_DISMISSED_KEY = "baby-atlas-wellbeing-support-dismissed";
 
 const MOODS: ReadonlyArray<{ value: 1 | 2 | 3 | 4 | 5; icon: LucideIcon }> = [
   { value: 1, icon: Frown },
@@ -24,9 +23,10 @@ const MOODS: ReadonlyArray<{ value: 1 | 2 | 3 | 4 | 5; icon: LucideIcon }> = [
 ];
 
 /** Reads a localStorage value after mount (the server cannot know it). */
-function useStoredValue(key: string) {
+function useStoredValue(key: string | undefined) {
   const [value, setValue] = useState<string | null | undefined>(undefined);
   useEffect(() => {
+    if (!key) return;
     try {
       setValue(localStorage.getItem(key));
     } catch {
@@ -34,6 +34,7 @@ function useStoredValue(key: string) {
     }
   }, [key]);
   const update = (next: string | null) => {
+    if (!key) return;
     try {
       if (next === null) localStorage.removeItem(key);
       else localStorage.setItem(key, next);
@@ -51,17 +52,38 @@ function useStoredValue(key: string) {
  * are read or written. No scores and no diagnosis.
  */
 export function WellbeingCard(_props: SupportCardProps) {
-  const [hidden, setHidden] = useStoredValue(WELLBEING_HIDDEN_KEY);
-  if (hidden === undefined || hidden !== null) return null;
-  return <WellbeingContent onHide={() => setHidden("1")} />;
+  const userId = useUserId();
+  const [hidden, setHidden] = useStoredValue(
+    userId ? wellbeingStorageKey("hidden", userId) : undefined
+  );
+  if (!userId || hidden === undefined || hidden !== null) return null;
+  return <WellbeingContent userId={userId} onHide={() => setHidden("1")} />;
 }
 
-function WellbeingContent({ onHide }: { onHide: () => void }) {
+/** Settings switch that brings the hidden check-in card back. Renders nothing while it is shown. */
+export function WellbeingToggle() {
+  const t = useTranslations("wellbeing");
+  const userId = useUserId();
+  const [hidden, setHidden] = useStoredValue(
+    userId ? wellbeingStorageKey("hidden", userId) : undefined
+  );
+  if (!userId || !hidden) return null;
+  return (
+    <Button variant="outline" className="min-h-12" onClick={() => setHidden(null)}>
+      {t("checkIn.show")}
+    </Button>
+  );
+}
+
+function WellbeingContent({ userId, onHide }: { userId: string; onHide: () => void }) {
   const t = useTranslations("wellbeing");
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const recent = trpc.wellbeing.recent.useQuery();
-  const [supportDismissed, setSupportDismissed] = useStoredValue(SUPPORT_DISMISSED_KEY);
+  const [supportDismissed, setSupportDismissed] = useStoredValue(
+    wellbeingStorageKey("support-dismissed", userId)
+  );
+  const radios = useRef<Array<HTMLButtonElement | null>>([]);
   const [sleepText, setSleepText] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState(0);
 
@@ -81,8 +103,25 @@ function WellbeingContent({ onHide }: { onHide: () => void }) {
     shouldShowSupport(recent.data, new Date()) &&
     supportDismissed !== osloDayKey(new Date());
 
-  const saveMood = (mood: number) =>
+  const saveMood = (mood: number) => {
+    // aria-disabled keeps focus on the button while saving
+    if (save.isPending) return;
     save.mutate({ mood, sleepHours: today?.sleepHours ?? null, note: today?.note ?? null });
+  };
+
+  const onRadioKeyDown = (event: KeyboardEvent, index: number) => {
+    const step =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -1
+          : 0;
+    if (!step) return;
+    event.preventDefault();
+    const next = (index + step + MOODS.length) % MOODS.length;
+    radios.current[next]?.focus();
+    saveMood(MOODS[next]!.value);
+  };
 
   const saveSleep = () => {
     if (!today || sleepText === null) return;
@@ -119,6 +158,14 @@ function WellbeingContent({ onHide }: { onHide: () => void }) {
             </li>
             <li>
               {t.rich("support.urgent", {
+                legevakt: (chunks) => (
+                  <a
+                    href="tel:116117"
+                    className="font-semibold text-primary underline underline-offset-4"
+                  >
+                    {chunks}
+                  </a>
+                ),
                 emergency: (chunks) => (
                   <a
                     href="tel:113"
@@ -159,20 +206,26 @@ function WellbeingContent({ onHide }: { onHide: () => void }) {
         </div>
 
         <div role="radiogroup" aria-label={t("checkIn.moodLabel")} className="mt-3 grid grid-cols-5 gap-2">
-          {MOODS.map(({ value, icon: Icon }) => {
+          {MOODS.map(({ value, icon: Icon }, index) => {
             const selected = today?.mood === value;
+            // Roving tabindex: one tab stop, on the selected face (or the first)
+            const tabStop = today ? selected : index === 0;
             return (
               <button
                 key={value}
+                ref={(node) => {
+                  radios.current[index] = node;
+                }}
                 type="button"
                 role="radio"
                 aria-checked={selected}
+                aria-disabled={save.isPending}
                 aria-label={t(`checkIn.mood.${value}`)}
-                title={t(`checkIn.mood.${value}`)}
-                disabled={save.isPending}
+                tabIndex={tabStop ? 0 : -1}
                 onClick={() => saveMood(value)}
+                onKeyDown={(e) => onRadioKeyDown(e, index)}
                 className={cn(
-                  "flex h-12 items-center justify-center rounded-lg border text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
+                  "flex h-12 items-center justify-center rounded-lg border text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-disabled:opacity-60",
                   selected
                     ? "border-primary bg-primary/10 text-primary"
                     : "hover:bg-accent hover:text-accent-foreground"
@@ -183,6 +236,12 @@ function WellbeingContent({ onHide }: { onHide: () => void }) {
             );
           })}
         </div>
+
+        {today && (
+          <p className="mt-2 text-sm font-medium" aria-live="polite">
+            {t(`checkIn.mood.${today.mood as 1 | 2 | 3 | 4 | 5}`)}
+          </p>
+        )}
 
         {today && (
           <div className="mt-3 space-y-1">

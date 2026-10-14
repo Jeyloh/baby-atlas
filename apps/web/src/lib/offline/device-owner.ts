@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { QueryClient } from "@tanstack/react-query";
 import { dropBrowserPushSubscription } from "@/lib/notifications/client";
+import { clearWellbeingStorage } from "@/lib/wellbeing-storage";
 import { clearSavedData } from "./query-persister";
 
 const LAST_OWNER_KEY = "baby-atlas-cache-owner";
@@ -45,6 +46,7 @@ export async function claimDevice(queryClient: QueryClient, userId: string) {
     // The previous user's push notifications must not keep arriving here
     await dropBrowserPushSubscription();
     await clearSavedData();
+    clearWellbeingStorage();
   }
   useDeviceOwner.setState({ owner: userId, verified: true });
 }
@@ -60,4 +62,5 @@ export async function releaseDevice(queryClient: QueryClient) {
   queryClient.clear();
   await dropBrowserPushSubscription();
   await clearSavedData();
+  clearWellbeingStorage();
 }
