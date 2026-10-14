@@ -66,6 +66,32 @@ describe("HealthHintsCard", () => {
     expect(more).toHaveAttribute("href", expect.stringContaining("helsenorge.no"));
   });
 
+  it("names the real source in the link and says how the limits were measured", () => {
+    const day10 = new Date("2026-01-05T00:00:00Z");
+    data = emptyData({
+      diapers: [
+        { time: ago(60), diaperType: "WET" },
+        { time: ago(180), diaperType: "WET" },
+        { time: ago(300), diaperType: "DIRTY" },
+        { time: ago(420), diaperType: "DIRTY" },
+      ],
+    });
+    renderCard(<HealthHintsCard childId="c1" birthDate={day10} />);
+
+    const link = screen.getByRole("link", { name: "Les mer hos Ammehjelpen" });
+    expect(link).toHaveAttribute("href", "https://ammehjelpen.no/trotte-barn/");
+    expect(screen.queryByRole("link", { name: /Helsenorge/ })).not.toBeInTheDocument();
+    expect(screen.getByText(/Grensene gjelder temperatur målt i endetarmen/)).toBeInTheDocument();
+    expect(screen.getByText(/Det kan hende at ikke alle bleier er logget/)).toBeInTheDocument();
+  });
+
+  it("offers the 113 button for a very high fever too", () => {
+    data = emptyData({ temperatures: [{ id: "t1", time: ago(30), celsius: 40.2 }] });
+    renderCard(<HealthHintsCard childId="c1" birthDate={FIVE_MONTHS_OLD} />);
+
+    expect(screen.getByRole("link", { name: /Ring 113/ })).toHaveAttribute("href", "tel:113");
+  });
+
   it("hides a dismissed hint and remembers it on this device", () => {
     data = emptyData({ temperatures: [{ id: "t1", time: ago(30), celsius: 38.4 }] });
     const { container, unmount } = renderCard(
@@ -106,7 +132,7 @@ describe("WhatsNextCard", () => {
     });
     renderCard(<WhatsNextCard childId="c1" birthDate={FIVE_MONTHS_OLD} />);
 
-    expect(screen.getByRole("heading", { name: "Hva skjer videre" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hva skjer nå" })).toBeInTheDocument();
     expect(screen.getByText(/Neste måltid/)).toBeInTheDocument();
     expect(screen.getByText(/om ca\. 30 min/)).toBeInTheDocument();
   });

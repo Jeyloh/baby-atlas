@@ -26,12 +26,12 @@ function fakePrisma(fixture: Fixture) {
 }
 
 /** Feeds every 150 minutes, the newest `lastAgo` minutes before NOW. */
-function feedsEvery150(lastAgo: number, childId = "c1") {
-  return Array.from({ length: 6 }, (_, i) => ({
+function feedsEvery150(lastAgo: number, childId = "c1", count = 6, now = NOW) {
+  return Array.from({ length: count }, (_, i) => ({
     id: `f${i}`,
     childId,
     feedingType: "BOTTLE",
-    startTime: ago(lastAgo + i * 150),
+    startTime: new Date(now.getTime() - min(lastAgo + i * 150)),
     endTime: null,
   }));
 }
@@ -67,6 +67,24 @@ describe("FEED_DUE evaluator", () => {
   it("is still relevant a few minutes after the predicted time", async () => {
     const result = await evaluate({ prisma: fakePrisma({ feeds: feedsEvery150(160) }), now: NOW });
     expect(result).toHaveLength(1);
+  });
+
+  describe("after 22:00", () => {
+    const LATE = new Date("2026-01-15T21:30:00Z"); // 22:30 in Oslo
+
+    it("skips when the rhythm lands at night and there are fewer than 3 night gaps", async () => {
+      // Last feed 20:10 Oslo, daytime rhythm 150 min: 22:40. Only daytime gaps so far.
+      const feeds = feedsEvery150(140, "c1", 6, LATE);
+      expect(await evaluate({ prisma: fakePrisma({ feeds }), now: LATE })).toEqual([]);
+    });
+
+    it("uses the night rhythm when at least 3 night gaps exist", async () => {
+      // Feeds every 150 min back to the previous afternoon: several gaps start at night
+      const feeds = feedsEvery150(140, "c1", 12, LATE);
+      const result = await evaluate({ prisma: fakePrisma({ feeds }), now: LATE });
+      expect(result).toHaveLength(1);
+      expect(result[0]!.params).toMatchObject({ time: "22:40" });
+    });
   });
 
   it("skips a child with a running sleep", async () => {

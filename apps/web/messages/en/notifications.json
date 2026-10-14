@@ -24,7 +24,7 @@
     },
     "feedDue": {
       "title": "{name}: feed coming up?",
-      "body": "Based on earlier feeds, the next one is expected around {time}."
+      "body": "Based on earlier feeds, the next feed is expected around {time}."
     },
     "napDue": {
       "title": "{name}: nap coming up?",

@@ -67,10 +67,38 @@ describe("predictNextFeed", () => {
       { startTime: at(17) },
       { startTime: at(22, 30) }, // 5.5 h gap starts at 17:00 (day); this one starts at 22:30
       { startTime: at(4, 30, 15) }, // night gap of 6 h that starts at night
+      { startTime: at(8, 0, 15) }, // 3.5 h night gap
+      { startTime: at(10, 30, 15) }, // last feed in the day (NOW is 12:00)
     ];
     const result = predictNextFeed(feeds, NOW);
     expect(result).not.toBeNull();
     expect(result!.intervalMinutes).toBe(150);
+  });
+
+  describe("at night", () => {
+    // Oslo clock times in January (UTC+1)
+    const at = (day: number, h: number, m = 0) => ({ startTime: new Date(Date.UTC(2026, 0, day, h - 1, m)) });
+    const dayFeeds = [at(14, 7, 30), at(14, 10), at(14, 12), at(14, 14), at(14, 16), at(14, 18), at(14, 20)];
+    const nightFeeds = [at(13, 22, 30), at(14, 1, 30), at(14, 4, 30)];
+
+    it("uses the median of night gaps when the last feed was at night", () => {
+      const feeds = [...nightFeeds, ...dayFeeds, at(14, 22, 30), at(15, 1, 30)];
+      const result = predictNextFeed(feeds, new Date(Date.UTC(2026, 0, 15, 0, 45)));
+      expect(result!.intervalMinutes).toBe(180);
+      expect(result!.at).toEqual(new Date(Date.UTC(2026, 0, 15, 3, 30)));
+    });
+
+    it("uses the night median when the daytime rhythm lands after 22:00", () => {
+      const feeds = [...nightFeeds, ...dayFeeds];
+      const result = predictNextFeed(feeds, new Date(Date.UTC(2026, 0, 14, 19, 30)));
+      expect(result!.intervalMinutes).toBe(180);
+      expect(result!.at).toEqual(new Date(Date.UTC(2026, 0, 14, 22, 0)));
+    });
+
+    it("gives no prediction at night with fewer than three night gaps", () => {
+      const feeds = [...dayFeeds, at(14, 22, 30), at(15, 1, 30)];
+      expect(predictNextFeed(feeds, new Date(Date.UTC(2026, 0, 15, 0, 45)))).toBeNull();
+    });
   });
 
   it("ignores gaps over 8 hours", () => {
@@ -159,20 +187,41 @@ describe("predictNextNap", () => {
     expect(predictNextNap({ birthDate: BIRTH_5_MONTHS, now: evening, sleeps })).toBeNull();
   });
 
-  it("still predicts at night for a newborn", () => {
-    const night = new Date("2026-01-15T23:00:00Z");
-    const result = predictNextNap({
-      birthDate: new Date("2026-01-05T00:00:00Z"),
-      now: night,
-      sleeps: [
-        {
-          startTime: new Date(night.getTime() - min(90)),
-          endTime: new Date(night.getTime() - min(30)),
-          sleepType: "NAP",
-        },
-      ],
-    });
+  const NEWBORN = new Date("2026-01-05T00:00:00Z");
+  const wokeAt = (iso: string): SleepEvent[] => [
+    {
+      startTime: new Date(new Date(iso).getTime() - min(60)),
+      endTime: new Date(iso),
+      sleepType: "NAP",
+    },
+  ];
+
+  it("predicts an evening nap for a newborn", () => {
+    // Woke 20:00 Oslo, window 52 minutes: 20:52
+    const now = new Date("2026-01-15T19:30:00Z");
+    const result = predictNextNap({ birthDate: NEWBORN, now, sleeps: wokeAt("2026-01-15T19:00:00Z") });
     expect(result).not.toBeNull();
+  });
+
+  it("returns null when the predicted time is 22:00-06:00, also for a newborn", () => {
+    // Woke 21:30 Oslo, window 52 minutes: 22:22
+    const now = new Date("2026-01-15T20:40:00Z");
+    expect(
+      predictNextNap({ birthDate: NEWBORN, now, sleeps: wokeAt("2026-01-15T20:30:00Z") })
+    ).toBeNull();
+    // Woke 00:30 Oslo: 01:22
+    const later = new Date("2026-01-15T23:40:00Z");
+    expect(
+      predictNextNap({ birthDate: NEWBORN, now: later, sleeps: wokeAt("2026-01-15T23:30:00Z") })
+    ).toBeNull();
+  });
+
+  it("predicts again once the morning window starts", () => {
+    // Woke 05:30 Oslo with a 52-minute window: 06:22
+    const now = new Date("2026-01-15T04:40:00Z");
+    expect(
+      predictNextNap({ birthDate: NEWBORN, now, sleeps: wokeAt("2026-01-15T04:30:00Z") })
+    ).not.toBeNull();
   });
 });
 

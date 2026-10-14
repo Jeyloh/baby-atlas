@@ -1765,6 +1765,7 @@ function TemperatureModal({ childId, onClose }: { childId: string; onClose: () =
       <div className="flex flex-col items-center py-6 gap-2">
         <span className="text-5xl font-bold">{f.temperatureC(temperatureCelsius)}</span>
         <span className={`text-sm font-medium ${status.color}`}>{status.label}</span>
+        <p className="px-6 text-center text-xs text-muted-foreground">{t("temperature.method")}</p>
       </div>
 
       <div className="px-6 py-4 border-b border-border">
