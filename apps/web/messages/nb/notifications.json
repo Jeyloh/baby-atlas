@@ -97,11 +97,11 @@
       },
       "FEED_DUE": {
         "label": "Snart tid for mat",
-        "description": "Et anslag ut fra tidligere måltider, litt før neste ventes."
+        "description": "Et anslag ut fra tidligere måltider, litt før neste ventes. Sendes ikke i stille timer."
       },
       "NAP_DUE": {
         "label": "Snart tid for lur",
-        "description": "Et anslag ut fra alder og tidligere søvn, litt før neste lur ventes."
+        "description": "Et anslag ut fra alder og tidligere søvn, litt før neste lur ventes. Sendes ikke i stille timer."
       },
       "CHECKUP_REMINDER": {
         "label": "Helsestasjon",

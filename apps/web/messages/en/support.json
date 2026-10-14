@@ -1,4 +1,8 @@
 {
+  "cards": {
+    "showMore": "Show {count} more",
+    "showLess": "Show fewer"
+  },
   "timerFix": {
     "title": "Is the timer still running?",
     "description": "{type} started {start} and has been running for {duration}.",

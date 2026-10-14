@@ -97,11 +97,11 @@
       },
       "FEED_DUE": {
         "label": "Feed coming up",
-        "description": "An estimate based on earlier feeds, shortly before the next one is expected."
+        "description": "An estimate based on earlier feeds, shortly before the next one is expected. Not sent during quiet hours."
       },
       "NAP_DUE": {
         "label": "Nap coming up",
-        "description": "An estimate based on age and earlier sleep, shortly before the next nap is expected."
+        "description": "An estimate based on age and earlier sleep, shortly before the next nap is expected. Not sent during quiet hours."
       },
       "CHECKUP_REMINDER": {
         "label": "Health station",

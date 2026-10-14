@@ -1,4 +1,8 @@
 {
+  "cards": {
+    "showMore": "Vis {count} til",
+    "showLess": "Vis færre"
+  },
   "timerFix": {
     "title": "Pågår den fortsatt?",
     "description": "{type} startet {start} og har pågått i {duration}.",

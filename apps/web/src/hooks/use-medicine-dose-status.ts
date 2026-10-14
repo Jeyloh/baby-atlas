@@ -34,9 +34,12 @@ function useNow(intervalMs = 60_000): Date {
  * Active medicines for a child with their dose status against the limits the
  * parent has set, as of now.
  */
-export function useMedicineDoseStatus(childId: string) {
+export function useMedicineDoseStatus(childId: string, options: { enabled?: boolean } = {}) {
   const now = useNow();
-  const query = trpc.medicine.doseStatus.useQuery({ childId }, sharedFreshness);
+  const query = trpc.medicine.doseStatus.useQuery(
+    { childId },
+    { ...sharedFreshness, enabled: options.enabled ?? true }
+  );
 
   const medicines = useMemo<MedicineWithStatus[]>(() => {
     return (query.data ?? []).map((m) => ({

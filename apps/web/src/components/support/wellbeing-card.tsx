@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Annoyed, Frown, Laugh, Lock, Meh, Smile, X, type LucideIcon } from "lucide-react";
 import { osloDayKey, shouldShowSupport } from "@baby-atlas/utils";
 import { trpc } from "@/lib/trpc/provider";
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/hooks/use-last-activities";
+import { useStoredValue } from "@/hooks/use-stored-value";
 import { wellbeingStorageKey } from "@/lib/wellbeing-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import type { SupportCardProps } from "./types";
+import { HIDDEN_CARD, type SupportCardState } from "./types";
 
 const MOODS: ReadonlyArray<{ value: 1 | 2 | 3 | 4 | 5; icon: LucideIcon }> = [
   { value: 1, icon: Frown },
@@ -22,42 +23,48 @@ const MOODS: ReadonlyArray<{ value: 1 | 2 | 3 | 4 | 5; icon: LucideIcon }> = [
   { value: 5, icon: Laugh },
 ];
 
-/** Reads a localStorage value after mount (the server cannot know it). */
-function useStoredValue(key: string | undefined) {
-  const [value, setValue] = useState<string | null | undefined>(undefined);
-  useEffect(() => {
-    if (!key) return;
-    try {
-      setValue(localStorage.getItem(key));
-    } catch {
-      setValue(null);
-    }
-  }, [key]);
-  const update = (next: string | null) => {
-    if (!key) return;
-    try {
-      if (next === null) localStorage.removeItem(key);
-      else localStorage.setItem(key, next);
-    } catch {
-      // storage unavailable: the choice only lasts for this page
-    }
-    setValue(next);
-  };
-  return [value, update] as const;
-}
-
 /**
  * Private daily check-in for the parent (mood and sleep), plus a gentle
  * support card after several hard days. Only the signed-in user's own rows
  * are read or written. No scores and no diagnosis.
+ *
+ * It is the home screen's soft card and takes the slot on days it wants a
+ * check-in: nothing answered today, or the support card is due. Once it has
+ * wanted one it stays for this visit, so it does not vanish after the answer.
  */
-export function WellbeingCard(_props: SupportCardProps) {
+export function useWellbeingCard(): SupportCardState {
   const userId = useUserId();
   const [hidden, setHidden] = useStoredValue(
     userId ? wellbeingStorageKey("hidden", userId) : undefined
   );
-  if (!userId || hidden === undefined || hidden !== null) return null;
-  return <WellbeingContent userId={userId} onHide={() => setHidden("1")} />;
+  const [supportDismissed, setSupportDismissed] = useStoredValue(
+    userId ? wellbeingStorageKey("support-dismissed", userId) : undefined
+  );
+  const recent = trpc.wellbeing.recent.useQuery(undefined, {
+    enabled: !!userId && hidden === null,
+  });
+  const [wanted, setWanted] = useState(false);
+
+  const entries = recent.data;
+  const today = osloDayKey(new Date());
+  const wants =
+    !!entries &&
+    (!entries.some((e) => e.date === today) ||
+      (shouldShowSupport(entries, new Date()) && supportDismissed !== today));
+  if (wants && !wanted) setWanted(true);
+
+  if (!userId || hidden !== null || !entries || !(wants || wanted)) return HIDDEN_CARD;
+  return {
+    visible: true,
+    urgent: false,
+    element: (
+      <WellbeingContent
+        supportDismissed={supportDismissed}
+        onDismissSupport={() => setSupportDismissed(today)}
+        onHide={() => setHidden("1")}
+      />
+    ),
+  };
 }
 
 /** Settings switch that brings the hidden check-in card back. Renders nothing while it is shown. */
@@ -75,14 +82,19 @@ export function WellbeingToggle() {
   );
 }
 
-function WellbeingContent({ userId, onHide }: { userId: string; onHide: () => void }) {
+function WellbeingContent({
+  supportDismissed,
+  onDismissSupport,
+  onHide,
+}: {
+  supportDismissed: string | null;
+  onDismissSupport: () => void;
+  onHide: () => void;
+}) {
   const t = useTranslations("wellbeing");
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const recent = trpc.wellbeing.recent.useQuery();
-  const [supportDismissed, setSupportDismissed] = useStoredValue(
-    wellbeingStorageKey("support-dismissed", userId)
-  );
   const radios = useRef<Array<HTMLButtonElement | null>>([]);
   const [sleepText, setSleepText] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState(0);
@@ -179,7 +191,7 @@ function WellbeingContent({ userId, onHide }: { userId: string; onHide: () => vo
           </ul>
           <button
             type="button"
-            onClick={() => setSupportDismissed(osloDayKey(new Date()))}
+            onClick={onDismissSupport}
             aria-label={t("support.dismiss")}
             className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >

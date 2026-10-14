@@ -13,7 +13,7 @@ import {
 } from "@baby-atlas/utils";
 import { useFormatters } from "@/lib/format";
 import { useNow, useSupportData } from "@/hooks/use-support-data";
-import type { SupportCardProps } from "./types";
+import { HIDDEN_CARD, type SupportCardProps, type SupportCardState } from "./types";
 
 interface Row {
   key: "feed" | "nap";
@@ -29,9 +29,7 @@ interface Row {
  * own log and age. Shows nothing without enough data, and drops a guess once
  * it is clearly out of date.
  */
-export function WhatsNextCard({ childId, birthDate }: SupportCardProps) {
-  const t = useTranslations("support.whatsNext");
-  const { time, duration } = useFormatters();
+export function useWhatsNextCard({ childId, birthDate }: SupportCardProps): SupportCardState {
   const data = useSupportData(childId);
   const now = useNow();
 
@@ -58,8 +56,17 @@ export function WhatsNextCard({ childId, birthDate }: SupportCardProps) {
     return result.sort((a, b) => a.at.getTime() - b.at.getTime());
   }, [data, birthDate, now]);
 
-  if (rows.length === 0) return null;
+  if (rows.length === 0) return HIDDEN_CARD;
+  return { visible: true, urgent: false, element: <WhatsNextRows rows={rows} now={now} /> };
+}
 
+export function WhatsNextCard(props: SupportCardProps) {
+  return useWhatsNextCard(props).element;
+}
+
+function WhatsNextRows({ rows, now }: { rows: Row[]; now: Date }) {
+  const t = useTranslations("support.whatsNext");
+  const { time, duration } = useFormatters();
   return (
     <section
       aria-labelledby="whats-next-title"

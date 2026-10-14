@@ -9,7 +9,7 @@ import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@baby-atlas/api";
 import { trpc } from "@/lib/trpc/provider";
 import { useFormatters } from "@/lib/format";
-import type { SupportCardProps } from "./types";
+import { HIDDEN_CARD, type SupportCardProps, type SupportCardState } from "./types";
 
 type Summary = NonNullable<inferRouterOutputs<AppRouter>["handover"]["summary"]>;
 
@@ -59,7 +59,7 @@ function usePageVisible() {
  * tracking on a first ever visit (no card then). Marking is best effort: when
  * it fails offline it is ignored and tried again on the next visit.
  */
-export function HandoverCard({ childId }: SupportCardProps) {
+export function useHandoverCard({ childId }: SupportCardProps): SupportCardState {
   const visit = useVisits((s) => s.byChild[childId]);
   const mountedAt = useRef(Date.now());
   const pageVisible = usePageVisible();
@@ -142,18 +142,22 @@ export function HandoverCard({ childId }: SupportCardProps) {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [refetch, childId]);
 
-  if (!visit?.snapshot || visit.dismissed) return null;
+  if (!visit?.snapshot || visit.dismissed) return HIDDEN_CARD;
 
-  return (
-    <HandoverSummary
-      ref={setRoot}
-      summary={visit.snapshot}
-      onDismiss={() => {
-        patchVisit(childId, { dismissed: true, marked: true });
-        if (!visit.marked) mutate({ childId });
-      }}
-    />
-  );
+  return {
+    visible: true,
+    urgent: false,
+    element: (
+      <HandoverSummary
+        ref={setRoot}
+        summary={visit.snapshot}
+        onDismiss={() => {
+          patchVisit(childId, { dismissed: true, marked: true });
+          if (!visit.marked) mutate({ childId });
+        }}
+      />
+    ),
+  };
 }
 
 function HandoverSummary({
