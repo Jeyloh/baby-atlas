@@ -1,1 +1,27 @@
-{}
+{
+  "checkIn": {
+    "title": "How are you doing today?",
+    "private": "Only visible to you",
+    "privateHint": "No one else in the household can see this.",
+    "moodLabel": "Mood today",
+    "mood": {
+      "1": "Very hard",
+      "2": "Hard",
+      "3": "So-so",
+      "4": "Good",
+      "5": "Very good"
+    },
+    "sleepLabel": "Hours of sleep last night (optional)",
+    "saved": "Saved",
+    "saveFailed": "Could not save. Try again when you are online.",
+    "hide": "Hide for good"
+  },
+  "support": {
+    "title": "It has been heavy for a while",
+    "body": "You have had several hard days in a row. Struggling is common in a busy time with a baby, and you do not have to carry it alone. Talking to someone often helps.",
+    "helsestasjon": "Talk to your health clinic (helsestasjon) or your GP. They have time to listen, to you as well.",
+    "mentalHelp": "Mental Helse helpline: <helpline>116 123</helpline> (open around the clock)",
+    "urgent": "If it is urgent, or you are thinking of harming yourself, call <emergency>113</emergency> right away.",
+    "dismiss": "Hide until tomorrow"
+  }
+}

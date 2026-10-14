@@ -5,3 +5,4 @@ export * from "./vaccination";
 export * from "./oslo-day";
 export * from "./journal";
 export * from "./quiet-hours";
+export * from "./wellbeing";
