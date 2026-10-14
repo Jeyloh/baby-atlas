@@ -9,8 +9,11 @@ import {
   updateMedicineRecordSchema,
   deleteMedicineRecordSchema,
   getMedicineRecordsSchema,
+  idSchema,
 } from "@baby-atlas/schemas";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
+
+const DOSE_STATUS_LOOKBACK_MS = 50 * 60 * 60 * 1000;
 
 export const medicineRouter = createTRPCRouter({
   list: householdProcedure
@@ -25,6 +28,27 @@ export const medicineRouter = createTRPCRouter({
       });
 
       return medicines;
+    }),
+
+  /**
+   * Active medicines with the doses logged in the last 50 hours (enough for
+   * the longest interval setting plus a margin), for dose status in the UI.
+   */
+  doseStatus: householdProcedure
+    .input(z.object({ childId: idSchema }))
+    .query(async ({ ctx, input }) => {
+      const since = new Date(Date.now() - DOSE_STATUS_LOOKBACK_MS);
+      return ctx.prisma.medicine.findMany({
+        where: { childId: input.childId, isActive: true },
+        orderBy: { name: "asc" },
+        include: {
+          records: {
+            where: { time: { gte: since } },
+            orderBy: { time: "desc" },
+            select: { id: true, time: true, skipped: true },
+          },
+        },
+      });
     }),
 
   get: recordProcedure("medicine")
@@ -64,6 +88,9 @@ export const medicineRouter = createTRPCRouter({
           dosage: input.dosage,
           frequency: input.frequency,
           notes: input.notes,
+          minIntervalHours: input.minIntervalHours ?? null,
+          maxDosesPer24h: input.maxDosesPer24h ?? null,
+          remindNextDose: input.remindNextDose ?? false,
         },
       });
 
@@ -88,6 +115,9 @@ export const medicineRouter = createTRPCRouter({
           frequency: input.frequency,
           notes: input.notes,
           isActive: input.isActive,
+          minIntervalHours: input.minIntervalHours,
+          maxDosesPer24h: input.maxDosesPer24h,
+          remindNextDose: input.remindNextDose,
         },
       });
 

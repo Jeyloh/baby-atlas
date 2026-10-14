@@ -90,6 +90,29 @@
       "ml": "ml",
       "drops": "dråper",
       "tsp": "ts"
+    },
+    "limits": {
+      "title": "Doseinnstillinger (valgfritt)",
+      "hint": "Du bestemmer selv. Appen sier fra hvis du registrerer en dose før tiden du har satt, eller over grensen du har satt.",
+      "minInterval": "Tidligst hver (timer)",
+      "minIntervalPlaceholder": "for eksempel 6",
+      "maxDoses": "Flest doser på 24 timer",
+      "maxDosesPlaceholder": "for eksempel 4",
+      "remind": "Varsle meg når neste dose kan gis",
+      "remindNeedsInterval": "Krever at du har satt et intervall.",
+      "invalidInterval": "Intervallet må være mellom 0,5 og 48 timer.",
+      "invalidMax": "Antall doser må være et helt tall mellom 1 og 24.",
+      "edit": "Doseinnstillinger",
+      "save": "Lagre innstillinger",
+      "saved": "Innstillinger lagret"
+    },
+    "confirm": {
+      "title": "Registrere dosen likevel?",
+      "lastDose": "Forrige dose ble gitt {time}.",
+      "tooSoon": "Tidligst neste dose er satt til {time} i innstillingene dine.",
+      "maxReached": "Du har registrert {count} doser de siste 24 timene, og grensen du har satt er {max}.",
+      "action": "Registrer likevel",
+      "cancel": "Avbryt"
     }
   },
   "growth": {

@@ -15,13 +15,38 @@ export async function handleMedicineTools(
 ): Promise<unknown> {
   switch (name) {
     case "create-medicine": {
-      const { childId, medicineName, dosage, frequency, notes } = args as {
+      const {
+        childId,
+        medicineName,
+        dosage,
+        frequency,
+        notes,
+        minIntervalHours,
+        maxDosesPer24h,
+        remindNextDose,
+      } = args as {
         childId: string;
         medicineName: string;
         dosage: string;
         frequency?: string;
         notes?: string;
+        minIntervalHours?: number;
+        maxDosesPer24h?: number;
+        remindNextDose?: boolean;
       };
+
+      if (
+        minIntervalHours !== undefined &&
+        !(minIntervalHours >= 0.5 && minIntervalHours <= 48)
+      ) {
+        throw new Error("minIntervalHours must be between 0.5 and 48");
+      }
+      if (
+        maxDosesPer24h !== undefined &&
+        !(Number.isInteger(maxDosesPer24h) && maxDosesPer24h >= 1 && maxDosesPer24h <= 24)
+      ) {
+        throw new Error("maxDosesPer24h must be a whole number between 1 and 24");
+      }
 
       const medicine = await prisma.medicine.create({
         data: {
@@ -31,6 +56,9 @@ export async function handleMedicineTools(
           frequency,
           notes,
           isActive: true,
+          minIntervalHours,
+          maxDosesPer24h,
+          remindNextDose: (remindNextDose ?? false) && minIntervalHours !== undefined,
         },
       });
 

@@ -128,6 +128,90 @@ describe("medicineRouter", () => {
     });
   });
 
+  describe("dose limits", () => {
+    it("saves interval, max doses and reminder on create", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.medicine.create.mockResolvedValue(createTestMedicine() as never);
+
+      await caller.create({
+        childId,
+        name: "Paracet",
+        dosage: "5 ml",
+        minIntervalHours: 6,
+        maxDosesPer24h: 4,
+        remindNextDose: true,
+      });
+
+      expect(prismaMock.medicine.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          minIntervalHours: 6,
+          maxDosesPer24h: 4,
+          remindNextDose: true,
+        }),
+      });
+    });
+
+    it("defaults to no limits and no reminder on create", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.medicine.create.mockResolvedValue(createTestMedicine() as never);
+
+      await caller.create({ childId, name: "Vitamin D", dosage: "1 ml" });
+
+      expect(prismaMock.medicine.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          minIntervalHours: null,
+          maxDosesPer24h: null,
+          remindNextDose: false,
+        }),
+      });
+    });
+
+    it("rejects values outside the allowed range", async () => {
+      const caller = createCaller(createTestContext());
+      const base = { childId, name: "X", dosage: "1 ml" };
+
+      await expect(caller.create({ ...base, minIntervalHours: 0.4 })).rejects.toThrow();
+      await expect(caller.create({ ...base, minIntervalHours: 49 })).rejects.toThrow();
+      await expect(caller.create({ ...base, maxDosesPer24h: 0 })).rejects.toThrow();
+      await expect(caller.create({ ...base, maxDosesPer24h: 25 })).rejects.toThrow();
+      await expect(caller.create({ ...base, maxDosesPer24h: 2.5 })).rejects.toThrow();
+      expect(prismaMock.medicine.create).not.toHaveBeenCalled();
+    });
+
+    it("clears a limit on update with null", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.medicine.update.mockResolvedValue(createTestMedicine() as never);
+
+      await caller.update({ id: medicineId, minIntervalHours: null, remindNextDose: false });
+
+      expect(prismaMock.medicine.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ minIntervalHours: null, remindNextDose: false }),
+        })
+      );
+    });
+
+    it("returns active medicines with recent doses for dose status", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.medicine.findMany.mockResolvedValue([createTestMedicine()] as never);
+
+      const result = await caller.doseStatus({ childId });
+
+      expect(result).toHaveLength(1);
+      expect(prismaMock.medicine.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { childId, isActive: true } })
+      );
+    });
+
+    it("denies dose status for a child in another household", async () => {
+      const caller = createCaller(createTestContext());
+      prismaMock.householdMember.findUnique.mockResolvedValue(null);
+
+      await expect(caller.doseStatus({ childId })).rejects.toMatchObject({ code: "FORBIDDEN" });
+      expect(prismaMock.medicine.findMany).not.toHaveBeenCalled();
+    });
+  });
+
   describe("update", () => {
     it("updates medicine details", async () => {
       const ctx = createTestContext();

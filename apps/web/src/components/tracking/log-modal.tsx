@@ -44,6 +44,15 @@ import { TimerDisplay } from "@/components/tracking/timer-display";
 import { BreastSideButton } from "@/components/tracking/breast-side-button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  MedicineLimitsFields,
+  EMPTY_LIMITS,
+  limitsFromMedicine,
+  parseLimits,
+  type MedicineLimitsValues,
+} from "@/components/tracking/medicine-limits-fields";
+import { MedicineDoseLines } from "@/components/support/medicine-dose-line";
+import { useMedicineDoseStatus } from "@/hooks/use-medicine-dose-status";
 
 type LogType = "sleep" | "breast" | "bottle" | "diaper" | "solids" | "pumping" | "medicine" | "growth" | "temperature" | "activity";
 
@@ -1249,6 +1258,7 @@ const MEDICINE_UNITS: MedicineUnit[] = ["ml", "drops", "tsp"];
 
 function MedicineModal({ childId, onClose }: { childId: string; onClose: () => void }) {
   const t = useTranslations("logModal");
+  const f = useFormatters();
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -1260,25 +1270,41 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
   const [unit, setUnit] = useState<MedicineUnit>("ml");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
+  const [newLimits, setNewLimits] = useState<MedicineLimitsValues>(EMPTY_LIMITS);
+  const [editLimits, setEditLimits] = useState<MedicineLimitsValues | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Fetch existing medicines for this child
   const { data: medicines } = trpc.medicine.list.useQuery({
     childId,
     activeOnly: true,
   });
+  const { medicines: doseStatuses, now } = useMedicineDoseStatus(childId, startTime);
 
   const createMedicine = trpc.medicine.create.useMutation({
     onSuccess: (result) => {
       utils.medicine.list.invalidate({ childId });
+      utils.medicine.doseStatus.invalidate({ childId });
+      setNewLimits(EMPTY_LIMITS);
       setSelectedMedicineId(result.id);
       setShowCreateNew(false);
       toast({ title: t("medicine.created") });
     },
   });
 
+  const updateMedicine = trpc.medicine.update.useMutation({
+    onSuccess: () => {
+      utils.medicine.list.invalidate({ childId });
+      utils.medicine.doseStatus.invalidate({ childId });
+      setEditLimits(null);
+      toast({ title: t("medicine.limits.saved") });
+    },
+  });
+
   const logMedicineRecord = trpc.medicine.logRecord.useMutation({
     onSuccess: () => {
       utils.medicine.list.invalidate({ childId });
+      utils.medicine.doseStatus.invalidate({ childId });
       utils.timeline.getLastActivities.invalidate({ childId });
       toast({ title: t("medicine.logged") });
       onClose();
@@ -1287,15 +1313,36 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
 
   const handleCreateMedicine = () => {
     if (!newMedicineName.trim() || !newMedicineDosage.trim()) return;
+    const { value, errors } = parseLimits(newLimits);
+    if (errors.minIntervalHours || errors.maxDosesPer24h) return;
     createMedicine.mutate({
       childId,
       name: newMedicineName.trim(),
       dosage: newMedicineDosage.trim(),
+      ...value,
     });
   };
 
+  const handleSaveLimits = () => {
+    if (!selectedMedicineId || !editLimits) return;
+    const { value, errors } = parseLimits(editLimits);
+    if (errors.minIntervalHours || errors.maxDosesPer24h) return;
+    updateMedicine.mutate({ id: selectedMedicineId, ...value });
+  };
+
+  // Logging too soon or over the limit is allowed, but asks first
   const handleSave = () => {
     if (!selectedMedicineId || !startTime) return;
+    if (selectedStatus && (selectedStatus.status.tooSoon || selectedStatus.status.maxReached)) {
+      setConfirmOpen(true);
+      return;
+    }
+    saveDose();
+  };
+
+  const saveDose = () => {
+    if (!selectedMedicineId || !startTime) return;
+    setConfirmOpen(false);
 
     const dosageGiven = amount ? `${amount} ${t(`medicine.units.${unit}`)}` : undefined;
 
@@ -1308,7 +1355,9 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
   };
 
   const selectedMedicine = medicines?.find((m: { id: string }) => m.id === selectedMedicineId);
-  const isLoading = createMedicine.isPending || logMedicineRecord.isPending;
+  const selectedStatus = doseStatuses.find((m) => m.id === selectedMedicineId);
+  const isLoading =
+    createMedicine.isPending || logMedicineRecord.isPending || updateMedicine.isPending;
 
   return (
     <>
@@ -1351,6 +1400,11 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
               value={newMedicineDosage}
               onChange={(e) => setNewMedicineDosage(e.target.value)}
             />
+            <MedicineLimitsFields
+              idPrefix="new-medicine"
+              values={newLimits}
+              onChange={setNewLimits}
+            />
             <Button
               onClick={handleCreateMedicine}
               disabled={!newMedicineName.trim() || !newMedicineDosage.trim() || createMedicine.isPending}
@@ -1367,7 +1421,10 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
               medicines?.map((medicine: { id: string; name: string }) => (
                 <button
                   key={medicine.id}
-                  onClick={() => setSelectedMedicineId(medicine.id)}
+                  onClick={() => {
+                    setSelectedMedicineId(medicine.id);
+                    setEditLimits(null);
+                  }}
                   className={`px-4 min-h-12 rounded-lg text-sm transition-colors ${
                     selectedMedicineId === medicine.id
                       ? "bg-primary text-primary-foreground"
@@ -1382,9 +1439,45 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
         )}
 
         {selectedMedicine && (
-          <p className="text-xs text-muted-foreground mt-2">
-            {t("medicine.defaultDosage", { dosage: selectedMedicine.dosage })}
-          </p>
+          <div className="mt-2 space-y-2">
+            <p className="text-xs text-muted-foreground">
+              {t("medicine.defaultDosage", { dosage: selectedMedicine.dosage })}
+            </p>
+            {selectedStatus && (
+              <MedicineDoseLines
+                status={selectedStatus.status}
+                maxDosesPer24h={selectedStatus.maxDosesPer24h}
+                now={now}
+              />
+            )}
+            {editLimits ? (
+              <div className="space-y-2">
+                <MedicineLimitsFields
+                  idPrefix="edit-medicine"
+                  values={editLimits}
+                  onChange={setEditLimits}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full min-h-12"
+                  onClick={handleSaveLimits}
+                  disabled={updateMedicine.isPending}
+                >
+                  {t("medicine.limits.save")}
+                </Button>
+              </div>
+            ) : (
+              selectedStatus && (
+                <button
+                  type="button"
+                  className="text-sm text-primary hover:underline min-h-12 px-1"
+                  onClick={() => setEditLimits(limitsFromMedicine(selectedStatus))}
+                >
+                  {t("medicine.limits.edit")}
+                </button>
+              )
+            )}
+          </div>
         )}
       </div>
 
@@ -1434,6 +1527,48 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
           {t("save")}
         </Button>
       </div>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("medicine.confirm.title")}</DialogTitle>
+          </DialogHeader>
+          {selectedStatus && (
+            <div className="space-y-2 text-sm">
+              {selectedStatus.status.lastDose && (
+                <p>
+                  {t("medicine.confirm.lastDose", {
+                    time: f.time(selectedStatus.status.lastDose.time),
+                  })}
+                </p>
+              )}
+              {selectedStatus.status.tooSoon && selectedStatus.status.nextByInterval && (
+                <p>
+                  {t("medicine.confirm.tooSoon", {
+                    time: f.time(selectedStatus.status.nextByInterval),
+                  })}
+                </p>
+              )}
+              {selectedStatus.status.maxReached && selectedStatus.maxDosesPer24h && (
+                <p>
+                  {t("medicine.confirm.maxReached", {
+                    count: selectedStatus.status.dosesLast24h,
+                    max: selectedStatus.maxDosesPer24h,
+                  })}
+                </p>
+              )}
+            </div>
+          )}
+          <div className="flex flex-col gap-2 sm:flex-row-reverse">
+            <Button className="min-h-12" onClick={saveDose} disabled={isLoading}>
+              {t("medicine.confirm.action")}
+            </Button>
+            <Button variant="outline" className="min-h-12" onClick={() => setConfirmOpen(false)}>
+              {t("medicine.confirm.cancel")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

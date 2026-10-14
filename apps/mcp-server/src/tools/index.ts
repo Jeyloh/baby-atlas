@@ -386,6 +386,20 @@ export function registerTools(): Tool[] {
             type: "string",
             description: "Additional notes about the medicine",
           },
+          minIntervalHours: {
+            type: "number",
+            description:
+              "Optional: the smallest gap between doses in hours (0.5 to 48), as set by the parent",
+          },
+          maxDosesPer24h: {
+            type: "number",
+            description: "Optional: most doses in 24 hours (1 to 24), as set by the parent",
+          },
+          remindNextDose: {
+            type: "boolean",
+            description:
+              "Optional: send a reminder when the interval has passed (needs minIntervalHours)",
+          },
         },
         required: ["childId", "medicineName", "dosage"],
       },
