@@ -24,7 +24,7 @@
     },
     "feedDue": {
       "title": "{name}: snart tid for mat?",
-      "body": "Ut fra tidligere måltider er neste ventet rundt kl. {time}."
+      "body": "Ut fra tidligere måltider er neste måltid ventet rundt kl. {time}."
     },
     "napDue": {
       "title": "{name}: snart tid for lur?",

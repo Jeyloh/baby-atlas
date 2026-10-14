@@ -72,7 +72,7 @@
     "maxReached": "Grensen du har satt er nådd. Ifølge innstillingene dine kan neste dose gis fra {time}."
   },
   "whatsNext": {
-    "title": "Hva skjer videre",
+    "title": "Hva skjer nå",
     "feed": {
       "label": "Neste måltid",
       "hint": "Vanligvis ca. hver {interval}"
@@ -90,12 +90,12 @@
     "note": "Et anslag ut fra loggen og alderen. Alle barn er forskjellige."
   },
   "healthHints": {
-    "title": "Å være oppmerksom på",
+    "title": "Verdt å merke seg",
     "dismiss": "Skjul dette tipset",
-    "readMore": "Les mer hos Helsenorge",
+    "readMore": "Les mer hos {source}",
     "callLegevakt": "Ring legevakten 116 117",
     "callEmergency": "Ring 113",
-    "note": "Generell informasjon fra offentlige helsesider, ikke en vurdering av barnet ditt.",
+    "note": "Generell informasjon fra offentlige helsesider, ikke en vurdering av barnet ditt. Grensene gjelder temperatur målt i endetarmen. Målt i øret eller armhulen kan tallet være for lavt eller upålitelig.",
     "feverYoung": {
       "title": "Feber på {temperature} °C hos et barn under 3 måneder",
       "body": "Kontakt lege eller legevakten (116 117) med en gang når et barn under 3 måneder har feber. Er barnet slapt, vanskelig å vekke eller har pustevansker, ring 113."
@@ -109,16 +109,24 @@
       "body": "Kontakt fastlegen eller legevakten (116 117) ved svært høy feber, særlig hvis barnet er slapt, ikke vil drikke eller feberen ikke går ned. Har barnet utslett som ikke blekner når du trykker på det, eller er det vanskelig å vekke, ring 113."
     },
     "feverLong": {
-      "title": "Feber i minst {days} døgn",
+      "title": "Feber på {days} ulike dager",
       "body": "Kontakt lege hvis barnet har hatt feber i mer enn tre døgn, eller hvis barnet er slapt eller ikke vil drikke."
     },
     "wetDiapers": {
       "title": "Få våte bleier siste døgn",
-      "body": "Du har logget {count, plural, =0 {ingen våte bleier} one {# våt bleie} other {# våte bleier}} siste døgn. Fra omtrent dag 5 regnes {min} eller flere våte bleier i døgnet som et godt tegn på at nyfødte får nok melk. Kanskje er ikke alle bleier logget. Kontakt helsestasjonen eller fastlegen hvis du er bekymret, eller legevakten (116 117) utenom åpningstid."
+      "body": "Du har logget {count, plural, =0 {ingen våte bleier} one {# våt bleie} other {# våte bleier}} siste døgn. På dag 5 og 6 regnes 5 eller flere våte bleier i døgnet som et godt tegn på at nyfødte får nok melk, og fra dag 7 regnes 6 eller flere. Det kan hende at ikke alle bleier er logget. Kontakt helsestasjonen eller fastlegen hvis du er bekymret, eller legevakten (116 117) utenom åpningstid."
     },
     "feedingGap": {
       "title": "Over {hours} timer siden siste måltid",
-      "body": "Det er lenger enn vanlig siden siste måltid, og små babyer spiser ofte, gjerne 8 til 12 ganger i døgnet de første ukene. Kanskje er et måltid ikke logget. Kontakt helsestasjonen eller legevakten (116 117) hvis barnet ikke vil spise, er slapt eller er vanskelig å vekke."
+      "body": "Det er lenger enn vanlig siden siste måltid, og små babyer spiser ofte, gjerne 8 til 12 ganger i døgnet de første ukene. Det kan hende at et måltid ikke er logget. Kontakt helsestasjonen eller legevakten (116 117) hvis barnet ikke vil spise, er slapt eller er vanskelig å vekke."
+    },
+    "feverInfant": {
+      "title": "Feber på {temperature} °C hos et barn under 6 måneder",
+      "body": "Kontakt lege eller legevakten (116 117) samme dag når et barn på 3 til 6 måneder har 39 °C eller mer. Er barnet slapt, vanskelig å vekke eller har pustevansker, ring 113."
+    },
+    "coolTemperatureYoung": {
+      "title": "Lav temperatur: {temperature} °C",
+      "body": "Varm barnet hud mot hud og mål på nytt i endetarmen. Kontakt lege eller legevakten (116 117) hvis temperaturen fortsatt er under 36 °C eller barnet er slapt eller spiser dårlig."
     }
   }
 }

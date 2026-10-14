@@ -130,7 +130,8 @@
     "normal": "Normal",
     "elevated": "Slightly elevated",
     "fever": "Fever",
-    "highFever": "High fever"
+    "highFever": "High fever",
+    "method": "The limits are for temperatures measured rectally. Ear or armpit readings can be too low or unreliable."
   },
   "activity": {
     "timerStarted": "Activity timer started",

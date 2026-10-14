@@ -78,7 +78,8 @@ export function recentFeedStarts(feeds: FeedEvent[], now: Date): Date[] {
  */
 export function typicalFeedIntervalMinutes(
   feeds: FeedEvent[],
-  now: Date
+  now: Date,
+  mode: "day" | "night" = "day"
 ): { minutes: number; sampleSize: number; lastFeedAt: Date } | null {
   const starts = recentFeedStarts(feeds, now);
   if (starts.length < MIN_FEEDS_FOR_PREDICTION) return null;
@@ -90,8 +91,13 @@ export function typicalFeedIntervalMinutes(
     intervals.push({ minutes, night: isNightMinute(osloMinutesOfDay(starts[i - 1]!)) });
   }
 
-  const day = intervals.filter((i) => !i.night);
-  const used = day.length >= 3 ? day : intervals;
+  let used = intervals;
+  if (mode === "night") {
+    used = intervals.filter((i) => i.night);
+  } else {
+    const day = intervals.filter((i) => !i.night);
+    if (day.length >= 3) used = day;
+  }
   if (used.length < 3) return null;
 
   return {
@@ -108,8 +114,21 @@ export function typicalFeedIntervalMinutes(
  * is running.
  */
 export function predictNextFeed(feeds: FeedEvent[], now: Date): NextFeedPrediction | null {
-  const typical = typicalFeedIntervalMinutes(feeds, now);
+  let typical = typicalFeedIntervalMinutes(feeds, now);
   if (!typical) return null;
+
+  // A feed at night (the last one started 22:00-06:00, or the daytime rhythm
+  // lands in that window) follows the night rhythm: the median of night gaps,
+  // when at least three exist. Without them there is no honest guess, so none.
+  const dayAt = typical.lastFeedAt.getTime() + typical.minutes * MINUTE;
+  if (
+    isNightMinute(osloMinutesOfDay(typical.lastFeedAt)) ||
+    isNightMinute(osloMinutesOfDay(new Date(dayAt)))
+  ) {
+    typical = typicalFeedIntervalMinutes(feeds, now, "night");
+    if (!typical) return null;
+  }
+
   return {
     at: new Date(typical.lastFeedAt.getTime() + typical.minutes * MINUTE),
     intervalMinutes: Math.round(typical.minutes),
@@ -252,10 +271,11 @@ export function predictNextNap(input: {
   }
 
   const at = new Date(lastWake.getTime() + minutes * MINUTE);
-  if (months >= BEDTIME_FROM_AGE_MONTHS) {
-    const minuteOfDay = osloMinutesOfDay(at);
-    if (minuteOfDay >= BEDTIME_START || minuteOfDay < NIGHT_END) return null;
-  }
+  // No nap predictions for the night at any age; from 3 months the evening
+  // from 19:30 is bedtime, not a nap
+  const minuteOfDay = osloMinutesOfDay(at);
+  if (isNightMinute(minuteOfDay)) return null;
+  if (months >= BEDTIME_FROM_AGE_MONTHS && minuteOfDay >= BEDTIME_START) return null;
 
   return { at, wakeWindowMinutes: Math.round(minutes), basis, lastWakeAt: lastWake };
 }

@@ -130,7 +130,8 @@
     "normal": "Normal",
     "elevated": "Litt forhøyet",
     "fever": "Feber",
-    "highFever": "Høy feber"
+    "highFever": "Høy feber",
+    "method": "Grensene gjelder temperatur målt i endetarmen. Målt i øret eller armhulen kan tallet være for lavt eller upålitelig."
   },
   "activity": {
     "timerStarted": "Aktivitetstidtaker startet",

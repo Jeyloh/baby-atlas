@@ -12,6 +12,11 @@ import type { SupportCardProps } from "./types";
 
 const LEGEVAKT_TEL = "tel:116117";
 const EMERGENCY_TEL = "tel:113";
+/** Organisation names are not translated */
+const SOURCE_NAMES: Record<HealthHint["source"], string> = {
+  helsenorge: "Helsenorge",
+  ammehjelpen: "Ammehjelpen",
+};
 
 /**
  * Rule-based, informational hints (fever, few wet diapers in a newborn, a long
@@ -98,7 +103,7 @@ export function HealthHintsCard({ childId, birthDate }: SupportCardProps) {
                     {t("callLegevakt")}
                   </a>
                 </li>
-                {urgent && (
+                {hint.emergency && (
                   <li>
                     <a
                       href={EMERGENCY_TEL}
@@ -117,7 +122,7 @@ export function HealthHintsCard({ childId, birthDate }: SupportCardProps) {
                     className="inline-flex min-h-11 items-center gap-1.5 font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <ExternalLink className="h-4 w-4" aria-hidden />
-                    {t("readMore")}
+                    {t("readMore", { source: SOURCE_NAMES[hint.source] })}
                   </a>
                 </li>
               </ul>
