@@ -15,7 +15,7 @@ import { sharedFreshness } from "@/lib/shared-freshness";
 import { useOutbox, type OutboxPath } from "@/lib/offline/outbox";
 import { useUserId } from "@/hooks/use-last-activities";
 
-type RunningTimerRow = inferRouterOutputs<AppRouter>["timeline"]["getRunningTimers"][number];
+type RunningTimerRow = inferRouterOutputs<AppRouter>["timeline"]["getRunningTimers"]["timers"][number];
 
 export interface RunningTimer extends RunningTimerRow {
   key: TimerThresholdKey;
@@ -59,12 +59,13 @@ export function useRunningTimers(childId: string) {
 
   const timers = useMemo<RunningTimer[] | undefined>(() => {
     if (!query.data) return undefined;
+    const rows = query.data.timers;
     const ending = new Set(
       entries
         .filter((e) => e.userId === userId && ENDING_PATHS.has(e.op.path))
         .map((e) => e.recordId)
     );
-    return query.data
+    return rows
       .filter((row) => !ending.has(row.recordId))
       .map((row) => {
         const key = timerThresholdKey(row.kind, row.sleepType);
@@ -73,5 +74,8 @@ export function useRunningTimers(childId: string) {
       });
   }, [query.data, entries, userId, overrides, now]);
 
-  return { timers, now, isLoading: query.isLoading };
+  // Viewers can read but not stop timers
+  const canEdit = query.data ? query.data.memberRole !== "VIEWER" : false;
+
+  return { timers, now, canEdit, isLoading: query.isLoading };
 }

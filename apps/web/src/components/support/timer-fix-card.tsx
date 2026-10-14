@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFixTimer } from "@/hooks/use-fix-timer";
+import { TimerAlreadyEndedError, useFixTimer } from "@/hooks/use-fix-timer";
 import { useRunningTimers, type RunningTimer } from "@/hooks/use-running-timers";
 import { useToast } from "@/hooks/use-toast";
 import { useFormatters } from "@/lib/format";
@@ -67,7 +67,9 @@ function TimerFixCardContent({ childId }: SupportCardProps) {
   const t = useTranslations("support.timerFix");
   const { toast } = useToast();
   const { dateTime, duration } = useFormatters();
-  const { timers, now } = useRunningTimers(childId);
+  const { timers: runningTimers, now, canEdit } = useRunningTimers(childId);
+  // Viewers cannot stop timers, so the card has nothing to offer them
+  const timers = canEdit ? runningTimers : undefined;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -214,7 +216,12 @@ function FixTimerDialog({
       await fixTimer(timer, endTime);
       toast({ title: t("toast.saved") });
       onClose();
-    } catch {
+    } catch (error) {
+      if (error instanceof TimerAlreadyEndedError) {
+        toast({ title: t("toast.alreadyEnded") });
+        onClose();
+        return;
+      }
       toast({ title: t("toast.failed"), variant: "destructive" });
       setSaving(false);
     }

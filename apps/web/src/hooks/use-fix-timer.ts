@@ -1,13 +1,20 @@
 "use client";
 
 import { useCallback } from "react";
-import { timerRecordType } from "@baby-atlas/utils";
+import { TRPCClientError } from "@trpc/client";
 import { trpc } from "@/lib/trpc/provider";
 import { useUserId } from "@/hooks/use-last-activities";
 import { breastSideDurations } from "@/hooks/use-quick-actions";
 import { queueOp } from "@/lib/offline/outbox";
 import { useTimerStore } from "@/stores/timer-store";
 import type { RunningTimer } from "@/hooks/use-running-timers";
+
+/** The timer was already stopped, for example on another device. */
+export class TimerAlreadyEndedError extends Error {
+  constructor() {
+    super("The timer has already stopped");
+  }
+}
 
 export class FixTimerUnavailableError extends Error {
   constructor() {
@@ -18,20 +25,20 @@ export class FixTimerUnavailableError extends Error {
 /**
  * Ends a running timer at a chosen time. Sleep, breastfeeds and pumping go
  * through the outbox like the quick actions, so the home screen is right at
- * once and the write survives being offline. Activities and bottle feeds have
- * no outbox operation and use the mutation directly. Either way the matching
+ * once and the write survives being offline. Activities have no outbox
+ * operation and use the mutation directly; if the server says the timer has
+ * already ended, the local timer is cleared, the queries refresh and
+ * TimerAlreadyEndedError is thrown. Either way the matching
  * timer in the local store is removed, and the queries refetch, so a timer
  * started on another device (only in the database) is cleared everywhere too.
  */
 export function useFixTimer(childId: string) {
   const userId = useUserId();
   const utils = trpc.useUtils();
-  const updateFeeding = trpc.feeding.update.useMutation();
   const endActivity = trpc.activity.end.useMutation();
 
   return useCallback(
     async (timer: RunningTimer, endTime: Date) => {
-      const recordType = timerRecordType(timer.kind);
       const needsOutbox = timer.kind === "sleep" || timer.kind === "breast" || timer.kind === "pumping";
       if (needsOutbox && !userId) throw new FixTimerUnavailableError();
 
@@ -72,23 +79,27 @@ export function useFixTimer(childId: string) {
         case "pumping":
           queueOp(userId!, childId, id, { path: "pumping.end", input: { id, endTime } });
           break;
-        case "bottle":
-          await updateFeeding.mutateAsync({ id, endTime });
-          break;
         case "activity":
-          await endActivity.mutateAsync({ id, endTime });
+          try {
+            await endActivity.mutateAsync({ id, endTime });
+          } catch (error) {
+            if (error instanceof TRPCClientError && error.data?.code === "CONFLICT") {
+              stopLocal();
+              await utils.timeline.invalidate();
+              await utils.activity.invalidate();
+              throw new TimerAlreadyEndedError();
+            }
+            throw error;
+          }
           break;
       }
 
       stopLocal();
       // The outbox invalidates after it has sent. Direct mutations refresh here.
       if (!needsOutbox) {
-        await Promise.all([
-          utils.timeline.invalidate(),
-          recordType === "feeding" ? utils.feeding.invalidate() : utils.activity.invalidate(),
-        ]);
+        await Promise.all([utils.timeline.invalidate(), utils.activity.invalidate()]);
       }
     },
-    [childId, userId, utils, updateFeeding, endActivity]
+    [childId, userId, utils, endActivity]
   );
 }

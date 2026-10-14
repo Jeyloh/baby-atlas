@@ -36,7 +36,6 @@ export const TIMER_THRESHOLD_KEYS = [
   "nap",
   "nightSleep",
   "breastfeeding",
-  "bottle",
   "pumping",
   "activity",
 ] as const;

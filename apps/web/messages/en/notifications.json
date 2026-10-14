@@ -10,9 +10,9 @@
     },
     "timerRunning": {
       "title1": "Did you forget to stop the timer?",
-      "body1": "{childName}'s {type, select, nap {nap} nightSleep {night sleep} breastfeeding {breastfeed} bottle {bottle feed} pumping {pumping session} other {activity}} has been running for {hours, plural, =0 {{minutes} min} other {# h {minutes} min}}. Tap to set the end time.",
+      "body1": "{childName}'s {type, select, nap {nap} nightSleep {night sleep} breastfeeding {breastfeed} pumping {pumping session} other {activity}} has been running for {hours, plural, =0 {{minutes} min} other {# h {minutes} min}}. Tap to set the end time.",
       "title2": "The timer is still running",
-      "body2": "{childName}'s {type, select, nap {nap} nightSleep {night sleep} breastfeeding {breastfeed} bottle {bottle feed} pumping {pumping session} other {activity}} has now been running for {hours, plural, =0 {{minutes} min} other {# h {minutes} min}}. Tap to correct the end time."
+      "body2": "{childName}'s {type, select, nap {nap} nightSleep {night sleep} breastfeeding {breastfeed} pumping {pumping session} other {activity}} has now been running for {hours, plural, =0 {{minutes} min} other {# h {minutes} min}}. Tap to correct the end time."
     },
     "weeklyTip": {
       "title": "New tip: {tip}",

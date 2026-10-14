@@ -10,9 +10,9 @@
     },
     "timerRunning": {
       "title1": "Har du glemt å stoppe tidtakeren?",
-      "body1": "{type, select, nap {Luren} nightSleep {Nattesøvnen} breastfeeding {Ammingen} bottle {Flaskemåltidet} pumping {Pumpingen} other {Aktiviteten}} til {childName} har pågått i {hours, plural, =0 {{minutes} min} other {# t {minutes} min}}. Trykk for å sette sluttid.",
+      "body1": "{type, select, nap {Luren} nightSleep {Nattesøvnen} breastfeeding {Ammingen} pumping {Pumpingen} other {Aktiviteten}} til {childName} har pågått i {hours, plural, =0 {{minutes} min} other {# t {minutes} min}}. Trykk for å sette sluttid.",
       "title2": "Tidtakeren går fortsatt",
-      "body2": "{type, select, nap {Luren} nightSleep {Nattesøvnen} breastfeeding {Ammingen} bottle {Flaskemåltidet} pumping {Pumpingen} other {Aktiviteten}} til {childName} har nå pågått i {hours, plural, =0 {{minutes} min} other {# t {minutes} min}}. Trykk for å rette sluttiden."
+      "body2": "{type, select, nap {Luren} nightSleep {Nattesøvnen} breastfeeding {Ammingen} pumping {Pumpingen} other {Aktiviteten}} til {childName} har nå pågått i {hours, plural, =0 {{minutes} min} other {# t {minutes} min}}. Trykk for å rette sluttiden."
     },
     "weeklyTip": {
       "title": "Nytt tips: {tip}",

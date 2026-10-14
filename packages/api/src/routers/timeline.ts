@@ -17,9 +17,11 @@ import { createTRPCRouter, householdProcedure } from "../trpc";
 const DAY_START_HOUR = 8;
 
 const RUNNING_TIMERS_PER_TYPE = 5;
+// Same window as the forgotten timer notifications: older open records are abandoned, not running
+const RUNNING_TIMERS_LOOKBACK_HOURS = 72;
 
 export interface RunningTimer {
-  kind: "sleep" | "breast" | "bottle" | "pumping" | "activity";
+  kind: "sleep" | "breast" | "pumping" | "activity";
   recordId: string;
   startTime: Date;
   sleepType: "NAP" | "NIGHT" | null;
@@ -188,19 +190,21 @@ export const timelineRouter = createTRPCRouter({
 
   /**
    * Every timer that is still running for a child (open records without an
-   * end time), whoever started it. Used to spot forgotten timers.
+   * end time), whoever started it, and the caller's role. Used to spot
+   * forgotten timers.
    */
   getRunningTimers: householdProcedure
     .input(getLastActivitiesSchema)
     .query(async ({ ctx, input }) => {
-      const where = { childId: input.childId, endTime: null };
+      const since = new Date(Date.now() - RUNNING_TIMERS_LOOKBACK_HOURS * 60 * 60 * 1000);
+      const where = { childId: input.childId, endTime: null, startTime: { gte: since } };
       const orderBy = { startTime: "desc" as const };
       const take = RUNNING_TIMERS_PER_TYPE;
 
       const [sleep, feeding, pumping, activity] = await Promise.all([
         ctx.prisma.sleepRecord.findMany({ where, orderBy, take }),
         ctx.prisma.feedingRecord.findMany({
-          where: { ...where, feedingType: { in: ["BREAST", "BOTTLE"] } },
+          where: { ...where, feedingType: "BREAST" },
           orderBy,
           take,
         }),
@@ -218,7 +222,7 @@ export const timelineRouter = createTRPCRouter({
           activityType: null,
         })),
         ...feeding.map((r) => ({
-          kind: r.feedingType === "BOTTLE" ? ("bottle" as const) : ("breast" as const),
+          kind: "breast" as const,
           recordId: r.id,
           startTime: r.startTime,
           sleepType: null,
@@ -245,7 +249,9 @@ export const timelineRouter = createTRPCRouter({
         })),
       ];
 
-      return timers.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+      timers.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+      // The role lets the app hide the stop actions from viewers
+      return { timers, memberRole: ctx.memberRole };
     }),
 
   /**

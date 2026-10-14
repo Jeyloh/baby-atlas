@@ -11,6 +11,7 @@ import {
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 import { rethrowIfAlreadyEnded } from "../errors";
+import { assertEndTime, assertUpdatedTimes, endTimeOrNow } from "../end-time";
 
 export const activityRouter = createTRPCRouter({
   list: householdProcedure
@@ -65,11 +66,17 @@ export const activityRouter = createTRPCRouter({
         });
       }
 
+      const stored = await ctx.prisma.activityRecord.findUnique({
+        where: { id: input.id },
+        select: { startTime: true },
+      });
+      if (!stored) throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
+
       const activity = await ctx.prisma.activityRecord
         .update({
           where: { id: input.id, endTime: null },
           data: {
-            endTime: input.endTime ?? new Date(),
+            endTime: endTimeOrNow(stored.startTime, input.endTime),
             notes: input.notes,
           },
         })
@@ -93,7 +100,8 @@ export const activityRouter = createTRPCRouter({
           childId: input.childId,
           activityType: input.activityType,
           startTime: input.startTime,
-          endTime: input.endTime,
+          // A manual log is a finished event. Only the start procedures leave a timer open.
+          endTime: assertEndTime(input.startTime, input.endTime) ?? input.startTime,
           notes: input.notes,
         },
       });
@@ -111,12 +119,19 @@ export const activityRouter = createTRPCRouter({
         });
       }
 
+      const stored = await ctx.prisma.activityRecord.findUnique({
+        where: { id: input.id },
+        select: { startTime: true, endTime: true },
+      });
+      if (!stored) throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
+      const endTime = assertUpdatedTimes(stored, input);
+
       const activity = await ctx.prisma.activityRecord.update({
         where: { id: input.id },
         data: {
           activityType: input.activityType,
           startTime: input.startTime,
-          endTime: input.endTime,
+          endTime,
           notes: input.notes,
         },
       });

@@ -1,22 +1,21 @@
 {
   "timerFix": {
-    "title": "Går tidtakeren fortsatt?",
+    "title": "Pågår den fortsatt?",
     "description": "{type} startet {start} og har pågått i {duration}.",
     "type": {
       "nap": "Luren",
       "nightSleep": "Nattesøvnen",
       "breastfeeding": "Ammingen",
-      "bottle": "Flaskemåltidet",
       "pumping": "Pumpingen",
       "activity": "Aktiviteten"
     },
     "actions": {
       "setEndTime": "Sett sluttid",
-      "stillGoing": "Den pågår fortsatt"
+      "stillGoing": "Pågår fortsatt"
     },
     "dialog": {
       "title": "Sett sluttid",
-      "description": "{type} startet {start}. Velg når det egentlig sluttet.",
+      "description": "{type} startet {start}. Velg når den egentlig sluttet.",
       "endLabel": "Sluttid",
       "durationPreview": "Varighet: {duration}",
       "save": "Lagre sluttid",
