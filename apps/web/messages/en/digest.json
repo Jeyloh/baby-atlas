@@ -1,1 +1,65 @@
-{}
+{
+  "title": "Weekly summary",
+  "notFound": "Child not found",
+  "loading": "Loading the week …",
+  "error": "Could not load the summary",
+  "retry": "Try again",
+  "week": {
+    "label": "Week {week}",
+    "range": "{start} – {end}",
+    "previous": "Previous week",
+    "next": "Next week",
+    "ongoing": "The week is still going, so the numbers may change."
+  },
+  "empty": "Nothing logged this week. Log some sleep, feeds or diapers and the summary will show up here.",
+  "average": "Average per day",
+  "averageHint": "Based on the days you logged. Days without logs are not counted.",
+  "noValue": "–",
+  "change": {
+    "up": "{value} more than the week before",
+    "down": "{value} less than the week before",
+    "same": "Same as the week before",
+    "none": "No numbers from the week before"
+  },
+  "metrics": {
+    "sleepTotal": "Total sleep",
+    "sleepNight": "Night sleep",
+    "sleepNaps": "Naps",
+    "napsPerDay": "{count} naps per day",
+    "feeds": "Feeds",
+    "bottle": "Bottle",
+    "wet": "Wet diapers",
+    "dirty": "Dirty diapers",
+    "pumping": "Pumped"
+  },
+  "units": {
+    "perDay": "{value} per day",
+    "ml": "{value} ml"
+  },
+  "growth": {
+    "title": "Growth this week",
+    "empty": "No measurements this week.",
+    "weight": "Weight",
+    "height": "Length",
+    "head": "Head circumference",
+    "changeUp": "+{value} since the last measurement",
+    "changeDown": "{value} since the last measurement",
+    "changeSame": "Unchanged since the last measurement"
+  },
+  "words": {
+    "title": "New words",
+    "count": "{count, plural, =0 {No new words} one {# new word} other {# new words}}",
+    "previous": "Week before: {count}"
+  },
+  "journal": {
+    "title": "Journal",
+    "count": "{count, plural, =0 {No entries} one {# entry} other {# entries}}",
+    "open": "Open the journal"
+  },
+  "links": {
+    "digest": "Weekly summary",
+    "digestDescription": "Sleep, feeding and diapers this week versus the week before",
+    "report": "Visit report",
+    "reportDescription": "A printout for the health station or the doctor"
+  }
+}

@@ -143,3 +143,43 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Visit report (/dashboard/[childId]/report): print on A4, hide the app chrome */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  body:has(.report-page) {
+    background: #fff;
+    color: #000;
+  }
+  /* App bar, back button and install hint */
+  body:has(.report-page) header,
+  body:has(.report-page) aside {
+    display: none !important;
+  }
+  .report-page,
+  .report-page * {
+    color: #111 !important;
+    background: transparent !important;
+    border-color: #bbb !important;
+    box-shadow: none !important;
+  }
+  .report-page {
+    font-size: 11pt;
+  }
+  /* Sections stay whole: one that does not fit moves to the next page */
+  .report-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 6mm;
+  }
+  .report-page thead {
+    display: table-header-group;
+  }
+  .report-page tr,
+  .report-page li {
+    break-inside: avoid;
+  }
+}

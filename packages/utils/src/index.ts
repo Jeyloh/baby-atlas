@@ -9,3 +9,4 @@ export * from "./timer-thresholds";
 export * from "./tips";
 export * from "./wellbeing";
 export * from "./medicine";
+export * from "./digest-week";

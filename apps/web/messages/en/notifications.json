@@ -17,6 +17,10 @@
     "weeklyTip": {
       "title": "New tip: {tip}",
       "body": "{text}"
+    },
+    "weeklyDigest": {
+      "title": "Week {week} for {name} is ready",
+      "body": "See how sleep, feeding and diapers went this week compared with the week before."
     }
   },
   "settings": {

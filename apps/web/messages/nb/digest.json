@@ -1,1 +1,65 @@
-{}
+{
+  "title": "Ukesoppsummering",
+  "notFound": "Fant ikke barnet",
+  "loading": "Henter uken …",
+  "error": "Kunne ikke hente oppsummeringen",
+  "retry": "Prøv igjen",
+  "week": {
+    "label": "Uke {week}",
+    "range": "{start} – {end}",
+    "previous": "Forrige uke",
+    "next": "Neste uke",
+    "ongoing": "Uken pågår fortsatt, så tallene kan endre seg."
+  },
+  "empty": "Ingen logger denne uken. Logg litt søvn, mating eller bleier, så dukker oppsummeringen opp her.",
+  "average": "Snitt per dag",
+  "averageHint": "Regnet ut fra dagene du har logget. Dager uten logg teller ikke med.",
+  "noValue": "–",
+  "change": {
+    "up": "{value} mer enn uken før",
+    "down": "{value} mindre enn uken før",
+    "same": "Som uken før",
+    "none": "Ingen tall fra uken før"
+  },
+  "metrics": {
+    "sleepTotal": "Søvn totalt",
+    "sleepNight": "Nattesøvn",
+    "sleepNaps": "Lurer",
+    "napsPerDay": "{count} lurer per dag",
+    "feeds": "Måltider",
+    "bottle": "Flaske",
+    "wet": "Tissebleier",
+    "dirty": "Bæsjebleier",
+    "pumping": "Utpumpet"
+  },
+  "units": {
+    "perDay": "{value} per dag",
+    "ml": "{value} ml"
+  },
+  "growth": {
+    "title": "Vekst denne uken",
+    "empty": "Ingen målinger denne uken.",
+    "weight": "Vekt",
+    "height": "Lengde",
+    "head": "Hodeomkrets",
+    "changeUp": "+{value} siden forrige måling",
+    "changeDown": "{value} siden forrige måling",
+    "changeSame": "Uendret siden forrige måling"
+  },
+  "words": {
+    "title": "Nye ord",
+    "count": "{count, plural, =0 {Ingen nye ord} one {# nytt ord} other {# nye ord}}",
+    "previous": "Uken før: {count}"
+  },
+  "journal": {
+    "title": "Dagbok",
+    "count": "{count, plural, =0 {Ingen innlegg} one {# innlegg} other {# innlegg}}",
+    "open": "Åpne dagboken"
+  },
+  "links": {
+    "digest": "Ukesoppsummering",
+    "digestDescription": "Søvn, mating og bleier denne uken mot uken før",
+    "report": "Besøksrapport",
+    "reportDescription": "Utskrift til helsestasjonen eller legen"
+  }
+}
