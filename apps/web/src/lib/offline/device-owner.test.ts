@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
 
 vi.mock("./query-persister", () => ({ clearSavedData: vi.fn().mockResolvedValue(undefined) }));
+vi.mock("@/lib/notifications/client", () => ({
+  dropBrowserPushSubscription: vi.fn().mockResolvedValue(undefined),
+}));
 
+import { dropBrowserPushSubscription } from "@/lib/notifications/client";
 import { clearSavedData } from "./query-persister";
 import { claimDevice, fallBackToLastConfirmedOwner, releaseDevice, useDeviceOwner } from "./device-owner";
 
@@ -16,6 +20,7 @@ describe("device owner", () => {
     localStorage.clear();
     useDeviceOwner.setState({ owner: undefined, verified: false });
     vi.mocked(clearSavedData).mockClear();
+    vi.mocked(dropBrowserPushSubscription).mockClear();
     queryClient = new QueryClient();
   });
 
@@ -36,6 +41,21 @@ describe("device owner", () => {
     expect(clearSavedData).toHaveBeenCalledOnce();
     expect(queryClient.getQueryData(["secret"])).toBeUndefined();
     expect(useDeviceOwner.getState()).toEqual({ owner: bob, verified: true });
+  });
+
+  it("removes the push subscription when another user takes over the device", async () => {
+    await claimDevice(queryClient, alice);
+    await claimDevice(queryClient, alice);
+    expect(dropBrowserPushSubscription).not.toHaveBeenCalled();
+
+    await claimDevice(queryClient, bob);
+    expect(dropBrowserPushSubscription).toHaveBeenCalledOnce();
+  });
+
+  it("removes the push subscription when the device is released", async () => {
+    await claimDevice(queryClient, alice);
+    await releaseDevice(queryClient);
+    expect(dropBrowserPushSubscription).toHaveBeenCalledOnce();
   });
 
   it("unsets the old owner before clearing, so a late load of its data is dropped", async () => {

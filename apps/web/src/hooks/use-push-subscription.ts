@@ -1,10 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { detectInstallHint, type InstallHint } from "@/lib/pwa/install-platform";
-import { browserSupportsPush, urlBase64ToUint8Array } from "@/lib/notifications/client";
+import {
+  PUSH_OWNER_KEY,
+  browserSupportsPush,
+  urlBase64ToUint8Array,
+  usesApplicationServerKey,
+} from "@/lib/notifications/client";
 import { toLocale } from "@/i18n/config";
 
 export type PushState =
@@ -23,7 +28,7 @@ export type PushState =
   | "off"
   | "on";
 
-export type TestResult = "sent" | "noSubscription" | "unavailable" | "failed";
+export type TestResult = "sent" | "noSubscription" | "unavailable" | "rateLimited" | "failed";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
 
@@ -37,6 +42,8 @@ export function usePushSubscription() {
   const utils = trpc.useUtils();
   const subscribeMutation = trpc.notifications.subscribe.useMutation();
   const unsubscribeMutation = trpc.notifications.unsubscribe.useMutation();
+  const { data: me } = trpc.user.get.useQuery();
+  const userId = me?.id;
 
   // The browser can only be asked after mount
   const [browserState, setBrowserState] = useState<{
@@ -69,7 +76,13 @@ export function usePushSubscription() {
       setBrowserState({ status: "denied", endpoint: null, installHint });
       return;
     }
-    const subscription = await registration.pushManager.getSubscription();
+    let subscription = await registration.pushManager.getSubscription();
+    // Made with another VAPID key (the keys were rotated): the push service
+    // would reject our messages, so drop it and subscribe again
+    if (subscription && !usesApplicationServerKey(subscription, VAPID_PUBLIC_KEY)) {
+      await subscription.unsubscribe();
+      subscription = null;
+    }
     setBrowserState({ status: "ready", endpoint: subscription?.endpoint ?? null, installHint });
   }, []);
 
@@ -96,16 +109,10 @@ export function usePushSubscription() {
     state = serverStatus.data?.thisDevice ? "on" : "off";
   }
 
-  /** Asks for permission, subscribes the browser and stores it. Returns whether it worked. */
-  const subscribe = useCallback(async (): Promise<boolean> => {
+  /** Subscribes the browser (permission already granted) and stores it on the server. */
+  const register = useCallback(async (): Promise<boolean> => {
     setBusy(true);
     try {
-      // Must run inside the tap handler: iOS only shows the prompt for a user gesture
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        await refresh();
-        return false;
-      }
       const registration = await getRegistration();
       if (!registration) return false;
 
@@ -133,6 +140,7 @@ export function usePushSubscription() {
         await subscription.unsubscribe();
         throw error;
       }
+      if (userId) localStorage.setItem(PUSH_OWNER_KEY, userId);
       await Promise.all([
         refresh(),
         utils.notifications.status.invalidate(),
@@ -142,7 +150,36 @@ export function usePushSubscription() {
     } finally {
       setBusy(false);
     }
-  }, [locale, refresh, subscribeMutation, utils]);
+  }, [locale, refresh, subscribeMutation, userId, utils]);
+
+  /** Asks for permission, then registers. Returns whether it worked. */
+  const subscribe = useCallback(async (): Promise<boolean> => {
+    // Must run inside the tap handler: iOS only shows the prompt for a user gesture
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      await refresh();
+      return false;
+    }
+    return register();
+  }, [refresh, register]);
+
+  // Push was on for this user on this device, but the server lost track of it
+  // (the subscription was replaced, or pruned): register again without asking
+  const reRegistered = useRef(false);
+  useEffect(() => {
+    if (reRegistered.current || browserState.status !== "ready" || !userId) return;
+    if (localStorage.getItem(PUSH_OWNER_KEY) !== userId) return;
+    if (Notification.permission !== "granted") return;
+
+    const missingOnServer =
+      browserState.endpoint === null || (serverStatus.isSuccess && !serverStatus.data.thisDevice);
+    if (!missingOnServer) return;
+
+    reRegistered.current = true;
+    void register().catch(() => {
+      // Left as "off": the user can turn it on again by hand
+    });
+  }, [browserState, register, serverStatus.data, serverStatus.isSuccess, userId]);
 
   const unsubscribe = useCallback(async (): Promise<void> => {
     setBusy(true);
@@ -153,6 +190,7 @@ export function usePushSubscription() {
         await unsubscribeMutation.mutateAsync({ endpoint: subscription.endpoint });
         await subscription.unsubscribe();
       }
+      localStorage.removeItem(PUSH_OWNER_KEY);
       await Promise.all([refresh(), utils.notifications.status.invalidate()]);
     } finally {
       setBusy(false);
@@ -167,6 +205,7 @@ export function usePushSubscription() {
       if (response.ok) return "sent";
       if (response.status === 409) return "noSubscription";
       if (response.status === 503) return "unavailable";
+      if (response.status === 429) return "rateLimited";
       return "failed";
     } catch {
       return "failed";

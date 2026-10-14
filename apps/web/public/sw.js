@@ -4,7 +4,7 @@
 // are never cached: queued quick actions and saved query data cover those.
 // The worker also shows push notifications and opens the app when one is tapped.
 
-const VERSION = "v2";
+const VERSION = "v3";
 const STATIC_CACHE = `static-${VERSION}`;
 // Sign-out deletes caches starting with "pages-" (signOutAndClearDevice)
 const PAGE_CACHE = `pages-${VERSION}`;
@@ -47,8 +47,15 @@ const NOTIFICATION_ICON = "/pwa-icon/192";
 
 function safeAppPath(url) {
   if (typeof url !== "string") return "/dashboard";
-  if (!url.startsWith("/") || url.startsWith("//") || url.startsWith("/\\")) return "/dashboard";
-  return url;
+  try {
+    // Parsed against our own origin: "//host", "/\host" and full URLs that
+    // point elsewhere resolve to another origin and are refused
+    const target = new URL(url, self.location.origin);
+    if (target.origin !== self.location.origin) return "/dashboard";
+    return target.pathname + target.search + target.hash;
+  } catch {
+    return "/dashboard";
+  }
 }
 
 self.addEventListener("push", (event) => {
@@ -86,18 +93,55 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     (async () => {
-      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      // Only windows this worker controls (they are ours by definition)
+      const windows = await self.clients.matchAll({ type: "window" });
+      let handled = false;
       for (const client of windows) {
-        if (new URL(client.url).origin !== self.location.origin) continue;
         try {
           await client.focus();
-          if ("navigate" in client) await client.navigate(target.href);
-          return;
         } catch {
-          // Fall through to opening a new window
+          continue;
         }
+        handled = true;
+        try {
+          if ("navigate" in client) await client.navigate(target.href);
+        } catch {
+          // The window is focused; staying on its current page is fine
+        }
+        break;
       }
-      await self.clients.openWindow(target.href);
+      if (!handled) await self.clients.openWindow(target.href);
+    })()
+  );
+});
+
+// The browser replaced the push subscription (key rotation, expiry). Subscribe
+// again with the same options and tell the server, which swaps the endpoint
+// when the old one is the signed-in user's. Browsers that give no old
+// subscription are handled when the app opens next.
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const oldSubscription = event.oldSubscription;
+        if (!oldSubscription) return;
+        const next =
+          event.newSubscription ||
+          (await self.registration.pushManager.subscribe(oldSubscription.options));
+        const json = next.toJSON();
+        await fetch("/api/notifications/resubscribe", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            oldEndpoint: oldSubscription.endpoint,
+            newEndpoint: json.endpoint,
+            keys: json.keys,
+          }),
+        });
+      } catch (error) {
+        console.error("Push resubscribe failed", error);
+      }
     })()
   );
 });

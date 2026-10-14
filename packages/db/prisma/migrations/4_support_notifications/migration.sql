@@ -97,6 +97,9 @@ CREATE INDEX "notification_logs_sent_at_idx" ON "notification_logs"("sent_at");
 CREATE UNIQUE INDEX "notification_logs_user_id_dedupe_key_key" ON "notification_logs"("user_id", "dedupe_key");
 
 -- CreateIndex
+CREATE INDEX "child_visits_child_id_idx" ON "child_visits"("child_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "checkup_records_child_id_checkup_key_key" ON "checkup_records"("child_id", "checkup_key");
 
 -- CreateIndex

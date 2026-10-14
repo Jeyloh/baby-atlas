@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import {
   DEFAULT_ENABLED_KINDS,
   DEFAULT_QUIET_END,
@@ -12,6 +11,7 @@ import {
   type TimerThresholds,
 } from "@baby-atlas/schemas";
 import { z } from "zod";
+import { storePushSubscription } from "../push-subscriptions";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 function parseThresholds(value: unknown): TimerThresholds {
@@ -56,26 +56,24 @@ export const notificationsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
-      // Muting a child only makes sense for children the user can see
-      if (input.mutedChildIds && input.mutedChildIds.length > 0) {
+      // Only children the user can see can be muted. Others (a child that was
+      // deleted, or a household the user left) are dropped without an error.
+      let mutedChildIds: string[] | undefined;
+      if (input.mutedChildIds) {
         const ids = [...new Set(input.mutedChildIds)];
-        const accessible = await ctx.prisma.child.findMany({
-          where: { id: { in: ids }, household: { members: { some: { userId } } } },
-          select: { id: true },
-        });
-        if (accessible.length !== ids.length) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "You do not have access to one of these children",
-          });
-        }
+        const accessible = ids.length
+          ? await ctx.prisma.child.findMany({
+              where: { id: { in: ids }, household: { members: { some: { userId } } } },
+              select: { id: true },
+            })
+          : [];
+        const allowed = new Set(accessible.map((child) => child.id));
+        mutedChildIds = ids.filter((id) => allowed.has(id));
       }
 
       const data = {
         ...(input.enabledKinds !== undefined && { enabledKinds: input.enabledKinds }),
-        ...(input.mutedChildIds !== undefined && {
-          mutedChildIds: [...new Set(input.mutedChildIds)],
-        }),
+        ...(mutedChildIds !== undefined && { mutedChildIds }),
         ...(input.quietStart !== undefined && { quietStart: input.quietStart }),
         ...(input.quietEnd !== undefined && { quietEnd: input.quietEnd }),
         ...(input.timerThresholds !== undefined && { timerThresholds: input.timerThresholds }),
@@ -96,21 +94,10 @@ export const notificationsRouter = createTRPCRouter({
     .input(subscribePushSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const fields = {
-        userId,
-        p256dh: input.keys.p256dh,
-        auth: input.keys.auth,
-        userAgent: input.userAgent ?? null,
-        failureCount: 0,
-      };
 
       // A browser profile that signs in as someone else keeps one endpoint:
       // it now belongs to the new user.
-      await ctx.prisma.pushSubscription.upsert({
-        where: { endpoint: input.endpoint },
-        create: { endpoint: input.endpoint, ...fields },
-        update: fields,
-      });
+      await storePushSubscription(ctx.prisma, userId, input);
 
       if (input.locale) {
         await ctx.prisma.notificationSettings.upsert({

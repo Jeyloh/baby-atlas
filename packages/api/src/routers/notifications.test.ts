@@ -9,7 +9,7 @@ import { createCallerFactory } from "../trpc";
 import { notificationsRouter } from "./notifications";
 
 const createCaller = createCallerFactory(notificationsRouter);
-const ENDPOINT = "https://push.example.com/send/abc123";
+const ENDPOINT = "https://fcm.googleapis.com/fcm/send/abc123";
 const keys = { p256dh: "p256dh-key", auth: "auth-key" };
 
 describe("notificationsRouter", () => {
@@ -114,15 +114,29 @@ describe("notificationsRouter", () => {
       expect(prismaMock.notificationSettings.upsert).toHaveBeenCalled();
     });
 
-    it("rejects muting a child from another household", async () => {
+    it("silently drops children from another household", async () => {
+      prismaMock.child.findMany.mockResolvedValue([{ id: TEST_IDS.childId }] as never);
+      const foreign = "clq1234567890abcdefghij99";
+
+      await createCaller(createTestContext()).updateSettings({
+        mutedChildIds: [TEST_IDS.childId, foreign],
+      });
+
+      expect(prismaMock.notificationSettings.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ update: { mutedChildIds: [TEST_IDS.childId] } })
+      );
+    });
+
+    it("saves an empty list when none of the children are accessible", async () => {
       prismaMock.child.findMany.mockResolvedValue([]);
 
-      await expect(
-        createCaller(createTestContext()).updateSettings({
-          mutedChildIds: [TEST_IDS.childId],
-        })
-      ).rejects.toMatchObject({ code: "FORBIDDEN" });
-      expect(prismaMock.notificationSettings.upsert).not.toHaveBeenCalled();
+      await createCaller(createTestContext()).updateSettings({
+        mutedChildIds: [TEST_IDS.childId],
+      });
+
+      expect(prismaMock.notificationSettings.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ update: { mutedChildIds: [] } })
+      );
     });
 
     it("rejects minutes outside a day", async () => {
@@ -154,6 +168,7 @@ describe("notificationsRouter", () => {
 
   describe("subscribe", () => {
     it("stores the subscription for the caller and moves an existing endpoint", async () => {
+      prismaMock.pushSubscription.findMany.mockResolvedValue([]);
       await createCaller(createTestContext()).subscribe({
         endpoint: ENDPOINT,
         keys,
@@ -167,6 +182,7 @@ describe("notificationsRouter", () => {
         auth: "auth-key",
         userAgent: "Test/1.0",
         failureCount: 0,
+        createdAt: expect.any(Date),
       };
       expect(prismaMock.pushSubscription.upsert).toHaveBeenCalledWith({
         where: { endpoint: ENDPOINT },
@@ -178,6 +194,42 @@ describe("notificationsRouter", () => {
         create: { userId: TEST_IDS.userId, locale: "en" },
         update: { locale: "en" },
       });
+    });
+
+    it("removes the oldest devices beyond ten", async () => {
+      prismaMock.pushSubscription.findMany.mockResolvedValue([{ id: "old-1" }, { id: "old-2" }] as never);
+
+      await createCaller(createTestContext()).subscribe({ endpoint: ENDPOINT, keys });
+
+      expect(prismaMock.pushSubscription.findMany).toHaveBeenCalledWith({
+        where: { userId: TEST_IDS.userId },
+        orderBy: { createdAt: "desc" },
+        skip: 10,
+        select: { id: true },
+      });
+      expect(prismaMock.pushSubscription.deleteMany).toHaveBeenCalledWith({
+        where: { id: { in: ["old-1", "old-2"] }, userId: TEST_IDS.userId },
+      });
+    });
+
+    it("keeps everything when the user has ten or fewer devices", async () => {
+      prismaMock.pushSubscription.findMany.mockResolvedValue([]);
+      await createCaller(createTestContext()).subscribe({ endpoint: ENDPOINT, keys });
+      expect(prismaMock.pushSubscription.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it("rejects endpoints that are not on a known push service", async () => {
+      const caller = createCaller(createTestContext());
+      for (const endpoint of [
+        "https://example.com/push",
+        "http://fcm.googleapis.com/fcm/send/abc",
+        "https://169.254.169.254/latest",
+      ]) {
+        await expect(caller.subscribe({ endpoint, keys })).rejects.toMatchObject({
+          code: "BAD_REQUEST",
+        });
+      }
+      expect(prismaMock.pushSubscription.upsert).not.toHaveBeenCalled();
     });
 
     it("rejects a malformed subscription", async () => {

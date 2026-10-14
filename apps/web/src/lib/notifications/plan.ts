@@ -40,15 +40,13 @@ export function logKey(userId: string, dedupeKey: string): string {
 
 /**
  * Who a candidate is meant for: the explicit audience, or every household
- * member except viewers. An audience is cut down to current members, so a
- * user who left the household stops getting its notices.
+ * member, always without viewers. An audience is cut down to current members,
+ * so a user who left the household stops getting its notices.
  */
 export function resolveAudience(candidate: Candidate, members: HouseholdMemberRef[]): string[] {
-  if (candidate.audience) {
-    const memberIds = new Set(members.map((m) => m.userId));
-    return [...new Set(candidate.audience)].filter((id) => memberIds.has(id));
-  }
-  return members.filter((m) => m.role !== "VIEWER").map((m) => m.userId);
+  const eligible = new Set(members.filter((m) => m.role !== "VIEWER").map((m) => m.userId));
+  if (candidate.audience) return [...new Set(candidate.audience)].filter((id) => eligible.has(id));
+  return [...eligible];
 }
 
 export interface PlanInput {

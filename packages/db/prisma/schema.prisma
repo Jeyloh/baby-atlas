@@ -658,6 +658,7 @@ model ChildVisit {
   child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
 
   @@id([userId, childId])
+  @@index([childId])
   @@map("child_visits")
 }
 

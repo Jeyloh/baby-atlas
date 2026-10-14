@@ -68,9 +68,39 @@ export const updateNotificationSettingsSchema = z.object({
 });
 export type UpdateNotificationSettingsInput = z.infer<typeof updateNotificationSettingsSchema>;
 
+/**
+ * Push services the browsers use. The server POSTs to a subscription's
+ * endpoint, so only these hosts are accepted (no requests to arbitrary URLs).
+ */
+const PUSH_SERVICE_HOSTS = [
+  "fcm.googleapis.com", // Chrome, Edge, Opera, Brave and others on Chromium
+  "push.services.mozilla.com", // Firefox (also updates.push.services.mozilla.com)
+  "notify.windows.com", // Edge on Windows (wns2-*.notify.windows.com)
+  "push.apple.com", // Safari and installed iOS apps (web.push.apple.com)
+];
+
+/** https, no credentials or custom port, on a known push service. */
+export function isAllowedPushEndpoint(endpoint: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== "https:" || url.username || url.password || url.port) return false;
+  const host = url.hostname.toLowerCase();
+  return PUSH_SERVICE_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+}
+
+const pushEndpointSchema = z
+  .string()
+  .url()
+  .max(2048)
+  .refine(isAllowedPushEndpoint, { message: "Unsupported push service" });
+
 /** The parts of PushSubscription.toJSON() the server needs */
 export const subscribePushSchema = z.object({
-  endpoint: z.string().url().max(2048),
+  endpoint: pushEndpointSchema,
   keys: z.object({
     p256dh: z.string().min(1).max(512),
     auth: z.string().min(1).max(512),
@@ -79,6 +109,17 @@ export const subscribePushSchema = z.object({
   locale: notificationLocaleSchema.optional(),
 });
 export type SubscribePushInput = z.infer<typeof subscribePushSchema>;
+
+/** Sent by the service worker when the browser replaced a subscription */
+export const resubscribePushSchema = z.object({
+  oldEndpoint: z.string().url().max(2048),
+  newEndpoint: pushEndpointSchema,
+  keys: z.object({
+    p256dh: z.string().min(1).max(512),
+    auth: z.string().min(1).max(512),
+  }),
+});
+export type ResubscribePushInput = z.infer<typeof resubscribePushSchema>;
 
 export const unsubscribePushSchema = z.object({
   endpoint: z.string().url().max(2048),

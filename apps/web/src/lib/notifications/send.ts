@@ -3,8 +3,14 @@ import webpush from "web-push";
 import type { PrismaClient } from "@baby-atlas/db";
 import type { PushPayload } from "./types";
 
-/** Delete a subscription after this many failed sends in a row */
+/** Delete a subscription after this many permanent rejections in a row */
 export const MAX_FAILURES = 5;
+/** Client errors that mean this subscription is wrong, not that the push service is down */
+const PERMANENT_STATUS_CODES = new Set([400, 403, 413]);
+/** A subscription that only ever sees temporary errors is dropped after this long without a success */
+export const STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
+/** A push service that does not answer should not hold up a whole run */
+export const SEND_TIMEOUT_MS = 10_000;
 
 interface VapidConfig {
   subject: string;
@@ -31,6 +37,8 @@ export interface StoredSubscription {
   endpoint: string;
   p256dh: string;
   auth: string;
+  lastSuccessAt: Date | null;
+  createdAt: Date;
 }
 
 export interface SendOptions {
@@ -66,6 +74,7 @@ export const sendWebPush: PushSender = async (subscription, payload, options) =>
       {
         vapidDetails: vapid,
         TTL: options.ttlSeconds,
+        timeout: SEND_TIMEOUT_MS,
         urgency: options.urgency,
         topic: options.topic,
       }
@@ -88,9 +97,13 @@ export interface DeliveryCounts {
 }
 
 /**
- * Sends to each subscription and keeps the table tidy: dead subscriptions
- * (404, 410) are deleted, other failures are counted and the subscription is
- * deleted after MAX_FAILURES in a row, a success resets the count.
+ * Sends to each subscription and keeps the table tidy:
+ * - 404 and 410 (the browser dropped it): deleted at once
+ * - 400, 403, 413 (the service rejects this subscription): counted, deleted
+ *   after MAX_FAILURES in a row; a success resets the count
+ * - anything else (5xx, 429, timeouts, no network): never counts, because the
+ *   push service may just be down. Deleted only when the subscription has had
+ *   no success for STALE_AFTER_MS (counted from creation if it never had one).
  */
 export async function sendToSubscriptions(
   prisma: PrismaClient,
@@ -117,9 +130,19 @@ export async function sendToSubscriptions(
       }
 
       counts.failed += 1;
-      if (result.gone) {
+      const remove = async () => {
         await prisma.pushSubscription.deleteMany({ where: { id: subscription.id } });
         counts.removed += 1;
+      };
+
+      if (result.gone) {
+        await remove();
+        return;
+      }
+
+      if (result.statusCode === undefined || !PERMANENT_STATUS_CODES.has(result.statusCode)) {
+        const lastGood = subscription.lastSuccessAt ?? subscription.createdAt;
+        if (now.getTime() - lastGood.getTime() > STALE_AFTER_MS) await remove();
         return;
       }
 
@@ -131,10 +154,7 @@ export async function sendToSubscriptions(
         where: { id: subscription.id },
         select: { failureCount: true },
       });
-      if (current && current.failureCount >= MAX_FAILURES) {
-        await prisma.pushSubscription.deleteMany({ where: { id: subscription.id } });
-        counts.removed += 1;
-      }
+      if (current && current.failureCount >= MAX_FAILURES) await remove();
     })
   );
 

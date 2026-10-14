@@ -22,6 +22,8 @@ import type { Candidate, Evaluate, NotificationKind } from "./types";
 export const LOG_RETENTION_DAYS = 60;
 /** Stop starting new sends after this long so the run ends within maxDuration. */
 export const DEFAULT_TIME_BUDGET_MS = 45_000;
+/** Deliveries sent at the same time */
+export const SEND_CONCURRENCY = 10;
 
 export interface DispatchResult {
   candidates: number;
@@ -88,7 +90,15 @@ async function loadContext(prisma: PrismaClient, candidates: Candidate[]) {
     prisma.notificationSettings.findMany({ where: { userId: { in: userIds } } }),
     prisma.pushSubscription.findMany({
       where: { userId: { in: userIds } },
-      select: { id: true, userId: true, endpoint: true, p256dh: true, auth: true },
+      select: {
+        id: true,
+        userId: true,
+        endpoint: true,
+        p256dh: true,
+        auth: true,
+        lastSuccessAt: true,
+        createdAt: true,
+      },
     }),
     prisma.notificationLog.findMany({
       where: {
@@ -189,14 +199,9 @@ export async function runDispatcher(options: DispatchOptions): Promise<DispatchR
   });
   result.planned = deliveries.length;
 
-  for (const [index, delivery] of deliveries.entries()) {
-    if (Date.now() > deadline) {
-      result.deferred = deliveries.length - index;
-      break;
-    }
-
+  const deliver = async (delivery: Delivery) => {
     // Insert the log row first: when it already exists, another run has it
-    if (!(await claimDelivery(prisma, delivery))) continue;
+    if (!(await claimDelivery(prisma, delivery))) return;
     result.claimed += 1;
 
     const { candidate, userId } = delivery;
@@ -228,7 +233,19 @@ export async function runDispatcher(options: DispatchOptions): Promise<DispatchR
         where: { userId, dedupeKey: candidate.dedupeKey },
       });
     }
-  }
+  };
+
+  // A few workers take deliveries in turn. None starts a new one after the
+  // deadline, so a slow push service cannot push the run past maxDuration.
+  let next = 0;
+  const worker = async () => {
+    while (Date.now() <= deadline && next < deliveries.length) {
+      const delivery = deliveries[next++]!;
+      await deliver(delivery);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(SEND_CONCURRENCY, deliveries.length) }, worker));
+  result.deferred = deliveries.length - next;
 
   return result;
 }

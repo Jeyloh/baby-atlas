@@ -62,8 +62,10 @@ describe("resolveAudience", () => {
     ]);
   });
 
-  it("allows an explicit audience to include a viewer who is a member", () => {
-    expect(resolveAudience(candidate({ audience: ["viewer"] }), members)).toEqual(["viewer"]);
+  it("never includes a viewer, even when named in the audience", () => {
+    expect(resolveAudience(candidate({ audience: ["viewer", "caregiver"] }), members)).toEqual([
+      "caregiver",
+    ]);
   });
 });
 

@@ -24,8 +24,8 @@ function candidate(overrides: Partial<Candidate> = {}): Candidate {
 function createFakePrisma() {
   const logs: { userId: string; dedupeKey: string; kind: string; childId: string; sentAt: Date }[] = [];
   const subscriptions = [
-    { id: "sub-1", userId: "owner", endpoint: "https://push.test/1", p256dh: "k", auth: "a", failureCount: 0 },
-    { id: "sub-2", userId: "caregiver", endpoint: "https://push.test/2", p256dh: "k", auth: "a", failureCount: 0 },
+    { id: "sub-1", userId: "owner", endpoint: "https://push.test/1", p256dh: "k", auth: "a", failureCount: 0, lastSuccessAt: null as Date | null, createdAt: NOW },
+    { id: "sub-2", userId: "caregiver", endpoint: "https://push.test/2", p256dh: "k", auth: "a", failureCount: 0, lastSuccessAt: null as Date | null, createdAt: NOW },
   ];
   let oldLogsPruned = 0;
 
@@ -181,7 +181,9 @@ describe("runDispatcher", () => {
 
     await runDispatcher({ prisma: fake.prisma, now: NOW, evaluators: evaluatorsReturning([candidate()]), sender });
 
-    expect(order.slice(0, 2)).toEqual(["claim", "send"]);
+    // Deliveries run side by side, but each one claims before it sends
+    expect(order[0]).toBe("claim");
+    expect(order.indexOf("send")).toBeGreaterThan(order.indexOf("claim"));
   });
 
   it("deletes a subscription that answers 410 and frees the claim", async () => {
@@ -199,8 +201,8 @@ describe("runDispatcher", () => {
     expect(fake.logs).toHaveLength(0);
   });
 
-  it("counts other failures and deletes the subscription after five in a row", async () => {
-    const sender = vi.fn<PushSender>(async () => ({ ok: false, gone: false, statusCode: 500 }));
+  it("counts permanent rejections (400, 403, 413) and deletes after five in a row", async () => {
+    const sender = vi.fn<PushSender>(async () => ({ ok: false, gone: false, statusCode: 403 }));
     const options = { prisma: fake.prisma, now: NOW, evaluators: evaluatorsReturning([candidate()]), sender };
 
     await runDispatcher(options);
@@ -210,6 +212,50 @@ describe("runDispatcher", () => {
 
     for (let i = 0; i < 4; i += 1) await runDispatcher(options);
     expect(fake.subscriptions).toHaveLength(0);
+  });
+
+  it.each([500, 503, 429, undefined])(
+    "never deletes a recent subscription for a temporary failure (%s)",
+    async (statusCode) => {
+      const sender = vi.fn<PushSender>(async () => ({ ok: false, gone: false, statusCode }));
+      const options = { prisma: fake.prisma, now: NOW, evaluators: evaluatorsReturning([candidate()]), sender };
+
+      for (let i = 0; i < 8; i += 1) await runDispatcher(options);
+
+      expect(fake.subscriptions).toHaveLength(2);
+      expect(fake.subscriptions.map((s) => s.failureCount)).toEqual([0, 0]);
+    }
+  );
+
+  it("drops a subscription that had only temporary failures for over 7 days", async () => {
+    const sender = vi.fn<PushSender>(async () => ({ ok: false, gone: false, statusCode: 503 }));
+    // sub-1 never succeeded and is 8 days old; sub-2 succeeded yesterday
+    fake.subscriptions[0]!.createdAt = new Date(NOW.getTime() - 8 * 24 * 3600 * 1000);
+    fake.subscriptions[1]!.createdAt = new Date(NOW.getTime() - 30 * 24 * 3600 * 1000);
+    fake.subscriptions[1]!.lastSuccessAt = new Date(NOW.getTime() - 24 * 3600 * 1000);
+
+    await runDispatcher({ prisma: fake.prisma, now: NOW, evaluators: evaluatorsReturning([candidate()]), sender });
+
+    expect(fake.subscriptions.map((s) => s.id)).toEqual(["sub-2"]);
+  });
+
+  it("sends at most ten deliveries at the same time", async () => {
+    const many = Array.from({ length: 25 }, (_, i) => candidate({ dedupeKey: `timer:rec-${i}:1x` }));
+    let running = 0;
+    let peak = 0;
+    const sender = vi.fn<PushSender>(async () => {
+      running += 1;
+      peak = Math.max(peak, running);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      running -= 1;
+      return { ok: true };
+    });
+
+    const result = await runDispatcher({ prisma: fake.prisma, now: NOW, evaluators: evaluatorsReturning(many), sender });
+
+    expect(result).toMatchObject({ planned: 50, claimed: 50, sent: 50, deferred: 0 });
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(10);
   });
 
   it("keeps going when an evaluator throws", async () => {

@@ -29,6 +29,7 @@
       "disabled": "Varsler er slått av",
       "testSent": "Testvarselet er sendt",
       "testNoSubscription": "Denne enheten har ingen aktiv varselregistrering. Slå på varsler først.",
+      "testRateLimited": "Vent litt før du sender et nytt testvarsel.",
       "testUnavailable": "Push-varsler er ikke satt opp på tjenesten ennå.",
       "testFailed": "Varselet kom ikke frem. Prøv å slå varsler av og på igjen.",
       "saveFailed": "Kunne ikke lagre varselinnstillingene",

@@ -29,6 +29,7 @@
       "disabled": "Notifications are off",
       "testSent": "The test notification was sent",
       "testNoSubscription": "This device has no active notification registration. Turn notifications on first.",
+      "testRateLimited": "Wait a moment before sending another test notification.",
       "testUnavailable": "Push notifications are not set up on the service yet.",
       "testFailed": "The notification did not arrive. Try turning notifications off and on again.",
       "saveFailed": "Could not save the notification settings",

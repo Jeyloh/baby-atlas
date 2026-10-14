@@ -65,6 +65,7 @@ const TEST_TOAST = {
   sent: "toast.testSent",
   noSubscription: "toast.testNoSubscription",
   unavailable: "toast.testUnavailable",
+  rateLimited: "toast.testRateLimited",
   failed: "toast.testFailed",
 } as const satisfies Record<TestResult, string>;
 
