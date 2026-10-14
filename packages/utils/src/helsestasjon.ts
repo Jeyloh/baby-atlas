@@ -217,6 +217,18 @@ export function formatOsloTime(date: Date): string {
 /** The reminder for a booked time goes out from 17:00 Oslo the day before. */
 export const BOOKED_REMINDER_FROM_MINUTES = 17 * 60;
 
+/** The same-day reminder is only useful at least this long before the visit. */
+export const SAME_DAY_REMINDER_MIN_LEAD_MINUTES = 60;
+
+/**
+ * Today's appointment, at least 60 minutes ahead: the fallback when the evening
+ * reminder was missed (quiet hours, no connection).
+ */
+export function isSameDayReminderDue(scheduledAt: Date, now: Date): boolean {
+  if (osloDayKey(scheduledAt) !== osloDayKey(now)) return false;
+  return scheduledAt.getTime() - now.getTime() >= SAME_DAY_REMINDER_MIN_LEAD_MINUTES * 60_000;
+}
+
 /**
  * A booked appointment tomorrow (Oslo calendar day), and it is 17:00 or later
  * in Oslo now. The dispatcher's quiet hours still apply.
@@ -240,11 +252,15 @@ export function isTimeToBook(
 ): boolean {
   if (contact.arrangedByNurse) return false;
   if (record?.completedAt || record?.scheduledAt) return false;
-  return checkupStatus(contact, birthDate, null, now) === "due";
+  if (checkupStatus(contact, birthDate, null, now) !== "due") return false;
+  return childAgeInDays(birthDate, now) - contact.windowStartDays <= TIME_TO_BOOK_MAX_DAYS_INTO_WINDOW;
 }
 
 /** Doses more than this long past their due date are no longer reminded about. */
-export const VACCINE_REMINDER_MAX_OVERDUE_DAYS = 60;
+export const VACCINE_REMINDER_MAX_OVERDUE_DAYS = 45;
+
+/** "Time to book" is only sent in the first days of a window. */
+export const TIME_TO_BOOK_MAX_DAYS_INTO_WINDOW = 14;
 
 /**
  * Doses from the existing programme whose due age is reached and that are not
@@ -261,6 +277,9 @@ export function vaccinesToRemind(
     if (givenKeys.has(dose.key)) return false;
     const daysPast = (today - vaccineDueDate(birthDate, dose).getTime()) / DAY_MS;
     if (daysPast < 0 || daysPast > VACCINE_REMINDER_MAX_OVERDUE_DAYS) return false;
+    if (dose.maxAgeDays !== undefined && childAgeInDays(birthDate, now) > dose.maxAgeDays) {
+      return false;
+    }
     return !checkupsForVaccine(dose.key).some((c) => futureBookedCheckupKeys.has(c.key));
   });
 }

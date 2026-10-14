@@ -53,10 +53,26 @@ describe("checkup evaluator", () => {
     });
   });
 
+  it("sends the same-day notice when the evening one was missed, with the same dedupeKey", () => {
+    const scheduledAt = new Date("2026-04-10T07:30:00Z"); // 09:30 Oslo
+    const child = row({
+      checkupRecords: [{ checkupKey: "month_3", scheduledAt, completedAt: null }],
+    });
+    const evening = checkupCandidates(child, new Date("2026-04-09T15:30:00Z"));
+    const sameDay = checkupCandidates(child, new Date("2026-04-10T05:00:00Z")); // 07:00 Oslo
+    expect(sameDay).toHaveLength(1);
+    expect(sameDay[0]).toMatchObject({ bodyKey: "push.checkupReminder.today.body" });
+    expect(sameDay[0]!.dedupeKey).toBe(evening[0]!.dedupeKey);
+    // Less than an hour ahead: nothing
+    expect(checkupCandidates(child, new Date("2026-04-10T06:45:00Z"))).toEqual([]);
+  });
+
   it("has push texts in both languages", () => {
     for (const locale of ["nb", "en"] as const) {
       expect(translatePush(locale, "push.checkupReminder.booked.body", { child: "Mia", time: "09:30" })).toContain("09:30");
       expect(translatePush(locale, "push.checkupReminder.book.body", { child: "Mia" })).toContain("Mia");
+      expect(translatePush(locale, "push.checkupReminder.today.body", { child: "Mia", time: "09:30" })).toContain("09:30");
+      expect(translatePush(locale, "push.vaccineReminder.body.several", { child: "Mia", count: 2 })).toContain("2");
     }
   });
 
@@ -77,9 +93,28 @@ describe("vaccine evaluator", () => {
       row({ vaccinationRecords: [{ vaccineKey: "rotavirus-1" }, { vaccineKey: "six-in-one-1" }] }),
       now
     );
-    expect(out.map((c) => c.dedupeKey)).toEqual(["vaccine:child1:rotavirus-2", "vaccine:child1:pneumococcal-1"]);
-    expect(out[0]).toMatchObject({ kind: "VACCINE_REMINDER", bodyKey: "push.vaccineReminder.body.rotavirus" });
-    expect(out[0]!.replaceKey).toBe(out[1]!.replaceKey);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({
+      kind: "VACCINE_REMINDER",
+      dedupeKey: "vaccine:child1:m3",
+      bodyKey: "push.vaccineReminder.body.several",
+      params: { child: "Mia", count: 2 },
+    });
+  });
+
+  it("names the vaccine when only one dose is left at that age", () => {
+    const out = vaccineCandidates(
+      row({
+        vaccinationRecords: [
+          { vaccineKey: "rotavirus-1" },
+          { vaccineKey: "six-in-one-1" },
+          { vaccineKey: "pneumococcal-1" },
+        ],
+      }),
+      now
+    );
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ bodyKey: "push.vaccineReminder.body.rotavirus" });
   });
 
   it("is silent when a checkup covering the dose is booked ahead", () => {
@@ -105,7 +140,8 @@ describe("vaccine evaluator", () => {
       }),
       now
     );
-    expect(out).toHaveLength(3);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ params: { count: 3 } });
   });
 
   it("has a text for every vaccine in both languages", () => {
@@ -121,6 +157,6 @@ describe("vaccine evaluator", () => {
   it("evaluates through prisma", async () => {
     const findMany = vi.fn().mockResolvedValue([row({ vaccinationRecords: [{ vaccineKey: "rotavirus-1" }] })]);
     const prisma = { child: { findMany } } as unknown as PrismaClient;
-    expect(await evaluateVaccines({ prisma, now })).toHaveLength(3);
+    expect(await evaluateVaccines({ prisma, now })).toHaveLength(1);
   });
 });

@@ -1,6 +1,6 @@
 {
   "title": "Helsestasjon",
-  "intro": "Helsestasjonen følger barnet fra fødsel til skolestart. Tidspunktene under er veiledende (\"vanligvis rundt\"). Kommunen bestemmer eksakt tidspunkt, og du får vanligvis innkalling derfra.",
+  "intro": "Helsestasjonen følger barnet fra fødsel til skolestart. Tidspunktene under er veiledende (\"vanligvis rundt\"). Kommunen bestemmer eksakt tidspunkt, og dere får vanligvis innkalling derfra.",
   "tabs": {
     "checkups": "Helsestasjon",
     "vaccines": "Vaksiner",
@@ -18,7 +18,7 @@
     "nurseDoctor": "Helsesykepleier og lege"
   },
   "group": "Ofte gruppekonsultasjon",
-  "vaccinesAtVisit": "Vaksiner denne timen",
+  "vaccinesAtVisit": "Vaksiner på denne timen",
   "notes": "Notater",
   "status": {
     "done": "Gjort",
@@ -31,7 +31,7 @@
     "description": "Veiledende tidspunkt: {window}",
     "bookTitle": "Time på helsestasjonen",
     "dateLabel": "Dato",
-    "timeLabel": "Klokkeslett",
+    "timeLabel": "Klokkeslett (norsk tid)",
     "saveBooking": "Lagre time",
     "removeBooking": "Fjern time",
     "bookingSaved": "Timen er lagret",
@@ -61,7 +61,7 @@
     },
     "week_6": {
       "title": "6 uker",
-      "description": "Legeundersøkelse og samtale om mating, utvikling og trygghet. Barnet veies og måles. Første dose av rotavirusvaksinen gis (gis i munnen) og dere får informasjon om vaksinene."
+      "description": "Legeundersøkelse og samtale om mating, utvikling og trygghet. Barnet veies og måles. Første dose av rotavirusvaksinen gis (gis i munnen) og dere får informasjon om vaksinene. Fra 2027 gis rotavirusvaksinen i tre doser (6 uker, 3 og 5 måneder)."
     },
     "month_3": {
       "title": "3 måneder",
@@ -69,7 +69,7 @@
     },
     "month_4": {
       "title": "4 måneder (gruppekonsultasjon)",
-      "description": "Samtale om mating og start med fast føde, søvn og trygghet, og om å begynne i barnehage. Ingen vaksiner."
+      "description": "Samtale om mating og når det passer å begynne med smaksporsjoner (vanligvis rundt 6 måneder), søvn og trygghet. Ingen vaksiner."
     },
     "month_5": {
       "title": "5 måneder",

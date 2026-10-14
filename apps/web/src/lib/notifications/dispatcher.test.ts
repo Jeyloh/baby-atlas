@@ -283,8 +283,10 @@ describe("runDispatcher", () => {
     const [{ where }] = fake.mocks.notificationLog.deleteMany.mock.calls[0] as unknown as [
       { where: { sentAt: { lt: Date } } },
     ];
-    // 60 days before NOW
-    expect(where.sentAt.lt.toISOString()).toBe("2025-11-16T11:00:00.000Z");
+    // 400 days before NOW
+    expect(where.sentAt.lt.toISOString()).toBe(
+      new Date(NOW.getTime() - 400 * 86_400_000).toISOString()
+    );
   });
 
   it("defers the rest when the time budget is used up", async () => {

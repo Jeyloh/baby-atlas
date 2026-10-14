@@ -35,10 +35,11 @@ export const checkupRouter = createTRPCRouter({
     });
     const notes = new Map(records.map((r) => [r.checkupKey, r.notes]));
 
-    return buildCheckupViews(child.birthDate, records, new Date()).map((view) => ({
+    const items = buildCheckupViews(child.birthDate, records, new Date()).map((view) => ({
       ...view,
       notes: notes.get(view.contact.key) ?? null,
     }));
+    return { canEdit: ctx.memberRole !== "VIEWER", items };
   }),
 
   /** Books a time (date and time), or removes the booking with `null`. */
@@ -74,6 +75,15 @@ export const checkupRouter = createTRPCRouter({
     if (input.completedAt.toISOString().slice(0, 10) > osloDayKey(new Date())) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "The date cannot be in the future" });
     }
+    const child = await ctx.prisma.child.findUnique({
+      where: { id: input.childId },
+      select: { birthDate: true },
+    });
+    if (!child) throw new TRPCError({ code: "NOT_FOUND" });
+    if (input.completedAt < child.birthDate) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "The date cannot be before birth" });
+    }
+    const notes = input.notes?.trim() ? input.notes.trim() : undefined;
 
     return ctx.prisma.checkupRecord.upsert({
       where: { childId_checkupKey: { childId: input.childId, checkupKey: input.checkupKey } },
@@ -81,11 +91,11 @@ export const checkupRouter = createTRPCRouter({
         childId: input.childId,
         checkupKey: input.checkupKey,
         completedAt: input.completedAt,
-        notes: input.notes,
+        notes,
       },
       update: {
         completedAt: input.completedAt,
-        ...(input.notes !== undefined && { notes: input.notes }),
+        ...(notes !== undefined && { notes }),
       },
     });
   }),

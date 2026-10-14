@@ -39,11 +39,13 @@ describe("checkupRouter", () => {
 
       const result = await createCaller(createTestContext()).list({ childId });
 
-      expect(result.length).toBeGreaterThan(10);
-      const m3 = result.find((v) => v.contact.key === "month_3");
+      expect(result.canEdit).toBe(true);
+      const items = result.items;
+      expect(items.length).toBeGreaterThan(10);
+      const m3 = items.find((v) => v.contact.key === "month_3");
       expect(m3).toMatchObject({ status: "done", notes: "Alt fint" });
-      expect(result.find((v) => v.contact.key === "week_6")?.notes).toBeNull();
-      expect(result.map((v) => v.contact.key as string)).not.toContain("year_4");
+      expect(items.find((v) => v.contact.key === "week_6")?.notes).toBeNull();
+      expect(items.map((v) => v.contact.key as string)).not.toContain("year_4");
     });
 
     it("is open to viewers", async () => {
@@ -51,7 +53,8 @@ describe("checkupRouter", () => {
         createTestMembership({ role: "VIEWER" }) as never
       );
       prismaMock.checkupRecord.findMany.mockResolvedValue([] as never);
-      await expect(createCaller(createTestContext()).list({ childId })).resolves.toBeDefined();
+      const result = await createCaller(createTestContext()).list({ childId });
+      expect(result.canEdit).toBe(false);
     });
   });
 
@@ -87,6 +90,21 @@ describe("checkupRouter", () => {
         where: { childId, checkupKey: "month_3" },
         data: { scheduledAt: null },
       });
+    });
+
+    it("rejects times in the past or too far ahead", async () => {
+      const caller = createCaller(createTestContext());
+      const day = 86_400_000;
+      for (const offset of [-3 * day, 3 * 365 * day]) {
+        await expect(
+          caller.setScheduled({
+            childId,
+            checkupKey: "month_3",
+            scheduledAt: new Date(Date.now() + offset),
+          })
+        ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      }
+      expect(prismaMock.checkupRecord.upsert).not.toHaveBeenCalled();
     });
 
     it("rejects unknown checkups", async () => {
@@ -129,6 +147,45 @@ describe("checkupRouter", () => {
         })
       ).rejects.toMatchObject({ code: "BAD_REQUEST" });
       expect(prismaMock.checkupRecord.upsert).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("markDone validation", () => {
+    it("rejects a date before birth", async () => {
+      prismaMock.child.findUnique.mockResolvedValue(
+        createTestChild({ birthDate: new Date("2026-01-01T00:00:00Z") }) as never
+      );
+      await expect(
+        createCaller(createTestContext()).markDone({
+          childId,
+          checkupKey: "week_6",
+          completedAt: new Date("2025-12-31T00:00:00Z"),
+        })
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      expect(prismaMock.checkupRecord.upsert).not.toHaveBeenCalled();
+    });
+
+    it("trims notes and drops blank ones", async () => {
+      prismaMock.checkupRecord.upsert.mockResolvedValue({} as never);
+      const completedAt = new Date("2026-01-05T00:00:00Z");
+      await createCaller(createTestContext()).markDone({
+        childId,
+        checkupKey: "week_6",
+        completedAt,
+        notes: "  ok  ",
+      });
+      expect(prismaMock.checkupRecord.upsert).toHaveBeenLastCalledWith(
+        expect.objectContaining({ update: { completedAt, notes: "ok" } })
+      );
+      await createCaller(createTestContext()).markDone({
+        childId,
+        checkupKey: "week_6",
+        completedAt,
+        notes: "   ",
+      });
+      expect(prismaMock.checkupRecord.upsert).toHaveBeenLastCalledWith(
+        expect.objectContaining({ update: { completedAt } })
+      );
     });
   });
 

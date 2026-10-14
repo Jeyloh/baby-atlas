@@ -8,6 +8,7 @@ import {
   formatOsloTime,
   getCheckup,
   isBookedReminderDue,
+  isSameDayReminderDue,
   isKnownCheckupKey,
   isTimeToBook,
   nextCheckup,
@@ -141,6 +142,17 @@ describe("isBookedReminderDue", () => {
   });
 });
 
+describe("isSameDayReminderDue", () => {
+  const appointment = new Date("2026-10-15T07:30:00Z"); // 09:30 Oslo
+
+  it("is due on the day, at least 60 minutes ahead", () => {
+    expect(isSameDayReminderDue(appointment, new Date("2026-10-15T05:00:00Z"))).toBe(true);
+    expect(isSameDayReminderDue(appointment, new Date("2026-10-15T06:30:00Z"))).toBe(true);
+    expect(isSameDayReminderDue(appointment, new Date("2026-10-15T06:31:00Z"))).toBe(false);
+    expect(isSameDayReminderDue(appointment, new Date("2026-10-14T20:00:00Z"))).toBe(false);
+  });
+});
+
 describe("isTimeToBook", () => {
   const month3 = getCheckup("month_3")!;
 
@@ -153,6 +165,11 @@ describe("isTimeToBook", () => {
     expect(isTimeToBook(month3, birth, { scheduledAt: null, completedAt: atAge(88) }, atAge(90))).toBe(false);
     expect(isTimeToBook(month3, birth, null, atAge(70))).toBe(false);
     expect(isTimeToBook(month3, birth, null, atAge(120))).toBe(false);
+  });
+
+  it("only asks in the first 14 days of the window", () => {
+    expect(isTimeToBook(month3, birth, null, atAge(84 + 14))).toBe(true);
+    expect(isTimeToBook(month3, birth, null, atAge(84 + 15))).toBe(false);
   });
 
   it("never asks to book the home visit", () => {
@@ -175,7 +192,21 @@ describe("vaccinesToRemind", () => {
     const given = new Set(["rotavirus-1", "rotavirus-2", "six-in-one-1"]);
     expect(vaccinesToRemind(birth, given, none, now).map((d) => d.key)).toEqual(["pneumococcal-1"]);
     expect(vaccinesToRemind(birth, none, none, new Date("2026-01-10T12:00:00Z"))).toEqual([]);
-    expect(vaccinesToRemind(birth, none, none, new Date("2027-01-01T12:00:00Z")).map((d) => d.key)).not.toContain("rotavirus-1");
+    expect(vaccinesToRemind(birth, none, none, new Date("2026-10-01T12:00:00Z"))).toEqual([]);
+    // 45 days after the 3 month dose date (2026-04-01)
+    const rotaGiven = new Set(["rotavirus-1", "rotavirus-2"]);
+    expect(vaccinesToRemind(birth, rotaGiven, none, new Date("2026-05-16T12:00:00Z"))).toHaveLength(2);
+    expect(vaccinesToRemind(birth, rotaGiven, none, new Date("2026-05-17T12:00:00Z"))).toEqual([]);
+  });
+
+  it("stops reminding about rotavirus past its age limit", () => {
+    // Born 2026-01-01: dose 2 limit is 112 days (2026-04-23), dose 1 limit 84 days
+    const keysAt = (d: string) =>
+      vaccinesToRemind(birth, none, none, new Date(d)).map((x) => x.key);
+    expect(keysAt("2026-04-20T12:00:00Z")).toContain("rotavirus-2");
+    expect(keysAt("2026-04-25T12:00:00Z")).not.toContain("rotavirus-2");
+    expect(keysAt("2026-04-25T12:00:00Z")).toContain("six-in-one-1");
+    expect(keysAt("2026-04-02T12:00:00Z")).not.toContain("rotavirus-1");
   });
 
   it("skips doses covered by a checkup booked in the future", () => {
