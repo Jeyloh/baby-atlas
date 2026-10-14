@@ -3,6 +3,10 @@
     "test": {
       "title": "Testvarsel fra Baby Atlas",
       "body": "Varslene fungerer på denne enheten."
+    },
+    "weeklyTip": {
+      "title": "Nytt tips: {tip}",
+      "body": "{text}"
     }
   },
   "settings": {

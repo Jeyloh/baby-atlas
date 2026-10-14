@@ -3,6 +3,10 @@
     "test": {
       "title": "Test notification from Baby Atlas",
       "body": "Notifications work on this device."
+    },
+    "weeklyTip": {
+      "title": "New tip: {tip}",
+      "body": "{text}"
     }
   },
   "settings": {
