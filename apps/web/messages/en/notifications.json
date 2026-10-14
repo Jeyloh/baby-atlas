@@ -1,5 +1,13 @@
 {
   "push": {
+    "feedDue": {
+      "title": "{name}: feed coming up?",
+      "body": "Based on earlier feeds, the next one is expected around {time}."
+    },
+    "napDue": {
+      "title": "{name}: nap coming up?",
+      "body": "Based on how long {name} has been awake, the next nap is expected around {time}."
+    },
     "test": {
       "title": "Test notification from Baby Atlas",
       "body": "Notifications work on this device."

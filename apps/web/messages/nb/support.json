@@ -1,1 +1,52 @@
-{}
+{
+  "whatsNext": {
+    "title": "Hva skjer videre",
+    "feed": {
+      "label": "Neste måltid",
+      "hint": "Vanligvis ca. hver {interval}"
+    },
+    "nap": {
+      "label": "Neste lur",
+      "hint": "Våken i ca. {interval} om gangen"
+    },
+    "at": "ca. kl. {time}",
+    "phase": {
+      "upcoming": "om ca. {duration}",
+      "now": "snart",
+      "late": "litt over tiden"
+    },
+    "note": "Et anslag ut fra loggen og alderen. Alle barn er forskjellige."
+  },
+  "healthHints": {
+    "title": "Å være oppmerksom på",
+    "dismiss": "Skjul dette tipset",
+    "readMore": "Les mer hos Helsenorge",
+    "callLegevakt": "Ring legevakten 116 117",
+    "callEmergency": "Ring 113",
+    "note": "Generell informasjon fra offentlige helsesider, ikke en vurdering av barnet ditt.",
+    "feverYoung": {
+      "title": "Feber på {temperature} °C hos et barn under 3 måneder",
+      "body": "Kontakt lege eller legevakten (116 117) med en gang når et barn under 3 måneder har feber. Er barnet slapt, vanskelig å vekke eller har pustevansker, ring 113."
+    },
+    "lowTemperatureYoung": {
+      "title": "Lav temperatur: {temperature} °C",
+      "body": "Kontakt lege eller legevakten (116 117) hvis et barn under 3 måneder har en temperatur under 35 °C. Er barnet slapt eller vanskelig å vekke, ring 113."
+    },
+    "feverVeryHigh": {
+      "title": "Høy feber: {temperature} °C",
+      "body": "Kontakt fastlegen eller legevakten (116 117) ved svært høy feber, særlig hvis barnet er slapt, ikke vil drikke eller feberen ikke går ned. Har barnet utslett som ikke blekner når du trykker på det, eller er det vanskelig å vekke, ring 113."
+    },
+    "feverLong": {
+      "title": "Feber i minst {days} døgn",
+      "body": "Kontakt lege hvis barnet har hatt feber i mer enn tre døgn, eller hvis barnet er slapt eller ikke vil drikke."
+    },
+    "wetDiapers": {
+      "title": "Få våte bleier siste døgn",
+      "body": "Du har logget {count, plural, =0 {ingen våte bleier} one {# våt bleie} other {# våte bleier}} siste døgn. Fra omtrent dag 5 regnes {min} eller flere våte bleier i døgnet som et godt tegn på at nyfødte får nok melk. Kanskje er ikke alle bleier logget. Kontakt helsestasjonen eller fastlegen hvis du er bekymret, eller legevakten (116 117) utenom åpningstid."
+    },
+    "feedingGap": {
+      "title": "Over {hours} timer siden siste måltid",
+      "body": "Det er lenger enn vanlig siden siste måltid, og små babyer spiser ofte, gjerne 8 til 12 ganger i døgnet de første ukene. Kanskje er et måltid ikke logget. Kontakt helsestasjonen eller legevakten (116 117) hvis barnet ikke vil spise, er slapt eller er vanskelig å vekke."
+    }
+  }
+}

@@ -1,1 +1,52 @@
-{}
+{
+  "whatsNext": {
+    "title": "What's next",
+    "feed": {
+      "label": "Next feed",
+      "hint": "Usually about every {interval}"
+    },
+    "nap": {
+      "label": "Next nap",
+      "hint": "Awake for about {interval} at a time"
+    },
+    "at": "about {time}",
+    "phase": {
+      "upcoming": "in about {duration}",
+      "now": "soon",
+      "late": "a little past due"
+    },
+    "note": "An estimate from the log and age. Every child is different."
+  },
+  "healthHints": {
+    "title": "Worth noticing",
+    "dismiss": "Hide this hint",
+    "readMore": "Read more at Helsenorge",
+    "callLegevakt": "Call the out-of-hours service 116 117",
+    "callEmergency": "Call 113",
+    "note": "General information from public health sites, not an assessment of your child.",
+    "feverYoung": {
+      "title": "Fever of {temperature} °C in a baby under 3 months",
+      "body": "Contact a doctor or the out-of-hours service (116 117) right away when a baby under 3 months has a fever. If the baby is limp, hard to wake or has trouble breathing, call 113."
+    },
+    "lowTemperatureYoung": {
+      "title": "Low temperature: {temperature} °C",
+      "body": "Contact a doctor or the out-of-hours service (116 117) if a baby under 3 months has a temperature under 35 °C. If the baby is limp or hard to wake, call 113."
+    },
+    "feverVeryHigh": {
+      "title": "High fever: {temperature} °C",
+      "body": "Contact your GP or the out-of-hours service (116 117) for a very high fever, especially if the child is limp, will not drink or the fever does not come down. If the child has a rash that does not fade when pressed, or is hard to wake, call 113."
+    },
+    "feverLong": {
+      "title": "Fever for at least {days} days",
+      "body": "Contact a doctor if the child has had a fever for more than three days, or is limp or will not drink."
+    },
+    "wetDiapers": {
+      "title": "Few wet diapers in the last 24 hours",
+      "body": "You have logged {count, plural, =0 {no wet diapers} one {# wet diaper} other {# wet diapers}} in the last 24 hours. From about day 5, {min} or more wet diapers a day is a good sign that a newborn gets enough milk. Not every diaper may be logged. Contact the child health clinic or your GP if you are worried, or the out-of-hours service (116 117) outside opening hours."
+    },
+    "feedingGap": {
+      "title": "Over {hours} hours since the last feed",
+      "body": "It is longer than usual since the last feed, and young babies feed often, around 8 to 12 times a day in the first weeks. A feed may not be logged. Contact the child health clinic or the out-of-hours service (116 117) if the baby will not eat, is limp or is hard to wake."
+    }
+  }
+}

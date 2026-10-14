@@ -1,5 +1,13 @@
 {
   "push": {
+    "feedDue": {
+      "title": "{name}: snart tid for mat?",
+      "body": "Ut fra tidligere måltider er neste ventet rundt kl. {time}."
+    },
+    "napDue": {
+      "title": "{name}: snart tid for lur?",
+      "body": "Ut fra hvor lenge {name} har vært våken, er neste lur ventet rundt kl. {time}."
+    },
     "test": {
       "title": "Testvarsel fra Baby Atlas",
       "body": "Varslene fungerer på denne enheten."
