@@ -1,1 +1,398 @@
-{}
+{
+  "card": {
+    "readMore": "Read more on helsenorge.no",
+    "dismiss": "Hide this tip",
+    "label": "Tip for this age",
+    "weekLabel": "Week {n}",
+    "monthLabel": "{n} months"
+  },
+  "week": {
+    "0": {
+      "title": "Skin to skin",
+      "body": "The first days are about getting to know each other. Skin-to-skin contact brings calm and can help with breastfeeding. Contact your midwife or helsestasjon if you wonder about anything.",
+      "url": "https://www.helsenorge.no/spedbarn/omsorgen-for-det-nyfodte-barnet"
+    },
+    "1": {
+      "title": "Many small feeds",
+      "body": "Most newborns who get breast milk feed at least 8–12 times a day. This is normal. Look for hunger cues such as smacking lips or hands moving to the mouth.",
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/amming-og-morsmelk"
+    },
+    "2": {
+      "title": "You need rest too",
+      "body": "Many parents feel more emotional in the first weeks. Try to rest when the baby sleeps, and say yes to help. Talk to the helsesykepleier if you feel low for a longer time.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
+    },
+    "3": {
+      "title": "Day and night feel the same",
+      "body": "Newborns do not tell day from night, and sleep comes in short pieces. Many sleep 14 to 17 hours a day. Light and activity by day and calm at night can help over time.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "4": {
+      "title": "Safe sleep",
+      "body": "Babies sleep safest on their back on a firm, flat mattress. Keep pillows, duvets and soft toys out of the bed. Ask the helsestasjon if you are unsure about the sleep setup.",
+      "url": "https://www.helsenorge.no/spedbarn/omsorgen-for-det-nyfodte-barnet"
+    },
+    "5": {
+      "title": "Crying is communication",
+      "body": "Babies often cry more in the first weeks, which can be hard. Try carrying, rocking or walking calmly. Never shake the baby. Lay them down safely and take a break if you feel worn out.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "6": {
+      "title": "First smiles",
+      "body": "Many babies start smiling back around this time. Talk and sing with your face close, and you will often see a response. These small exchanges matter for development.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "7": {
+      "title": "Growth and weight",
+      "body": "Children grow at different paces. The helsestasjon follows growth and development at check-ups. You can note weight and length in the app and bring it along.",
+      "url": "https://www.helsenorge.no/barn/tjeneste-smabarnsliv/"
+    },
+    "8": {
+      "title": "Tummy time",
+      "body": "Try short periods on the tummy while the baby is awake and you are close by. Many babies practise lifting their head this way.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "9": {
+      "title": "Growth spurts",
+      "body": "Babies can have periods of wanting to feed more often. This is common and does not necessarily mean you have too little milk. Contact the helsestasjon if you worry about weight.",
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/amming-og-morsmelk"
+    },
+    "10": {
+      "title": "Looking at the world",
+      "body": "Your baby is increasingly interested in faces and contrast. Hold a face or a simple toy at arm length and move it slowly. Notice what your baby follows.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "11": {
+      "title": "Ask for help",
+      "body": "Having a baby is demanding, even when all goes well. Share tasks with your partner and accept help. Foreldresupport is a 24-hour phone and chat service if you need someone to talk to.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
+    },
+    "12": {
+      "title": "The body clock wakes",
+      "body": "Around 3–4 months many babies start making melatonin themselves in the evening. A steady bedtime routine such as a bath and a song can make falling asleep easier. It need not be long.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "13": {
+      "title": "Coos and babbling",
+      "body": "Many babies begin to make sounds and answer when you talk. Repeat their sounds and wait for a reply, like a small conversation. This supports language.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "14": {
+      "title": "Discovering hands",
+      "body": "Babies often discover their hands and reach for things. Offer safe toys of different shapes and textures. Always keep an eye on your baby during play.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "15": {
+      "title": "Sleep varies",
+      "body": "Babies sleep differently. Most sleep 12–15 hours a day between 3 and 6 months. Look at mood and energy more than the clock. It is normal for sleep to change from week to week.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "16": {
+      "title": "Rolling over",
+      "body": "Many babies begin to twist and roll over in time. Never leave your baby alone on a changing table or sofa, even for a moment. Keep a hand on your baby.",
+      "url": "https://www.helsenorge.no/sykdom/forstehjelp-og-skader/sikkerhet-for-sma-barn/"
+    },
+    "17": {
+      "title": "Vitamin D",
+      "body": "Breastfed babies need a vitamin D supplement. Make it part of the daily routine, for example at the morning change. Ask the helsestasjon if you are unsure.",
+      "url": "https://www.helsenorge.no/barn/spedbarnsmat-og-amming/amming-og-morsmelk"
+    },
+    "18": {
+      "title": "Time for the two of you",
+      "body": "Relationships often change with a baby. Set aside a few minutes to talk without discussing the baby. Small moments count.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
+    },
+    "19": {
+      "title": "Laughter and play",
+      "body": "Many babies start to laugh and squeal. Try peekaboo or gentle tickling. Follow your baby signals and stop when they turn away.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "20": {
+      "title": "Grab and explore",
+      "body": "Babies often put things in their mouth to explore. Choose toys too large to swallow. Check that they are intact with no loose parts.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "21": {
+      "title": "Fussy evenings",
+      "body": "Many babies are fussier in the evening. Dim lights and calm activities before bedtime can help. It often passes by itself.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "22": {
+      "title": "Who is familiar?",
+      "body": "Many babies recognise familiar faces and may become shy with strangers. Give your baby time and let them watch new people from your arms.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "23": {
+      "title": "Ready for solids?",
+      "body": "Many start solid food around 6 months, some a little earlier, but not before 4 months. Look for signs such as good head control and sitting with support. Ask the helsestasjon for advice.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "24": {
+      "title": "First tastes",
+      "body": "The first meals can be a teaspoon of mashed food. Breast milk or formula is still the main food. Never force your baby to eat.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "25": {
+      "title": "Iron in food",
+      "body": "From about 6 months babies also need iron from food. Meat, fish, egg, lentils and wholegrain porridge are good sources. Vitamin C in the meal helps absorption.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "26": {
+      "title": "Avoid small hard pieces",
+      "body": "Small hard pieces such as nuts and grapes can get stuck in the throat. Mash or cut food, and keep your baby upright when eating. Always stay with them at mealtimes.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "27": {
+      "title": "Falling asleep alone",
+      "body": "Many babies still wake at night, which is normal. You can sometimes try laying your baby down drowsy but awake. Go at your own pace.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "28": {
+      "title": "Sitting with support",
+      "body": "Many babies start to sit with support. Place toys within reach and let your baby stretch. Cushions around can soften a tumble.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "29": {
+      "title": "Copy the sounds",
+      "body": "Babies often babble with sounds like \"ba\" and \"da\". Say the sounds back and comment on what you do together. Plenty of everyday talk is enough.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "30": {
+      "title": "Make home safe",
+      "body": "Many babies start moving around. Look around the home at your baby level. Secure stairs and sockets, and keep cleaning products and medicines out of reach.",
+      "url": "https://www.helsenorge.no/sykdom/forstehjelp-og-skader/sikkerhet-for-sma-barn/"
+    },
+    "31": {
+      "title": "Stranger worries",
+      "body": "Many babies become wary of strangers around this age. It often shows a strong bond. Comfort your baby and give time.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "32": {
+      "title": "More variety",
+      "body": "Your baby can try many kinds of food. Offer new tastes many times, even if rejected. Avoid honey and salt, and do not give cow milk as a drink.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "33": {
+      "title": "Teething",
+      "body": "Many babies get their first tooth around this time, and some are fussy. Something cold and safe to chew on may help. Contact a doctor if your baby has a high fever or seems ill.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "34": {
+      "title": "First tooth brushing",
+      "body": "Start brushing when the first tooth appears. Use a small soft brush morning and evening. Make it a pleasant routine.",
+      "url": "https://www.helsenorge.no/tannhelse/tannstell-hos-barn/"
+    },
+    "35": {
+      "title": "Crawling and exploring",
+      "body": "Many start crawling or shuffling. Give plenty of floor space and let your baby explore. It is fun to join them on the floor.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "36": {
+      "title": "Peekaboo",
+      "body": "Many babies learn that things exist even when out of sight. Play peekaboo or hide a toy under a blanket. Babies love repetition.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "37": {
+      "title": "Feeding themselves",
+      "body": "Many want to grab the food themselves. Offer soft pieces they can hold. Expect some mess, it is part of learning.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "38": {
+      "title": "Night waking",
+      "body": "Around 9 months about half sleep for long stretches, but many still wake. This is common. A steady bedtime routine can make evenings calm.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "39": {
+      "title": "Point and show",
+      "body": "Many begin to point and show things. Name what your baby points at. This builds vocabulary together.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "40": {
+      "title": "Take breaks yourself",
+      "body": "Parenthood is big. Take small breaks, get outside and meet other parents. Talk to the helsestasjon if you are tired for a long time.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
+    },
+    "41": {
+      "title": "Pulling up",
+      "body": "Many pull up to stand by furniture. Check furniture is stable and sharp edges are covered. Let your baby practise at their own pace.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "42": {
+      "title": "First words coming",
+      "body": "Many babies say first words around one year. Read picture books and sing songs together. Contact the helsestasjon if you wonder about language or hearing.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "43": {
+      "title": "Family meals",
+      "body": "Your child can gradually eat most of the family food. Sit together at the table at a calm pace. Avoid screens during meals.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "44": {
+      "title": "A steadier rhythm",
+      "body": "Many children nap a little less and sleep longer stretches at night. Keep times fairly steady from day to day. Waking now and then is normal.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "45": {
+      "title": "Car safety",
+      "body": "Children should sit in an approved car seat, preferably rear-facing as long as possible. Check the seat is fitted correctly. Never leave your child alone in the car.",
+      "url": "https://www.helsenorge.no/sykdom/forstehjelp-og-skader/sikkerhet-for-sma-barn/"
+    },
+    "46": {
+      "title": "First steps",
+      "body": "Children start walking at different times, many between 10 and 18 months. Bare feet indoors give good grip. Celebrate small steps without comparing.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "47": {
+      "title": "Cruising",
+      "body": "Many walk along furniture and some take first steps alone. Make a safe area without sharp corners. Let your baby practise at their own pace.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "48": {
+      "title": "Imitation",
+      "body": "Many babies wave, clap and copy what you do. Show simple actions and let your baby imitate. It is a good way to practise interaction.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "49": {
+      "title": "Calm before bed",
+      "body": "Dim light and fewer impressions before bedtime make falling asleep easier. A steady routine with a book and song gives security. Keep screens out of the bedroom.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "50": {
+      "title": "Drinking from a cup",
+      "body": "Many babies practise drinking from a cup. Offer water in a small cup with meals. Breast milk can continue for as long as you wish.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "51": {
+      "title": "Be kind to yourself",
+      "body": "The first year has been intense. You do not need to do everything perfectly. Talk to the helsestasjon if things feel heavy.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
+    },
+    "52": {
+      "title": "One year",
+      "body": "Your child has grown a lot in the first year. Look back on your notes and see what you have mastered. Congratulations on the first year.",
+      "url": "https://www.helsenorge.no/barn/"
+    }
+  },
+  "month": {
+    "13": {
+      "title": "Walking and exploring",
+      "body": "Many children walk or take first steps. Give safe spaces to explore and move. Wear good shoes outside and bare feet indoors.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "14": {
+      "title": "Small and big tastes",
+      "body": "Appetite varies a lot at 1–2 years. Offer varied food and let your child decide how much to eat. Sit together if you can.",
+      "url": "https://www.helsenorge.no/en/barn/infant-food-and-breastfeeding/weaning-your-baby-onto-solid-food/"
+    },
+    "15": {
+      "title": "One or two naps",
+      "body": "Many children go from two naps to one during the second year. Notice how your child is doing before changing anything. A steady rhythm can help.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "16": {
+      "title": "Daily tooth brushing",
+      "body": "Brush morning and evening. At 1 year, a smear of toothpaste the size of a little fingernail is right. Help your child and keep it playful.",
+      "url": "https://www.helsenorge.no/tannhelse/tannstell-hos-barn/"
+    },
+    "17": {
+      "title": "More words",
+      "body": "Many children use a few words and understand much more. Talk about what you see and do. Contact the helsestasjon if you wonder about language.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "18": {
+      "title": "Play and movement",
+      "body": "Children aged 1–2 should be active in varied ways at least three hours across the day. Go for walks, climb low and dance. Play is learning.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "19": {
+      "title": "Strong opinions",
+      "body": "Many start saying no and showing their own will. Offer simple choices such as two jumpers. Safe limits and patience help.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "20": {
+      "title": "Screens and play",
+      "body": "Screens are not recommended for children under 2. If you use them, do it together with an adult. Avoid screens near bedtime.",
+      "url": "https://www.helsenorge.no/skjermrad/skjermrad-for-barn-0-5-ar/"
+    },
+    "21": {
+      "title": "Safety at home",
+      "body": "Children this age get everywhere. Secure windows, chemicals and hot surfaces. Always stay close near water.",
+      "url": "https://www.helsenorge.no/sykdom/forstehjelp-og-skader/sikkerhet-for-sma-barn/"
+    },
+    "22": {
+      "title": "Pretend play",
+      "body": "Many start pretend play, such as feeding a doll. Join in. It strengthens language and imagination.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "23": {
+      "title": "Bedtime routines",
+      "body": "Steady routines with a book and song give security. Children may protest at bedtime, which is common. Stay calm and predictable.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "24": {
+      "title": "Your own time",
+      "body": "The toddler years are tiring. Find small breaks and talk to other adults. Contact the helsestasjon or your GP if you feel low for a long time.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
+    },
+    "25": {
+      "title": "Nearly two",
+      "body": "Many children put two words together around this time. Read books and give your child time to answer. Contact the helsestasjon if you wonder about language.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "26": {
+      "title": "Tantrums and feelings",
+      "body": "Tantrums are a normal part of development. Name the feelings, such as \"you are angry\". Calm and clear limits help.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "27": {
+      "title": "Doing it myself",
+      "body": "Your child wants to do things alone. Let them try with clothes and spoon, even if it takes time. It builds confidence.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "28": {
+      "title": "Moving to a bed",
+      "body": "Some children move to a regular bed. Make the change calm and predictable. It is common for children to wake now and then until around age three.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "29": {
+      "title": "Screen time",
+      "body": "From age 2, keep screen time to at most 30–60 minutes a day. Watch together and talk about it. Avoid using screens to soothe.",
+      "url": "https://www.helsenorge.no/skjermrad/skjermrad-for-barn-0-5-ar/"
+    },
+    "30": {
+      "title": "Potty and toilet",
+      "body": "Many children show interest in the toilet around this age, but timing varies. Follow your child signals and avoid pressure. Use the potty module in the app if helpful.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "31": {
+      "title": "Draw and build",
+      "body": "Your child likes drawing, building and stacking. Offer thick crayons and blocks. The process matters more than the result.",
+      "url": "https://www.helsenorge.no/trening-og-fysisk-aktivitet/fysisk-aktivitet-0-5-ar"
+    },
+    "32": {
+      "title": "Sentences",
+      "body": "Many use short sentences and ask questions. Answer and build on what your child says. Read together every day.",
+      "url": "https://www.helsenorge.no/barn/0-2-ar/"
+    },
+    "33": {
+      "title": "Sleep and energy",
+      "body": "Many children need 10–13 hours of sleep a day. Some stop napping. Quiet rest may be enough.",
+      "url": "https://www.helsenorge.no/barn/sovn-hos-barn/"
+    },
+    "34": {
+      "title": "Pea-sized toothpaste",
+      "body": "From age 3 use a pea-sized amount of toothpaste. Help brush until your child manages alone. The dental service will call your child in for check-ups.",
+      "url": "https://www.helsenorge.no/tannhelse/tannstell-hos-barn/"
+    },
+    "35": {
+      "title": "Safe outdoors",
+      "body": "Your child is more independent outdoors. Show traffic rules and hold hands. Use a car seat or belt suited to height and weight.",
+      "url": "https://www.helsenorge.no/sykdom/forstehjelp-og-skader/sikkerhet-for-sma-barn/"
+    },
+    "36": {
+      "title": "Look back",
+      "body": "You have done a big job. Take time to notice what works. Talk to the helsestasjon if you need support.",
+      "url": "https://www.helsenorge.no/etter-fodsel/"
+    }
+  }
+}
