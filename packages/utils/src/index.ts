@@ -7,3 +7,4 @@ export * from "./journal";
 export * from "./quiet-hours";
 export * from "./timer-thresholds";
 export * from "./tips";
+export * from "./wellbeing";

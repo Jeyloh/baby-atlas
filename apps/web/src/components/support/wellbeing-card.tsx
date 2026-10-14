@@ -1,8 +1,222 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Annoyed, Frown, Laugh, Lock, Meh, Smile, X, type LucideIcon } from "lucide-react";
+import { osloDayKey, shouldShowSupport } from "@baby-atlas/utils";
+import { trpc } from "@/lib/trpc/provider";
+import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import type { SupportCardProps } from "./types";
 
-// Stub: filled in by its feature. Render null when there is nothing to show.
+/** localStorage keys. Private to this browser, like the check-in itself. */
+export const WELLBEING_HIDDEN_KEY = "baby-atlas-wellbeing-hidden";
+const SUPPORT_DISMISSED_KEY = "baby-atlas-wellbeing-support-dismissed";
+
+const MOODS: ReadonlyArray<{ value: 1 | 2 | 3 | 4 | 5; icon: LucideIcon }> = [
+  { value: 1, icon: Frown },
+  { value: 2, icon: Annoyed },
+  { value: 3, icon: Meh },
+  { value: 4, icon: Smile },
+  { value: 5, icon: Laugh },
+];
+
+/** Reads a localStorage value after mount (the server cannot know it). */
+function useStoredValue(key: string) {
+  const [value, setValue] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    try {
+      setValue(localStorage.getItem(key));
+    } catch {
+      setValue(null);
+    }
+  }, [key]);
+  const update = (next: string | null) => {
+    try {
+      if (next === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, next);
+    } catch {
+      // storage unavailable: the choice only lasts for this page
+    }
+    setValue(next);
+  };
+  return [value, update] as const;
+}
+
+/**
+ * Private daily check-in for the parent (mood and sleep), plus a gentle
+ * support card after several hard days. Only the signed-in user's own rows
+ * are read or written. No scores and no diagnosis.
+ */
 export function WellbeingCard(_props: SupportCardProps) {
-  return null;
+  const [hidden, setHidden] = useStoredValue(WELLBEING_HIDDEN_KEY);
+  if (hidden === undefined || hidden !== null) return null;
+  return <WellbeingContent onHide={() => setHidden("1")} />;
+}
+
+function WellbeingContent({ onHide }: { onHide: () => void }) {
+  const t = useTranslations("wellbeing");
+  const { toast } = useToast();
+  const utils = trpc.useUtils();
+  const recent = trpc.wellbeing.recent.useQuery();
+  const [supportDismissed, setSupportDismissed] = useStoredValue(SUPPORT_DISMISSED_KEY);
+  const [sleepText, setSleepText] = useState<string | null>(null);
+  const [savedAt, setSavedAt] = useState(0);
+
+  const save = trpc.wellbeing.upsertToday.useMutation({
+    onSuccess: async () => {
+      setSavedAt(Date.now());
+      await utils.wellbeing.recent.invalidate();
+    },
+    onError: () => toast({ title: t("checkIn.saveFailed"), variant: "destructive" }),
+  });
+
+  if (recent.isLoading || !recent.data) return null;
+
+  const today = recent.data.find((e) => e.date === osloDayKey(new Date()));
+  const sleepValue = sleepText ?? (today?.sleepHours != null ? String(today.sleepHours) : "");
+  const showSupport =
+    shouldShowSupport(recent.data, new Date()) &&
+    supportDismissed !== osloDayKey(new Date());
+
+  const saveMood = (mood: number) =>
+    save.mutate({ mood, sleepHours: today?.sleepHours ?? null, note: today?.note ?? null });
+
+  const saveSleep = () => {
+    if (!today || sleepText === null) return;
+    const parsed = sleepText.trim() === "" ? null : Number(sleepText.replace(",", "."));
+    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0 || parsed > 24)) return;
+    if (parsed === (today.sleepHours ?? null)) return;
+    save.mutate({ mood: today.mood, sleepHours: parsed, note: today.note });
+  };
+
+  return (
+    <div className="space-y-3">
+      {showSupport && (
+        <section
+          aria-labelledby="wellbeing-support-title"
+          className="relative rounded-lg border bg-card p-4 pr-12 text-card-foreground"
+        >
+          <h2 id="wellbeing-support-title" className="font-display text-base font-semibold leading-tight">
+            {t("support.title")}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">{t("support.body")}</p>
+          <ul className="mt-3 space-y-2 text-sm">
+            <li>{t("support.helsestasjon")}</li>
+            <li>
+              {t.rich("support.mentalHelp", {
+                helpline: (chunks) => (
+                  <a
+                    href="tel:116123"
+                    className="font-semibold text-primary underline underline-offset-4"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </li>
+            <li>
+              {t.rich("support.urgent", {
+                emergency: (chunks) => (
+                  <a
+                    href="tel:113"
+                    className="font-semibold text-primary underline underline-offset-4"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </li>
+          </ul>
+          <button
+            type="button"
+            onClick={() => setSupportDismissed(osloDayKey(new Date()))}
+            aria-label={t("support.dismiss")}
+            className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </section>
+      )}
+
+      <section
+        aria-labelledby="wellbeing-title"
+        className="rounded-lg border bg-card p-4 text-card-foreground"
+      >
+        <div className="flex items-start justify-between gap-2">
+          <h2 id="wellbeing-title" className="font-display text-base font-semibold leading-tight">
+            {t("checkIn.title")}
+          </h2>
+          <span
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+            title={t("checkIn.privateHint")}
+          >
+            <Lock className="h-3 w-3" aria-hidden />
+            {t("checkIn.private")}
+          </span>
+        </div>
+
+        <div role="radiogroup" aria-label={t("checkIn.moodLabel")} className="mt-3 grid grid-cols-5 gap-2">
+          {MOODS.map(({ value, icon: Icon }) => {
+            const selected = today?.mood === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={t(`checkIn.mood.${value}`)}
+                title={t(`checkIn.mood.${value}`)}
+                disabled={save.isPending}
+                onClick={() => saveMood(value)}
+                className={cn(
+                  "flex h-12 items-center justify-center rounded-lg border text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
+                  selected
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <Icon className="h-6 w-6" aria-hidden />
+              </button>
+            );
+          })}
+        </div>
+
+        {today && (
+          <div className="mt-3 space-y-1">
+            <Label htmlFor="wellbeing-sleep" className="text-sm font-normal text-muted-foreground">
+              {t("checkIn.sleepLabel")}
+            </Label>
+            <Input
+              id="wellbeing-sleep"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              max={24}
+              step={0.5}
+              value={sleepValue}
+              onChange={(e) => setSleepText(e.target.value)}
+              onBlur={saveSleep}
+              className="max-w-[8rem]"
+            />
+          </div>
+        )}
+
+        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+          <span role="status" aria-live="polite">
+            {savedAt > 0 && !save.isPending && !save.isError ? t("checkIn.saved") : ""}
+          </span>
+          <button
+            type="button"
+            onClick={onHide}
+            className="underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {t("checkIn.hide")}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
 }

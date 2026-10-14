@@ -32,5 +32,32 @@
       "failed": "Kunne ikke lagre sluttiden. Prøv igjen.",
       "alreadyEnded": "Tidtakeren er allerede stoppet"
     }
+  },
+  "handover": {
+    "title": "Siden du var her sist ({when})",
+    "dismiss": "Skjul oppsummeringen",
+    "nothing": "Ingenting er registrert siden da.",
+    "sleepTotal": "Søvn: {duration} til sammen",
+    "feeds": "Mat: {count, plural, one {# måltid} other {# måltider}}, sist {detail} kl. {time}",
+    "feedsNoDetail": "Mat: {count, plural, one {# måltid} other {# måltider}}",
+    "side": {
+      "LEFT": "venstre side",
+      "RIGHT": "høyre side",
+      "BOTH": "begge sider"
+    },
+    "diapers": "Bleier: {wet, plural, =0 {ingen våte} one {# våt} other {# våte}}, {dirty, plural, =0 {ingen med bæsj} one {# med bæsj} other {# med bæsj}}",
+    "medicine": "Medisin: {count, plural, one {# dose} other {# doser}}, sist {name} kl. {time}",
+    "temperature": "Temperatur: {value} kl. {time}",
+    "running": "Pågår nå: {items}",
+    "runningItem": "{label} siden {time}",
+    "runningType": {
+      "sleepNap": "Lur",
+      "sleepNight": "Nattesøvn",
+      "feedingBREAST": "Amming",
+      "feedingBOTTLE": "Flaske",
+      "feedingSOLIDS": "Fast føde",
+      "pumping": "Pumping",
+      "activity": "Aktivitet"
+    }
   }
 }

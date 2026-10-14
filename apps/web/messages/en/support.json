@@ -32,5 +32,32 @@
       "failed": "Could not save the end time. Try again.",
       "alreadyEnded": "The timer has already stopped"
     }
+  },
+  "handover": {
+    "title": "Since you were last here ({when})",
+    "dismiss": "Hide the summary",
+    "nothing": "Nothing has been logged since then.",
+    "sleepTotal": "Sleep: {duration} in total",
+    "feeds": "Feeds: {count, plural, one {# feed} other {# feeds}}, last {detail} at {time}",
+    "feedsNoDetail": "Feeds: {count, plural, one {# feed} other {# feeds}}",
+    "side": {
+      "LEFT": "left side",
+      "RIGHT": "right side",
+      "BOTH": "both sides"
+    },
+    "diapers": "Diapers: {wet, plural, =0 {no wet} other {# wet}}, {dirty, plural, =0 {none dirty} other {# dirty}}",
+    "medicine": "Medicine: {count, plural, one {# dose} other {# doses}}, last {name} at {time}",
+    "temperature": "Temperature: {value} at {time}",
+    "running": "Running now: {items}",
+    "runningItem": "{label} since {time}",
+    "runningType": {
+      "sleepNap": "Nap",
+      "sleepNight": "Night sleep",
+      "feedingBREAST": "Breastfeeding",
+      "feedingBOTTLE": "Bottle",
+      "feedingSOLIDS": "Solids",
+      "pumping": "Pumping",
+      "activity": "Activity"
+    }
   }
 }
