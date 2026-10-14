@@ -1,53 +1,42 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { useTranslations } from "next-intl";
 import { ExternalLink, Lightbulb, X } from "lucide-react";
 import { tipKeyForAge } from "@baby-atlas/utils";
-import type { SupportCardProps } from "./types";
+import { useStoredValue } from "@/hooks/use-stored-value";
+import { tipDismissKey } from "@/lib/support/tip-dismissed";
+import { HIDDEN_CARD, type SupportCardProps, type SupportCardState } from "./types";
 
-/** Dismissal is remembered per child and tip, so the next tip shows again. */
-export function tipDismissKey(childId: string, tipKey: string): string {
-  return `baby-atlas-tip-dismissed:${childId}:${tipKey}`;
+/** The tip for the child's age this week. Dismissal is remembered per child and tip. */
+export function useWeeklyTipCard({ childId, birthDate }: SupportCardProps): SupportCardState {
+  const tipKey = tipKeyForAge(birthDate, new Date());
+  const [dismissedAt, setDismissedAt] = useStoredValue(
+    tipKey ? tipDismissKey(childId, tipKey) : undefined
+  );
+
+  if (!tipKey || dismissedAt !== null) return HIDDEN_CARD;
+  return {
+    visible: true,
+    urgent: false,
+    element: (
+      <WeeklyTip tipKey={tipKey} onDismiss={() => setDismissedAt(new Date().toISOString())} />
+    ),
+  };
 }
 
-export function WeeklyTipCard({ childId, birthDate }: SupportCardProps) {
+export function WeeklyTipCard(props: SupportCardProps) {
+  return useWeeklyTipCard(props).element;
+}
+
+function WeeklyTip({ tipKey, onDismiss }: { tipKey: string; onDismiss: () => void }) {
   const t = useTranslations("tips");
   const headingId = useId();
-  // Decided after mount: the saved dismissal only exists in the browser
-  const [state, setState] = useState<{ tipKey: string; dismissed: boolean } | null>(null);
-
-  const tipKey = tipKeyForAge(birthDate, new Date());
-
-  useEffect(() => {
-    if (!tipKey) {
-      setState(null);
-      return;
-    }
-    let dismissed = false;
-    try {
-      dismissed = localStorage.getItem(tipDismissKey(childId, tipKey)) !== null;
-    } catch {
-      // Storage can be blocked: show the tip
-    }
-    setState({ tipKey, dismissed });
-  }, [childId, tipKey]);
-
-  if (!tipKey || !state || state.tipKey !== tipKey || state.dismissed) return null;
 
   const [kind, index] = tipKey.split(".") as ["week" | "month", string];
   const age = kind === "week" ? t("card.weekLabel", { n: index }) : t("card.monthLabel", { n: index });
   // Keys are built from the child's age, so they are not in the typed key union
   const text = t as unknown as (key: string) => string;
-
-  const dismiss = () => {
-    try {
-      localStorage.setItem(tipDismissKey(childId, tipKey), new Date().toISOString());
-    } catch {
-      // Not saved: it only hides until the next visit
-    }
-    setState({ tipKey, dismissed: true });
-  };
 
   return (
     <aside
@@ -75,7 +64,7 @@ export function WeeklyTipCard({ childId, birthDate }: SupportCardProps) {
       </div>
       <button
         type="button"
-        onClick={dismiss}
+        onClick={onDismiss}
         aria-label={t("card.dismiss")}
         title={t("card.dismiss")}
         className="-mr-2 -mt-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

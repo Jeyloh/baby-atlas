@@ -12,26 +12,44 @@ interface HomeViewProps {
   birthDate: Date;
 }
 
+type LastActivities = NonNullable<ReturnType<typeof useLastActivities>["data"]>;
+
 export function HomeView({ childId, birthDate }: HomeViewProps) {
+  const { data: lastActivities, isLoading } = useLastActivities(childId);
+
+  // The support cards sit below the latest activity and mount at once (also
+  // while that loads), so their queries start immediately. Below, because a
+  // card that arrives late then only pushes the module links down instead of
+  // moving the quick actions and the latest activity the parent already reads.
+  return (
+    <div className="space-y-6">
+      {isLoading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+            <div key={i} className="h-[76px] bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      ) : (
+        <HomeActivity childId={childId} lastActivities={lastActivities} />
+      )}
+
+      <SupportCards childId={childId} birthDate={birthDate} />
+
+      {!isLoading && <ModuleLinks childId={childId} />}
+    </div>
+  );
+}
+
+function HomeActivity({
+  childId,
+  lastActivities,
+}: {
+  childId: string;
+  lastActivities: LastActivities | undefined;
+}) {
   const t = useTranslations("dashboard.card");
   const tModules = useTranslations("dashboard.modules");
   const details = useActivityDetails();
-  const { data: lastActivities, isLoading } = useLastActivities(childId);
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-            <div
-              key={i}
-              className="h-[76px] bg-muted animate-pulse rounded-lg"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   const {
     lastSleep,
@@ -63,10 +81,8 @@ export function HomeView({ childId, birthDate }: HomeViewProps) {
   const activityLastTime = lastActivity?.endTime ?? lastActivity?.startTime ?? null;
 
   return (
-    <div className="space-y-6">
+    <>
       <QuickActionBar childId={childId} />
-
-      <SupportCards childId={childId} birthDate={birthDate} />
 
       <section aria-labelledby="latest-activity-title" className="space-y-2">
         <h2 id="latest-activity-title" className="font-display text-lg font-semibold tracking-tight">
@@ -156,8 +172,6 @@ export function HomeView({ childId, birthDate }: HomeViewProps) {
           />
         </div>
       </section>
-
-      <ModuleLinks childId={childId} />
-    </div>
+    </>
   );
 }

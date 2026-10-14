@@ -70,6 +70,26 @@ describe("device owner", () => {
     expect(localStorage.getItem("baby-atlas:report-questions:child-2")).toBeNull();
   });
 
+  it("removes the support card dismissals when the owner changes or the device is released", async () => {
+    const keys = [
+      "baby-atlas-health-hints-dismissed:child-1",
+      "baby-atlas-tip-dismissed:child-1:week.3",
+      "baby-atlas-timer-fix-dismissed",
+    ];
+    await claimDevice(queryClient, alice);
+    await claimDevice(queryClient, alice);
+    for (const key of keys) localStorage.setItem(key, "{}");
+    await claimDevice(queryClient, alice);
+    for (const key of keys) expect(localStorage.getItem(key)).toBe("{}");
+
+    await claimDevice(queryClient, bob);
+    for (const key of keys) expect(localStorage.getItem(key)).toBeNull();
+
+    for (const key of keys) localStorage.setItem(key, "{}");
+    await releaseDevice(queryClient);
+    for (const key of keys) expect(localStorage.getItem(key)).toBeNull();
+  });
+
   it("unsets the old owner before clearing, so a late load of its data is dropped", async () => {
     await claimDevice(queryClient, alice);
     let ownerDuringClear: string | undefined = "not called";

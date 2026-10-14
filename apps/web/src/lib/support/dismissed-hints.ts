@@ -1,3 +1,5 @@
+import { removeKeysWithPrefix } from "./browser-storage";
+
 const KEY_PREFIX = "baby-atlas-health-hints-dismissed:";
 /** A dismissal is forgotten after this long (hint ids carry a record or a time, so they do not come back). */
 const KEEP_DAYS = 14;
@@ -8,9 +10,9 @@ function keyFor(childId: string): string {
   return `${KEY_PREFIX}${childId}`;
 }
 
-function read(storage: Pick<Storage, "getItem">, childId: string): Dismissed {
+function read(storage: Pick<Storage, "getItem"> | null, childId: string): Dismissed {
   try {
-    const parsed: unknown = JSON.parse(storage.getItem(keyFor(childId)) ?? "{}");
+    const parsed: unknown = JSON.parse(storage?.getItem(keyFor(childId)) ?? "{}");
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     return Object.fromEntries(
       Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === "string")
@@ -22,7 +24,7 @@ function read(storage: Pick<Storage, "getItem">, childId: string): Dismissed {
 
 /** The ids of hints this device has dismissed for a child. */
 export function readDismissedHints(
-  storage: Pick<Storage, "getItem">,
+  storage: Pick<Storage, "getItem"> | null,
   childId: string,
   now: Date
 ): Set<string> {
@@ -32,6 +34,11 @@ export function readDismissedHints(
       .filter(([, at]) => new Date(at).getTime() >= cutoff)
       .map(([id]) => id)
   );
+}
+
+/** Removes every health hint dismissal from this device (used when the owner changes). */
+export function clearDismissedHints(storage: Storage): void {
+  removeKeysWithPrefix(storage, KEY_PREFIX);
 }
 
 /** Remembers a dismissal on this device and forgets old ones. */
