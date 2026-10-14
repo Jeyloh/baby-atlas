@@ -19,7 +19,7 @@ export interface ShortcutTarget {
 export const SHORTCUT_TARGETS: ShortcutTarget[] = [
   {
     id: "sleep",
-    name: "Start søvn",
+    name: "Logg søvn",
     shortName: "Søvn",
     description: "Logg søvn for barnet",
     childPath: "log?type=sleep",

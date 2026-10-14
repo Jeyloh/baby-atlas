@@ -9,11 +9,11 @@
     "range": "{start} – {end}",
     "previous": "Previous week",
     "next": "Next week",
-    "ongoing": "The week is still going, so the numbers may change."
+    "ongoing": "The week is still going. Today is left out of the averages, so the numbers may change."
   },
   "empty": "Nothing logged this week. Log some sleep, feeds or diapers and the summary will show up here.",
   "average": "Average per day",
-  "averageHint": "Based on the days you logged. Days without logs are not counted.",
+  "averageHint": "Based on the days you logged. Days without logs are not counted, and neither is today if the day is not over.",
   "noValue": "–",
   "change": {
     "up": "{value} more than the week before",
@@ -24,7 +24,7 @@
   "metrics": {
     "sleepTotal": "Total sleep",
     "sleepNight": "Night sleep",
-    "sleepNaps": "Naps",
+    "sleepNaps": "Daytime naps",
     "napsPerDay": "{count} naps per day",
     "feeds": "Feeds",
     "bottle": "Bottle",

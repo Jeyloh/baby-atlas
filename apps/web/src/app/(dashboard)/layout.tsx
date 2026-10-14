@@ -1,5 +1,7 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { loginUrlFor } from "@/lib/safe-callback-url";
 import { DashboardNav } from "@/components/dashboard/nav";
 import { InstallHint } from "@/components/dashboard/install-hint";
 
@@ -11,7 +13,8 @@ export default async function DashboardLayout({
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    // Come back to this page after signing in (a shortcut, a notification link)
+    redirect(loginUrlFor((await headers()).get("x-pathname")));
   }
 
   return (

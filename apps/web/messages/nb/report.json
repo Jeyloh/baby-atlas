@@ -36,10 +36,10 @@
   },
   "averages": {
     "title": "Snitt per dag",
-    "hint": "Regnet ut fra dagene som er logget. Dager uten logg teller ikke med.",
+    "hint": "Regnet ut fra dagene som er logget. Dager uten logg teller ikke med, og heller ikke i dag.",
     "sleepTotal": "Søvn totalt",
     "sleepNight": "Nattesøvn",
-    "sleepNaps": "Lurer",
+    "sleepNaps": "Lurer på dagen",
     "napsCount": "{count} lurer per dag",
     "feeds": "Måltider",
     "bottle": "Flaske",
@@ -55,13 +55,15 @@
     "given": "{count, plural, =0 {Ingen doser gitt} one {# dose gitt} other {# doser gitt}}",
     "skipped": "{count, plural, one {# hoppet over} other {# hoppet over}}",
     "regular": "Fast dose: {dosage}",
+    "firstLast": "Første: {first}. Siste: {last}.",
     "inactive": "Ikke i bruk nå"
   },
   "temperatures": {
     "title": "Temperatur",
     "highest": "Høyeste: {value} ({date} kl. {time})",
     "count": "{count, plural, one {# måling} other {# målinger}}",
-    "reading": "{date} kl. {time}: {value}"
+    "reading": "{date} kl. {time}: {value}",
+    "latestOnly": "viser de {shown} nyeste"
   },
   "vaccines": {
     "title": "Vaksiner",

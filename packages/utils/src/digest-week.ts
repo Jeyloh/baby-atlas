@@ -4,10 +4,10 @@ import { osloMinutesOfDay } from "./quiet-hours";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
 
-/** Sunday evening from this time (Oslo) the week is ready to be summarised. */
-export const DIGEST_START_MINUTES = 18 * 60;
-/** On Monday the digest is still sent as a catch-up until this time (Oslo). */
-export const DIGEST_CATCH_UP_END_MINUTES = 12 * 60;
+/** The digest for the week that just ended goes out on Monday from this time (Oslo)... */
+export const DIGEST_START_MINUTES = 8 * 60;
+/** ...until this time (Oslo). A notice held back by quiet hours is still sent inside the window. */
+export const DIGEST_END_MINUTES = 20 * 60;
 
 function parseKey(key: string): [number, number, number] {
   const [y, m, d] = key.split("-").map(Number) as [number, number, number];
@@ -81,15 +81,13 @@ export function isoWeekLabel(key: string): string {
 
 /**
  * Which week the digest push should summarise right now (as its Monday key),
- * or null when it is not the time for it. Sunday from 18:00 gives the week
- * that is ending, and Monday until 12:00 gives the week that just ended
- * (catch-up for devices that were in quiet hours or offline).
+ * or null when it is not the time for it. Only Monday from 08:00 to 20:00
+ * Oslo, for the week that just ended, so the numbers are complete.
  */
 export function digestWeekToSend(now: Date): string | null {
   const today = osloDayKey(now);
   const minutes = osloMinutesOfDay(now);
-  const weekday = isoWeekday(today);
-  if (weekday === 7 && minutes >= DIGEST_START_MINUTES) return mondayOfKey(today);
-  if (weekday === 1 && minutes < DIGEST_CATCH_UP_END_MINUTES) return addDaysToKey(today, -7);
-  return null;
+  if (isoWeekday(today) !== 1) return null;
+  if (minutes < DIGEST_START_MINUTES || minutes >= DIGEST_END_MINUTES) return null;
+  return addDaysToKey(today, -7);
 }

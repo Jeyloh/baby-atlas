@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData } from "@tanstack/react-query";
 import { NORWEGIAN_VACCINE_PROGRAMME } from "@baby-atlas/utils";
 import { Printer } from "lucide-react";
 import { trpc } from "@/lib/trpc/provider";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { questionsStorageKey } from "./report-utils";
+import { questionsStorageKey } from "@/lib/report-questions";
 
 type Period = "4w" | "8w" | "12w" | "sinceCheckup";
 
@@ -53,7 +54,11 @@ export function ReportView({ childId }: { childId: string }) {
   const f = useFormatters();
   const [period, setPeriod] = useState<Period>("4w");
 
-  const { data, isLoading, isError, refetch } = trpc.digest.report.useQuery({ childId, period });
+  // Keep showing the last report while another period loads, so the page does not jump
+  const { data, isLoading, isError, refetch } = trpc.digest.report.useQuery(
+    { childId, period },
+    { placeholderData: keepPreviousData }
+  );
 
   // Questions for the visit stay on this device, one note per child
   const [questions, setQuestions] = useState("");
@@ -327,7 +332,7 @@ export function ReportView({ childId }: { childId: string }) {
                     {medicine.frequency ? `, ${medicine.frequency}` : ""}
                   </p>
                   <p className="text-sm">
-                    {t("medicines.given", { count: medicine.given.length })}
+                    {t("medicines.given", { count: medicine.givenCount })}
                     {medicine.skipped > 0 && (
                       <span className="text-muted-foreground">
                         {" · "}
@@ -335,9 +340,24 @@ export function ReportView({ childId }: { childId: string }) {
                       </span>
                     )}
                   </p>
-                  {medicine.given.length > 0 && (
+                  {/* Many doses: first and last only. Few doses: every one. */}
+                  {medicine.doses.length === 0 && medicine.firstDose && medicine.lastDose && (
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      {t("medicines.firstLast", {
+                        first: t("medicines.dose", {
+                          date: dateOf(medicine.firstDose),
+                          time: timeOf(medicine.firstDose),
+                        }),
+                        last: t("medicines.dose", {
+                          date: dateOf(medicine.lastDose),
+                          time: timeOf(medicine.lastDose),
+                        }),
+                      })}
+                    </p>
+                  )}
+                  {medicine.doses.length > 0 && (
                     <ul className="text-xs text-muted-foreground tabular-nums">
-                      {medicine.given.map((dose, index) => (
+                      {medicine.doses.map((dose, index) => (
                         <li key={index}>
                           {dose.dosageGiven
                             ? t("medicines.doseWithAmount", {
@@ -360,7 +380,7 @@ export function ReportView({ childId }: { childId: string }) {
         </Section>
 
         <Section id="report-temperatures" title={t("temperatures.title")}>
-          {data.temperatures.readings.length === 0 || !data.temperatures.highest ? (
+          {data.temperatures.count === 0 || !data.temperatures.highest ? (
             <p className="text-sm text-muted-foreground">{t("empty")}</p>
           ) : (
             <div className="space-y-1 rounded-lg border bg-card p-3.5">
@@ -372,10 +392,12 @@ export function ReportView({ childId }: { childId: string }) {
                 })}
               </p>
               <p className="text-sm text-muted-foreground">
-                {t("temperatures.count", { count: data.temperatures.readings.length })}
+                {t("temperatures.count", { count: data.temperatures.count })}
+                {data.temperatures.count > data.temperatures.latest.length &&
+                  ` · ${t("temperatures.latestOnly", { shown: data.temperatures.latest.length })}`}
               </p>
               <ul className="text-xs text-muted-foreground tabular-nums">
-                {data.temperatures.readings.map((reading, index) => (
+                {data.temperatures.latest.map((reading, index) => (
                   <li key={index}>
                     {t("temperatures.reading", {
                       date: dateOf(reading.time),

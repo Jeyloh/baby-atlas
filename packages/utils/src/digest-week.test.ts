@@ -78,25 +78,28 @@ describe("osloStartOfDay", () => {
 });
 
 describe("digestWeekToSend", () => {
-  it("is null before Sunday 18:00", () => {
-    expect(digestWeekToSend(new Date("2026-10-18T15:59:00Z"))).toBeNull(); // 17:59 Oslo
-    expect(digestWeekToSend(new Date("2026-10-14T16:00:00Z"))).toBeNull();
+  it("is null on Sunday, including the evening", () => {
+    expect(digestWeekToSend(new Date("2026-10-18T16:00:00Z"))).toBeNull(); // 18:00 Oslo
+    expect(digestWeekToSend(new Date("2026-10-18T21:30:00Z"))).toBeNull();
   });
 
-  it("sends the ending week from Sunday 18:00 Oslo", () => {
-    expect(digestWeekToSend(new Date("2026-10-18T16:00:00Z"))).toBe("2026-10-12");
-    expect(digestWeekToSend(new Date("2026-10-18T21:30:00Z"))).toBe("2026-10-12");
+  it("is null on other weekdays", () => {
+    expect(digestWeekToSend(new Date("2026-10-14T10:00:00Z"))).toBeNull();
   });
 
-  it("catches up on Monday morning until 12:00 Oslo", () => {
-    expect(digestWeekToSend(new Date("2026-10-18T22:30:00Z"))).toBe("2026-10-12");
-    expect(digestWeekToSend(new Date("2026-10-19T09:59:00Z"))).toBe("2026-10-12");
-    expect(digestWeekToSend(new Date("2026-10-19T10:00:00Z"))).toBeNull();
+  it("is null on Monday before 08:00 and from 20:00 Oslo", () => {
+    expect(digestWeekToSend(new Date("2026-10-19T05:59:00Z"))).toBeNull(); // 07:59 Oslo
+    expect(digestWeekToSend(new Date("2026-10-19T18:00:00Z"))).toBeNull(); // 20:00 Oslo
+  });
+
+  it("sends the week that just ended on Monday from 08:00 to 20:00 Oslo", () => {
+    expect(digestWeekToSend(new Date("2026-10-19T06:00:00Z"))).toBe("2026-10-12");
+    expect(digestWeekToSend(new Date("2026-10-19T17:59:00Z"))).toBe("2026-10-12");
   });
 
   it("uses winter time after the clocks change", () => {
-    // Sunday 1 November 2026: 18:00 Oslo is 17:00Z
-    expect(digestWeekToSend(new Date("2026-11-01T16:30:00Z"))).toBeNull();
-    expect(digestWeekToSend(new Date("2026-11-01T17:00:00Z"))).toBe("2026-10-26");
+    // Monday 2 November 2026: 08:00 Oslo is 07:00Z
+    expect(digestWeekToSend(new Date("2026-11-02T06:59:00Z"))).toBeNull();
+    expect(digestWeekToSend(new Date("2026-11-02T07:00:00Z"))).toBe("2026-10-26");
   });
 });

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { QueryClient } from "@tanstack/react-query";
 import { dropBrowserPushSubscription } from "@/lib/notifications/client";
 import { clearWellbeingStorage } from "@/lib/wellbeing-storage";
+import { clearReportQuestions } from "@/lib/report-questions";
 import { clearSavedData } from "./query-persister";
 
 const LAST_OWNER_KEY = "baby-atlas-cache-owner";
@@ -47,6 +48,7 @@ export async function claimDevice(queryClient: QueryClient, userId: string) {
     await dropBrowserPushSubscription();
     await clearSavedData();
     clearWellbeingStorage();
+    clearReportQuestions();
   }
   useDeviceOwner.setState({ owner: userId, verified: true });
 }
@@ -63,4 +65,5 @@ export async function releaseDevice(queryClient: QueryClient) {
   await dropBrowserPushSubscription();
   await clearSavedData();
   clearWellbeingStorage();
+  clearReportQuestions();
 }

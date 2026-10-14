@@ -9,11 +9,11 @@
     "range": "{start} – {end}",
     "previous": "Forrige uke",
     "next": "Neste uke",
-    "ongoing": "Uken pågår fortsatt, så tallene kan endre seg."
+    "ongoing": "Uken pågår fortsatt. I dag er ikke med i snittene, så tallene kan endre seg."
   },
   "empty": "Ingen logger denne uken. Logg litt søvn, mating eller bleier, så dukker oppsummeringen opp her.",
   "average": "Snitt per dag",
-  "averageHint": "Regnet ut fra dagene du har logget. Dager uten logg teller ikke med.",
+  "averageHint": "Regnet ut fra dagene du har logget. Dager uten logg teller ikke med, og heller ikke i dag hvis dagen ikke er over.",
   "noValue": "–",
   "change": {
     "up": "{value} mer enn uken før",
@@ -24,7 +24,7 @@
   "metrics": {
     "sleepTotal": "Søvn totalt",
     "sleepNight": "Nattesøvn",
-    "sleepNaps": "Lurer",
+    "sleepNaps": "Lurer på dagen",
     "napsPerDay": "{count} lurer per dag",
     "feeds": "Måltider",
     "bottle": "Flaske",

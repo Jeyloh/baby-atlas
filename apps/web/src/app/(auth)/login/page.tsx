@@ -8,11 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
-// Only same-site paths, so a crafted link cannot send people to another site
-function safeCallbackUrl(value: string | null): string {
-  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
-}
+import { safeCallbackUrl } from "@/lib/safe-callback-url";
 
 export default function LoginPage() {
   const t = useTranslations("auth.login");
