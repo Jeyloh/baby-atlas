@@ -77,7 +77,7 @@ describe("MEDICINE_NEXT_DOSE evaluator", () => {
   it("reminds exactly at the allowed time and at the edge of the window", async () => {
     const atTime = setup({}, [{ id: "r1", time: ago(6) }]);
     expect(await evaluate({ prisma: atTime.prisma, now: NOW })).toHaveLength(1);
-    const atEdge = setup({}, [{ id: "r1", time: ago(8) }]);
+    const atEdge = setup({}, [{ id: "r1", time: ago(18) }]);
     expect(await evaluate({ prisma: atEdge.prisma, now: NOW })).toHaveLength(1);
   });
 
@@ -86,8 +86,8 @@ describe("MEDICINE_NEXT_DOSE evaluator", () => {
     expect(await evaluate({ prisma, now: NOW })).toEqual([]);
   });
 
-  it("does not send stale reminders (allowed more than 2 h ago)", async () => {
-    const { prisma } = setup({}, [{ id: "r1", time: ago(8.1) }]);
+  it("does not send stale reminders (allowed more than 12 h ago)", async () => {
+    const { prisma } = setup({}, [{ id: "r1", time: ago(18.1) }]);
     expect(await evaluate({ prisma, now: NOW })).toEqual([]);
   });
 

@@ -2,7 +2,7 @@
   "push": {
     "medicineNextDose": {
       "title": "{medicine} til {child}",
-      "body": "Neste dose kan gis fra {time} ifølge innstillingen din."
+      "body": "Ifølge innstillingene dine kan neste dose gis fra {time}."
     },
     "test": {
       "title": "Testvarsel fra Baby Atlas",
@@ -69,7 +69,7 @@
       },
       "MEDICINE_NEXT_DOSE": {
         "label": "Medisin",
-        "description": "Når tidspunktet du har satt som tidligste neste dose er nådd."
+        "description": "Når tiden du har satt mellom doser har gått. Varselet venter til stille timer er over."
       },
       "FEED_DUE": {
         "label": "Snart tid for mat",

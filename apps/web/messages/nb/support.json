@@ -67,9 +67,9 @@
     "lastDose": "Siste dose {time}",
     "dosesOfMax": "{count} av {max} doser siste 24 timer",
     "doses": "{count, plural, one {# dose} other {# doser}} siste 24 timer",
-    "nextFrom": "Neste dose kan gis fra {time} ifølge innstillingen din",
+    "nextFrom": "Ifølge innstillingene dine kan neste dose gis fra {time}.",
     "intervalPassed": "Tiden du har satt mellom doser har gått",
-    "maxReached": "Grensen du har satt er nådd. Neste dose kan gis fra {time} ifølge innstillingen din"
+    "maxReached": "Grensen du har satt er nådd. Ifølge innstillingene dine kan neste dose gis fra {time}."
   },
   "whatsNext": {
     "title": "Hva skjer videre",

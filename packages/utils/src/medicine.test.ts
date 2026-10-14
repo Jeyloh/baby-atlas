@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { medicineDoseStatus, type MedicineDoseRecord } from "./medicine";
+import { medicineDoseStatus, medicineDoseCheck, type MedicineDoseRecord } from "./medicine";
+
+const at = (iso: string) => new Date(iso);
+const given = (id: string, iso: string): MedicineDoseRecord => ({ id, time: at(iso), skipped: false });
 
 const H = 60 * 60 * 1000;
 const NOW = new Date("2026-03-10T12:00:00Z");
@@ -8,6 +11,72 @@ const rec = (id: string, hours: number, skipped = false): MedicineDoseRecord => 
   id,
   time: ago(hours),
   skipped,
+});
+
+describe("medicineDoseCheck", () => {
+  const settings = { minIntervalHours: 6, maxDosesPer24h: 3 };
+
+  it("needs no confirmation when nothing conflicts", () => {
+    const c = medicineDoseCheck([rec("a", 7)], settings, NOW);
+    expect(c.needsConfirm).toBe(false);
+    expect(c.previousDose?.id).toBe("a");
+  });
+
+  it("flags a dose too soon after the previous one, not exactly at the boundary", () => {
+    expect(medicineDoseCheck([rec("a", 5.9)], settings, NOW).tooSoonAfterPrevious).toBe(true);
+    expect(medicineDoseCheck([rec("a", 6)], settings, NOW).tooSoonAfterPrevious).toBe(false);
+  });
+
+  it("flags a back-dated dose that is too close to a later one", () => {
+    const c = medicineDoseCheck([given("ten", "2026-03-10T10:00:00Z")], settings, at("2026-03-10T08:00:00Z"));
+    expect(c.tooCloseToLater).toBe(true);
+    expect(c.laterDose?.id).toBe("ten");
+    expect(c.needsConfirm).toBe(true);
+  });
+
+  it("allows a back-dated dose exactly one interval before a later one", () => {
+    const c = medicineDoseCheck([given("x", "2026-03-10T14:00:00Z")], settings, at("2026-03-10T08:00:00Z"));
+    expect(c.tooCloseToLater).toBe(false);
+  });
+
+  it("ignores skipped records on both sides", () => {
+    const c = medicineDoseCheck([rec("s", 1, true), rec("t", -1, true)], settings, NOW);
+    expect(c.needsConfirm).toBe(false);
+    expect(c.previousDose).toBeNull();
+    expect(c.laterDose).toBeNull();
+  });
+
+  it("flags the max when the last 24 h are full", () => {
+    const c = medicineDoseCheck([rec("a", 20), rec("b", 14), rec("c", 8)], settings, NOW);
+    expect(c.overMax).toBe(true);
+    expect(c.maxInWindow).toBe(3);
+  });
+
+  it("does not flag the max when old doses have rolled out", () => {
+    const c = medicineDoseCheck([rec("a", 25), rec("b", 14), rec("c", 8)], settings, NOW);
+    expect(c.overMax).toBe(false);
+  });
+
+  it("flags the max in a later window that includes a back-dated dose", () => {
+    const logged = [
+      given("a", "2026-03-10T02:00:00Z"),
+      given("b", "2026-03-10T08:00:00Z"),
+      given("c", "2026-03-10T20:00:00Z"),
+    ];
+    const c = medicineDoseCheck(logged, { maxDosesPer24h: 3 }, at("2026-03-09T21:00:00Z"));
+    expect(c.overMax).toBe(true);
+  });
+
+  it("treats doses exactly 24 h apart as separate windows", () => {
+    const logged = [given("a", "2026-03-09T12:00:00Z"), given("b", "2026-03-09T13:00:00Z")];
+    const c = medicineDoseCheck(logged, { maxDosesPer24h: 2 }, at("2026-03-10T12:00:00Z"));
+    expect(c.maxInWindow).toBe(1);
+    expect(c.overMax).toBe(false);
+  });
+
+  it("needs no confirmation without settings", () => {
+    expect(medicineDoseCheck([rec("a", 0.1)], {}, NOW).needsConfirm).toBe(false);
+  });
 });
 
 describe("medicineDoseStatus", () => {
