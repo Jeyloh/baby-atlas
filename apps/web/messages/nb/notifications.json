@@ -3,6 +3,12 @@
     "test": {
       "title": "Testvarsel fra Baby Atlas",
       "body": "Varslene fungerer på denne enheten."
+    },
+    "timerRunning": {
+      "title1": "Har du glemt å stoppe tidtakeren?",
+      "body1": "{type, select, nap {Luren} nightSleep {Nattesøvnen} breastfeeding {Ammingen} bottle {Flaskemåltidet} pumping {Pumpingen} other {Aktiviteten}} til {childName} har pågått i {hours, plural, =0 {{minutes} min} other {# t {minutes} min}}. Trykk for å sette sluttid.",
+      "title2": "Tidtakeren går fortsatt",
+      "body2": "{type, select, nap {Luren} nightSleep {Nattesøvnen} breastfeeding {Ammingen} bottle {Flaskemåltidet} pumping {Pumpingen} other {Aktiviteten}} til {childName} har nå pågått i {hours, plural, =0 {{minutes} min} other {# t {minutes} min}}. Trykk for å rette sluttiden."
     }
   },
   "settings": {
@@ -81,6 +87,22 @@
       "title": "Dempe barn",
       "description": "Ingen varsler om barn du demper.",
       "none": "Du har ingen barn å dempe ennå."
+    },
+    "timerThresholds": {
+      "summary": "Avansert: når en tidtaker regnes som glemt",
+      "description": "Du får første varsel når en tidtaker har gått så lenge, og ett til når den har gått dobbelt så lenge. Tom verdi bruker standard.",
+      "unit": "minutter",
+      "default": "Standard: {minutes} min",
+      "invalid": "Skriv et helt tall fra 1 til 1440.",
+      "reset": "Tilbakestill til standard",
+      "types": {
+        "nap": "Lur",
+        "nightSleep": "Nattesøvn",
+        "breastfeeding": "Amming",
+        "bottle": "Flaske",
+        "pumping": "Pumping",
+        "activity": "Aktivitet"
+      }
     }
   }
 }

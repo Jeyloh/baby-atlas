@@ -2,14 +2,21 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Bell, BellOff, Share } from "lucide-react";
+import { useState } from "react";
 import {
   DEFAULT_QUIET_END,
   DEFAULT_QUIET_START,
   NOTIFICATION_KINDS,
+  TIMER_THRESHOLD_KEYS,
   type NotificationKind,
+  type TimerThresholds,
   type UpdateNotificationSettingsInput,
 } from "@baby-atlas/schemas";
-import { formatMinutesOfDay, parseMinutesOfDay } from "@baby-atlas/utils";
+import {
+  DEFAULT_TIMER_THRESHOLD_MINUTES,
+  formatMinutesOfDay,
+  parseMinutesOfDay,
+} from "@baby-atlas/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +65,102 @@ function CheckRow({
         )}
       </Label>
     </div>
+  );
+}
+
+const MAX_THRESHOLD_MINUTES = 24 * 60;
+
+/** "90" -> 90, "" -> undefined (use the default), anything else -> null (invalid). */
+function parseThreshold(text: string): number | undefined | null {
+  const trimmed = text.trim();
+  if (trimmed === "") return undefined;
+  if (!/^\d+$/.test(trimmed)) return null;
+  const minutes = Number(trimmed);
+  return minutes >= 1 && minutes <= MAX_THRESHOLD_MINUTES ? minutes : null;
+}
+
+/**
+ * Per timer type: how many minutes before a timer counts as forgotten. Saved
+ * when a field loses focus. Mounted once with the saved values, so a refetch
+ * does not overwrite what is being typed.
+ */
+function TimerThresholdFields({
+  thresholds,
+  onSave,
+}: {
+  thresholds: TimerThresholds;
+  onSave: (next: TimerThresholds) => void;
+}) {
+  const t = useTranslations("notifications.settings.timerThresholds");
+  const [drafts, setDrafts] = useState<Record<string, string>>(() =>
+    Object.fromEntries(TIMER_THRESHOLD_KEYS.map((key) => [key, String(thresholds[key] ?? "")]))
+  );
+
+  const commit = (next: Record<string, string>) => {
+    const result: TimerThresholds = {};
+    for (const key of TIMER_THRESHOLD_KEYS) {
+      const minutes = parseThreshold(next[key] ?? "");
+      if (minutes === null) return; // the field shows the error, nothing is saved
+      if (minutes !== undefined) result[key] = minutes;
+    }
+    onSave(result);
+  };
+
+  return (
+    <details className="rounded-lg border">
+      <summary className="cursor-pointer select-none px-3 py-3 text-sm font-medium">
+        {t("summary")}
+      </summary>
+      <div className="space-y-3 border-t px-3 py-3">
+        <p className="text-sm text-muted-foreground">{t("description")}</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {TIMER_THRESHOLD_KEYS.map((key) => {
+            const invalid = parseThreshold(drafts[key] ?? "") === null;
+            const inputId = `notification-threshold-${key}`;
+            return (
+              <div key={key} className="space-y-1">
+                <Label htmlFor={inputId}>
+                  {t(`types.${key}`)} ({t("unit")})
+                </Label>
+                <Input
+                  id={inputId}
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={MAX_THRESHOLD_MINUTES}
+                  step={1}
+                  value={drafts[key] ?? ""}
+                  placeholder={String(DEFAULT_TIMER_THRESHOLD_MINUTES[key])}
+                  aria-invalid={invalid}
+                  aria-describedby={`${inputId}-hint`}
+                  onChange={(event) => setDrafts({ ...drafts, [key]: event.target.value })}
+                  onBlur={() => commit(drafts)}
+                />
+                <p
+                  id={`${inputId}-hint`}
+                  className={invalid ? "text-xs text-destructive" : "text-xs text-muted-foreground"}
+                >
+                  {invalid
+                    ? t("invalid")
+                    : t("default", { minutes: DEFAULT_TIMER_THRESHOLD_MINUTES[key] })}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setDrafts({});
+            onSave({});
+          }}
+        >
+          {t("reset")}
+        </Button>
+      </div>
+    </details>
   );
 }
 
@@ -281,6 +384,16 @@ export function NotificationSettings() {
                 ))
               )}
             </fieldset>
+          </>
+        )}
+
+        {settings && (
+          <>
+            <Separator />
+            <TimerThresholdFields
+              thresholds={settings.timerThresholds}
+              onSave={(timerThresholds) => save({ timerThresholds })}
+            />
           </>
         )}
 

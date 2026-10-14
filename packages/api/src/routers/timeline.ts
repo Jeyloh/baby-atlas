@@ -16,6 +16,19 @@ import { createTRPCRouter, householdProcedure } from "../trpc";
 // Day starts at 8am for baby timeline (sleep patterns often cross midnight)
 const DAY_START_HOUR = 8;
 
+const RUNNING_TIMERS_PER_TYPE = 5;
+
+export interface RunningTimer {
+  kind: "sleep" | "breast" | "bottle" | "pumping" | "activity";
+  recordId: string;
+  startTime: Date;
+  sleepType: "NAP" | "NIGHT" | null;
+  side: "LEFT" | "RIGHT" | "BOTH" | null;
+  leftDurationSeconds?: number | null;
+  rightDurationSeconds?: number | null;
+  activityType: string | null;
+}
+
 function getTimelineDayBoundaries(date: Date): { start: Date; end: Date } {
   const dayStart = startOfDay(date);
   const start = addHours(dayStart, DAY_START_HOUR);
@@ -171,6 +184,68 @@ export const timelineRouter = createTRPCRouter({
         lastTemperature,
         lastActivity,
       };
+    }),
+
+  /**
+   * Every timer that is still running for a child (open records without an
+   * end time), whoever started it. Used to spot forgotten timers.
+   */
+  getRunningTimers: householdProcedure
+    .input(getLastActivitiesSchema)
+    .query(async ({ ctx, input }) => {
+      const where = { childId: input.childId, endTime: null };
+      const orderBy = { startTime: "desc" as const };
+      const take = RUNNING_TIMERS_PER_TYPE;
+
+      const [sleep, feeding, pumping, activity] = await Promise.all([
+        ctx.prisma.sleepRecord.findMany({ where, orderBy, take }),
+        ctx.prisma.feedingRecord.findMany({
+          where: { ...where, feedingType: { in: ["BREAST", "BOTTLE"] } },
+          orderBy,
+          take,
+        }),
+        ctx.prisma.pumpingRecord.findMany({ where, orderBy, take }),
+        ctx.prisma.activityRecord.findMany({ where, orderBy, take }),
+      ]);
+
+      const timers: RunningTimer[] = [
+        ...sleep.map((r) => ({
+          kind: "sleep" as const,
+          recordId: r.id,
+          startTime: r.startTime,
+          sleepType: r.sleepType,
+          side: null,
+          activityType: null,
+        })),
+        ...feeding.map((r) => ({
+          kind: r.feedingType === "BOTTLE" ? ("bottle" as const) : ("breast" as const),
+          recordId: r.id,
+          startTime: r.startTime,
+          sleepType: null,
+          side: r.side,
+          leftDurationSeconds: r.leftDurationSeconds,
+          rightDurationSeconds: r.rightDurationSeconds,
+          activityType: null,
+        })),
+        ...pumping.map((r) => ({
+          kind: "pumping" as const,
+          recordId: r.id,
+          startTime: r.startTime,
+          sleepType: null,
+          side: r.side,
+          activityType: null,
+        })),
+        ...activity.map((r) => ({
+          kind: "activity" as const,
+          recordId: r.id,
+          startTime: r.startTime,
+          sleepType: null,
+          side: null,
+          activityType: r.activityType,
+        })),
+      ];
+
+      return timers.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
     }),
 
   /**

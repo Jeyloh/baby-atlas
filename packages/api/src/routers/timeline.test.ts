@@ -340,4 +340,52 @@ describe("timelineRouter", () => {
       expect(types).toContain("DIAPER");
     });
   });
+  describe("getRunningTimers", () => {
+    it("lists open records of every timer type, oldest first, with open-record filters", async () => {
+      const caller = createCaller(createTestContext());
+
+      prismaMock.sleepRecord.findMany.mockResolvedValue([
+        createTestSleepRecord({ id: "sleep1", endTime: null, sleepType: "NIGHT", startTime: new Date("2024-01-15T20:00:00Z") }),
+      ] as never);
+      prismaMock.feedingRecord.findMany.mockResolvedValue([
+        createTestFeedingRecord({ id: "feed1", endTime: null, feedingType: "BREAST", startTime: new Date("2024-01-15T08:00:00Z") }),
+        createTestFeedingRecord({ id: "feed2", endTime: null, feedingType: "BOTTLE", side: null, startTime: new Date("2024-01-15T09:00:00Z") }),
+      ] as never);
+      prismaMock.pumpingRecord.findMany.mockResolvedValue([
+        { id: "pump1", startTime: new Date("2024-01-15T07:00:00Z"), side: null },
+      ] as never);
+      prismaMock.activityRecord.findMany.mockResolvedValue([
+        { id: "act1", startTime: new Date("2024-01-15T10:00:00Z"), activityType: "TUMMY_TIME" },
+      ] as never);
+
+      const result = await caller.getRunningTimers({ childId });
+
+      expect(result.map((t) => [t.kind, t.recordId])).toEqual([
+        ["pumping", "pump1"],
+        ["breast", "feed1"],
+        ["bottle", "feed2"],
+        ["activity", "act1"],
+        ["sleep", "sleep1"],
+      ]);
+      expect(result.find((t) => t.recordId === "sleep1")?.sleepType).toBe("NIGHT");
+      expect(prismaMock.sleepRecord.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { childId, endTime: null } })
+      );
+      expect(prismaMock.feedingRecord.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { childId, endTime: null, feedingType: { in: ["BREAST", "BOTTLE"] } },
+        })
+      );
+    });
+
+    it("rejects a caller who is not a member of the household", async () => {
+      prismaMock.householdMember.findUnique.mockResolvedValue(null);
+      const caller = createCaller(createTestContext());
+
+      await expect(caller.getRunningTimers({ childId })).rejects.toMatchObject({
+        code: "FORBIDDEN",
+      });
+      expect(prismaMock.sleepRecord.findMany).not.toHaveBeenCalled();
+    });
+  });
 });
