@@ -82,6 +82,16 @@ describe("checkup evaluator", () => {
     const out = await evaluateCheckups({ prisma, now: atAge(90) });
     expect(out).toHaveLength(1);
     expect(findMany.mock.calls[0]![0].where.household.members.some.user.pushSubscriptions).toEqual({ some: {} });
+    expect(findMany.mock.calls[0]![0].where.household.members.some.role).toEqual({ not: "VIEWER" });
+  });
+
+  it("loads the children once per run when checkups and vaccines share a memo", async () => {
+    const findMany = vi.fn().mockResolvedValue([row()]);
+    const prisma = { child: { findMany } } as unknown as PrismaClient;
+    const ctx = { prisma, now: atAge(90), memo: new Map<string, Promise<unknown>>() };
+    await evaluateCheckups(ctx);
+    await evaluateVaccines(ctx);
+    expect(findMany).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -130,12 +140,36 @@ describe("vaccine evaluator", () => {
     expect(out).toEqual([]);
   });
 
-  it("still reminds when the booked time has already passed", () => {
+  it("is silent when the covering checkup is completed", () => {
+    const out = vaccineCandidates(
+      row({
+        vaccinationRecords: [{ vaccineKey: "rotavirus-1" }],
+        checkupRecords: [{ checkupKey: "month_3", scheduledAt: null, completedAt: new Date("2026-04-01") }],
+      }),
+      now
+    );
+    expect(out).toEqual([]);
+  });
+
+  it("is silent when the booked time was within the last 3 days", () => {
     const out = vaccineCandidates(
       row({
         vaccinationRecords: [{ vaccineKey: "rotavirus-1" }],
         checkupRecords: [
-          { checkupKey: "month_3", scheduledAt: new Date("2026-04-01T08:00:00Z"), completedAt: null },
+          { checkupKey: "month_3", scheduledAt: new Date("2026-03-31T08:00:00Z"), completedAt: null },
+        ],
+      }),
+      now
+    );
+    expect(out).toEqual([]);
+  });
+
+  it("still reminds when the booked time passed more than 3 days ago", () => {
+    const out = vaccineCandidates(
+      row({
+        vaccinationRecords: [{ vaccineKey: "rotavirus-1" }],
+        checkupRecords: [
+          { checkupKey: "month_3", scheduledAt: new Date("2026-03-25T08:00:00Z"), completedAt: null },
         ],
       }),
       now

@@ -94,6 +94,9 @@ CREATE INDEX "push_subscriptions_user_id_idx" ON "push_subscriptions"("user_id")
 CREATE INDEX "notification_logs_sent_at_idx" ON "notification_logs"("sent_at");
 
 -- CreateIndex
+CREATE INDEX "notification_logs_dedupe_key_idx" ON "notification_logs"("dedupe_key");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "notification_logs_user_id_dedupe_key_key" ON "notification_logs"("user_id", "dedupe_key");
 
 -- CreateIndex

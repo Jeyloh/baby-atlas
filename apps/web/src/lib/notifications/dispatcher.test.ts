@@ -270,6 +270,40 @@ describe("runDispatcher", () => {
     expect(result).toMatchObject({ evaluatorErrors: 1, sent: 2 });
   });
 
+  it("counts an evaluator that never answers as failed after 15 s and carries on", async () => {
+    vi.useFakeTimers();
+    try {
+      const sender = okSender();
+      const evaluators = evaluatorsReturning([candidate()]);
+      evaluators.WEEKLY_TIP = () => new Promise(() => {});
+
+      const run = runDispatcher({ prisma: fake.prisma, now: NOW, evaluators, sender });
+      await vi.advanceTimersByTimeAsync(1);
+      await vi.advanceTimersByTimeAsync(15_000);
+      const result = await run;
+
+      expect(result).toMatchObject({ evaluatorErrors: 1, sent: 2 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("shares one memo between the evaluators of a run", async () => {
+    const seen: unknown[] = [];
+    const evaluators = evaluatorsReturning([]);
+    evaluators.CHECKUP_REMINDER = async (ctx) => {
+      seen.push(ctx.memo);
+      return [];
+    };
+    evaluators.VACCINE_REMINDER = async (ctx) => {
+      seen.push(ctx.memo);
+      return [];
+    };
+    await runDispatcher({ prisma: fake.prisma, now: NOW, evaluators, sender: okSender() });
+    expect(seen[0]).toBeInstanceOf(Map);
+    expect(seen[0]).toBe(seen[1]);
+  });
+
   it("prunes old log rows", async () => {
     fake.setOldLogs(7);
     const result = await runDispatcher({

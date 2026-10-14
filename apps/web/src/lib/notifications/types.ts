@@ -48,6 +48,8 @@ export interface Candidate {
 export interface EvaluatorContext {
   prisma: PrismaClient;
   now: Date;
+  /** Shared by all evaluators of one run, for data more than one of them needs */
+  memo?: Map<string, Promise<unknown>>;
 }
 
 /** Returns the candidates that are relevant at `ctx.now`. Must not send or write. */

@@ -26,6 +26,8 @@ import type { Candidate, Evaluate, NotificationKind } from "./types";
 export const LOG_RETENTION_DAYS = 400;
 /** Stop starting new sends after this long so the run ends within maxDuration. */
 export const DEFAULT_TIME_BUDGET_MS = 45_000;
+/** An evaluator that takes longer counts as failed; the others carry on. */
+export const EVALUATOR_TIMEOUT_MS = 15_000;
 /** Deliveries sent at the same time */
 export const SEND_CONCURRENCY = 10;
 
@@ -50,14 +52,23 @@ export interface DispatchOptions {
   timeBudgetMs?: number;
 }
 
+function withTimeout<T>(promise: Promise<T>, ms = EVALUATOR_TIMEOUT_MS): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`evaluator timed out after ${ms} ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 async function collectCandidates(
   prisma: PrismaClient,
   now: Date,
   evaluators: Record<NotificationKind, Evaluate>
 ): Promise<{ candidates: Candidate[]; errors: number }> {
   // One failing evaluator must not stop the others
+  const memo = new Map<string, Promise<unknown>>();
   const results = await Promise.allSettled(
-    Object.values(evaluators).map((evaluate) => evaluate({ prisma, now }))
+    Object.values(evaluators).map((evaluate) => withTimeout(Promise.resolve().then(() => evaluate({ prisma, now, memo }))))
   );
 
   const candidates: Candidate[] = [];

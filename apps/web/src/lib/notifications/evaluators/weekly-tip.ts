@@ -24,7 +24,7 @@ export const evaluate: Evaluate = async ({ prisma, now }) => {
         gte: new Date(now.getTime() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000),
       },
       household: {
-        members: { some: { user: { pushSubscriptions: { some: {} } } } },
+        members: { some: { role: { not: "VIEWER" }, user: { pushSubscriptions: { some: {} } } } },
       },
     },
     select: { id: true, birthDate: true },

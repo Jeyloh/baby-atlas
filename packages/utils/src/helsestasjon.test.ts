@@ -15,6 +15,7 @@ import {
   osloLocalToInstant,
   upcomingCheckups,
   vaccinesToRemind,
+  checkupKeysToSkipForVaccines,
 } from "./helsestasjon";
 import { NORWEGIAN_VACCINE_PROGRAMME } from "./vaccination";
 
@@ -213,5 +214,28 @@ describe("vaccinesToRemind", () => {
     const now = new Date("2026-04-02T12:00:00Z");
     const keys = vaccinesToRemind(birth, new Set(["rotavirus-1"]), new Set(["month_3"]), now);
     expect(keys).toEqual([]);
+  });
+});
+
+describe("checkupKeysToSkipForVaccines", () => {
+  const now = new Date("2026-04-10T12:00:00Z");
+  const rec = (checkupKey: string, scheduledAt: Date | null, completedAt: Date | null) => ({
+    checkupKey,
+    scheduledAt,
+    completedAt,
+  });
+
+  it("keeps completed, future and last-3-days checkups, drops older bookings", () => {
+    const keys = checkupKeysToSkipForVaccines(
+      [
+        rec("done", null, new Date("2026-03-01")),
+        rec("future", new Date("2026-04-20T08:00:00Z"), null),
+        rec("recent", new Date("2026-04-08T08:00:00Z"), null),
+        rec("old", new Date("2026-04-01T08:00:00Z"), null),
+        rec("unbooked", null, null),
+      ],
+      now
+    );
+    expect([...keys].sort()).toEqual(["done", "future", "recent"]);
   });
 });

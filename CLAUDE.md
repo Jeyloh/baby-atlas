@@ -62,14 +62,14 @@ baby-atlas/
 │
 ├── packages/
 │   ├── db/                      # Prisma schema + client
-│   │   ├── prisma/schema.prisma # Database schema (17 models)
+│   │   ├── prisma/schema.prisma # Database schema (28 models)
 │   │   └── src/index.ts         # Prisma client singleton
 │   │
 │   ├── api/                     # tRPC routers
 │   │   └── src/
 │   │       ├── trpc.ts          # tRPC context, procedures, middleware
 │   │       ├── root.ts          # Root router combining all routers
-│   │       └── routers/         # Individual routers (12 total)
+│   │       └── routers/         # Individual routers (notifications, checkup, handover, wellbeing and digest are the support routers)
 │   │
 │   ├── schemas/                 # Shared Zod validation schemas
 │   │   └── src/                 # One file per domain (sleep, feeding, etc.)
@@ -113,7 +113,7 @@ pnpm --filter @baby-atlas/web dev       # Run only web app
 pnpm --filter @baby-atlas/mcp-server build  # Build MCP server
 
 # Testing
-pnpm test                   # Run all tests (Vitest)
+pnpm test                   # Run all tests (Vitest). The pnpm test:* scripts start vitest in watch mode and hang in agent shells: use `pnpm exec vitest run` (optionally `--project <name>`) instead
 pnpm test:unit              # Run utils + schemas tests only
 pnpm test:integration       # Run API integration tests only
 pnpm test:components        # Run web component tests only
@@ -237,6 +237,7 @@ Timers persist in localStorage via Zustand (`apps/web/src/stores/timer-store.ts`
 - `public/sw.js` (production only): `/_next/static` cache first, pages network first with a 4 second timeout, `/api` never cached. Bump `VERSION` to drop old caches.
 - Mutations default to `networkMode: "always"`, so detail forms fail with an error offline instead of waiting.
 - iOS has no install prompt. `InstallHint` (dashboard layout) shows the Share steps in iOS browsers, or "Open in Safari" in in-app browsers where iOS hides "Add to Home Screen". Dismissal is stored in localStorage.
+- Every new localStorage key that holds user or child data must be user-scoped or cleared in `claimDevice`/`releaseDevice` (`lib/offline/device-owner.ts`). Current keys: `baby-atlas-cache-owner` (device owner, managed there), `baby-atlas-timers` (timer store), the outbox, `baby-atlas-wellbeing-*` (cleared by `clearWellbeingStorage`), `baby-atlas:report-questions:*` (cleared by `clearReportQuestions`), `baby-atlas-timer-fix-dismissed`, tip dismissals (`tipDismissKey`), the push owner key, `baby-atlas-install-hint-dismissed` (not user data).
 - The Capacitor shell has no service worker unless App-Bound Domains are set up. The outbox and saved cache still work there.
 
 ### AI Chat Interface
@@ -261,10 +262,33 @@ A shared journal per child (`/dashboard/[childId]/journal`): text, up to 6 photo
 
 Web Push (VAPID, `web-push`), personal per user. Settings UI: "Varsler" card on the profile settings page (`components/notifications/notification-settings.tsx`, `hooks/use-push-subscription.ts`). tRPC `notifications` router stores settings and subscriptions; `POST /api/notifications/test` sends a test push (web-push lives in `apps/web`, not the API package).
 - Env: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:`), `CRON_SECRET`. Generate keys with `npx web-push generate-vapid-keys`. Missing keys disable push (UI says so, cron answers 503). `apps/web/.env.example` could not be updated by the agent (access denied), add these four there.
-- `GET /api/cron/notifications` (bearer `CRON_SECRET`, constant-time compare) runs `runDispatcher` (`lib/notifications/`): evaluators (`evaluators/<kind>.ts`, one per `NotificationKind`, registered in `evaluators/index.ts`) return `Candidate`s; `plan.ts` filters per recipient (enabled kind, muted child, quiet hours in Europe/Oslo, already logged); the dispatcher inserts the `NotificationLog` row first and sends only if the insert won, so concurrent runs never double-send. A notice held back by quiet hours is not logged, so it is re-evaluated next run. Subscriptions: 404/410 are deleted at once; 400/403/413 count and delete after 5; 5xx, 429 and network errors never count and delete only after 7 days without a success. Endpoints must be https on a known push service (`isAllowedPushEndpoint`), at most 10 per user, sends time out after 10 s and run 10 at a time. Sign-out and a device owner change remove the browser subscription; `pushsubscriptionchange` in `sw.js` re-registers through `POST /api/notifications/resubscribe`. Logs older than 60 days are pruned.
-- Call the endpoint every 5 minutes from cron-job.org; `apps/web/vercel.json` has a daily Vercel cron as a backstop (Hobby allows daily only).
+- `GET /api/cron/notifications` (bearer `CRON_SECRET`, constant-time compare) runs `runDispatcher` (`lib/notifications/`): evaluators (`evaluators/<kind>.ts`, one per `NotificationKind`, registered in `evaluators/index.ts`) return `Candidate`s; `plan.ts` filters per recipient (enabled kind, muted child, quiet hours in Europe/Oslo, already logged); the dispatcher inserts the `NotificationLog` row first and sends only if the insert won, so concurrent runs never double-send. A notice held back by quiet hours is not logged, so it is re-evaluated next run. Subscriptions: 404/410 are deleted at once; 400/403/413 count and delete after 5; 5xx, 429 and network errors never count and delete only after 7 days without a success. Endpoints must be https on a known push service (`isAllowedPushEndpoint`), at most 10 per user, sends time out after 10 s and run 10 at a time. Sign-out and a device owner change remove the browser subscription; `pushsubscriptionchange` in `sw.js` re-registers through `POST /api/notifications/resubscribe`. Logs older than 400 days are pruned (once-only notices such as vaccine and checkup reminders must stay logged for months; `NotificationLog` has an index on `dedupeKey`). Each evaluator is raced against a 15 s timeout (`EVALUATOR_TIMEOUT_MS`): a timeout counts as an evaluator error and the others continue. `EvaluatorContext.memo` is shared by one run, so checkup and vaccine evaluators load the checkup children once (`checkup-data.ts`). Evaluator queries exclude VIEWER-only households (viewers get no pushes).
+- cron-job.org setup: `GET https://baby-atlas.vercel.app/api/cron/notifications` every 5 minutes, header `Authorization: Bearer <CRON_SECRET>`; `apps/web/vercel.json` has a daily Vercel cron as a backstop (Hobby allows daily only).
+- Quiet hours (default 22:00 to 07:00 Oslo, per user) hold a notice back without logging it; if it is still relevant when they end it goes out. Evaluator windows decide relevance, so old notices expire instead of arriving late.
+- The 8 kinds (default on: TIMER_RUNNING, MEDICINE_NEXT_DOSE, CHECKUP_REMINDER, VACCINE_REMINDER, WEEKLY_DIGEST, WEEKLY_TIP; FEED_DUE and NAP_DUE are opt-in):
+  - TIMER_RUNNING (`timer-running.ts`): running timer past 1x and 2x its threshold (nap 180 min, night sleep 780, breastfeeding 60, pumping 45, activity 120; per-user overrides in `timerThresholds`); a tier is only sent within 12 h of being reached. Opens `?fixTimer=`.
+  - MEDICINE_NEXT_DOSE (`medicine-next-dose.ts`): `remindNextDose` medicines when the earliest next dose time passes, within 12 h, not when the 24 h max is reached.
+  - FEED_DUE / NAP_DUE (`feed-due.ts`, `nap-due.ts`): 10 min before the predicted time until 20 min after.
+  - CHECKUP_REMINDER (`checkup-reminder.ts`): evening before a booked visit (from 17:00 Oslo), same-day reminder, and "time to book" in the first 14 days of an age window.
+  - VACCINE_REMINDER (`vaccine-reminder.ts`): due doses not recorded, up to 45 days overdue, one notice per age; skipped when the covering checkup is completed, booked ahead or was booked in the last 3 days (`checkupKeysToSkipForVaccines`).
+  - WEEKLY_DIGEST (`weekly-digest.ts`): Monday 08:00 to 20:00 Oslo, once per ISO week.
+  - WEEKLY_TIP (`weekly-tip.ts`): from 10:00 Oslo on the day an age tip starts, up to 3 days late.
 - Push texts live in `messages/{nb,en}/notifications.json` under `push.*` and are translated server-side in the recipient's `NotificationSettings.locale` (`translate.ts`). Keep `Candidate.titleKey/bodyKey` relative to the `notifications` namespace.
 - `public/sw.js` handles `push` and `notificationclick` (only same-origin paths are opened). The worker is production only; set `NEXT_PUBLIC_SW_IN_DEV=1` to test push locally. iOS needs the app on the Home Screen (16.4+).
+
+### Support features
+
+Informational help for parents. Never diagnoses and never gives dosing advice; wording is factual with links to helsenorge.no.
+- **Home support cards** (`components/support/support-cards.tsx`, mounted in `home-view.tsx`): urgent health hints and timers at 2x their threshold come first, then at most 3 non-urgent cards, then one soft card last (tip or wellbeing); the rest sit behind "show more".
+- **Forgotten timer** (`timer-fix-card.tsx`, `packages/utils/src/timer-thresholds.ts`): banner when a timer passes its threshold, `?fixTimer=<type>:<recordId>` opens the "set end time" dialog (also from the push). The server validates end time (after start, not in the future) in `packages/api/src/end-time.ts`. "Still going" is dismissed per tier in localStorage.
+- **Medicine limits**: `Medicine.minIntervalHours`, `maxDosesPer24h`, `remindNextDose`. `medicineDoseStatus` (status now) and `medicineDoseCheck` (before logging) in `packages/utils/src/medicine.ts`; too soon or over max shows a confirm dialog, never a block.
+- **Predictions and health hints** (`predictions.ts`, `health-hints.ts`): next feed (median interval), next nap (age wake windows plus own history), fever, wet-diaper and feed-gap hints. Informational only, each with a source URL; fever rules assume rectal measurement. Hints are dismissible.
+- **Helsestasjon programme** (`packages/utils/src/helsestasjon.ts`): checkups by age window; vaccine doses use the keys of `vaccination.ts`. `checkup` router lists status, sets `scheduledAt`, marks done (`CheckupRecord`). The rotavirus change planned for 2027 is not modelled.
+- **Weekly tips** (`tips` namespace, `tipKeyForAge` in `packages/utils/src/tips.ts`): week 0 to 52, then months 13 to 36. Push params can be a typed `MessageRef` (`{ ref: "tips", key }`) that `translate.ts` translates per recipient.
+- **Handover** (`handover` router): summary since my last visit when the gap is 2 h or more, window capped at 24 h. `markSeen` runs when the card has been visible, not on fetch.
+- **Wellbeing** (`wellbeing` router, `ParentCheckIn`): strictly the caller's own userId, never shared with the household. After repeated low days the card shows support numbers (Mental Helse 116 123, 113 in an emergency, helsestasjon or fastlege). No scoring.
+- **Weekly digest and visit report**: `/dashboard/[childId]/digest` (Monday 08-20 Oslo push) and `/dashboard/[childId]/report` (printable, "Save as PDF") are free. Premium keeps trend charts, daily series and AI.
+- **PWA**: manifest shortcuts (`lib/pwa/shortcuts.ts`) open `/dashboard/go/[target]`, which resolves the child and redirects. `apps/web/src/middleware.ts` sets `x-pathname` so the login redirect keeps a `callbackUrl`.
 
 ### Timeline Views
 
@@ -297,7 +321,9 @@ Key models in `packages/db/prisma/schema.prisma`:
 - `Child` - Child profiles
 - `SleepRecord`, `FeedingRecord`, `DiaperRecord` - Core tracking
 - `PumpingRecord`, `GrowthRecord`, `ActivityRecord`, `TemperatureRecord` - Extended tracking
-- `Medicine`, `MedicineRecord` - Medicine tracking
+- `Medicine`, `MedicineRecord` - Medicine tracking (`Medicine` has dose limits and `remindNextDose`)
+- `PushSubscription`, `NotificationSettings`, `NotificationLog` - Push notifications
+- `CheckupRecord` - Helsestasjon checkups per child; `ChildVisit` - last seen per user and child (handover); `ParentCheckIn` - private daily mood per user
 
 ## Git Workflow
 
@@ -479,4 +505,6 @@ The AI chat route sets `maxDuration = 60` (`apps/web/src/app/api/chat/route.ts`)
 - Email sending for magic links needs SMTP config
 - No payments yet: premium is set by `User.isPremium` or `PREMIUM_EMAILS`. RevenueCat (iOS) or Stripe (web) should set `isPremium` via webhook.
 - Supabase Realtime `postgres_changes` (`use-realtime.ts`, only on the legacy sleep/feeding/diapers pages) stops working once RLS is on. Switch to Realtime Broadcast from the server if live sync is needed.
+- `householdProcedure` and `recordProcedure` have no write option, so each mutation checks for VIEWER inline.
+- `apps/web/.env.example` lacks `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `CRON_SECRET` (permission rules block agents from editing it); add them by hand.
 - The MCP server (`apps/mcp-server`) trusts its arguments and is for single-user local use only. The web chat scopes calls via `scopeToolCall`.

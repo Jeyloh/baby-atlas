@@ -57,7 +57,8 @@ export function checkupCandidates(child: ChildRow, now: Date): Candidate[] {
   return candidates;
 }
 
-export async function evaluate({ prisma, now }: EvaluatorContext): Promise<Candidate[]> {
-  const children = await loadChildrenForCheckups(prisma, now);
+export async function evaluate(ctx: EvaluatorContext): Promise<Candidate[]> {
+  const { now } = ctx;
+  const children = await loadChildrenForCheckups(ctx);
   return children.flatMap((child) => checkupCandidates(child, now));
 }

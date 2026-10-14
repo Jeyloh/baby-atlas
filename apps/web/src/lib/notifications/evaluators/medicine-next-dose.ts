@@ -25,7 +25,7 @@ export const evaluate: Evaluate = async ({ prisma, now }) => {
       minIntervalHours: { not: null },
       child: {
         household: {
-          members: { some: { user: { pushSubscriptions: { some: {} } } } },
+          members: { some: { role: { not: "VIEWER" }, user: { pushSubscriptions: { some: {} } } } },
         },
       },
     },

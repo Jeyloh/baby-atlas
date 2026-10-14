@@ -1,4 +1,4 @@
-import { vaccinesToRemind, type VaccineDose } from "@baby-atlas/utils";
+import { checkupKeysToSkipForVaccines, vaccinesToRemind, type VaccineDose } from "@baby-atlas/utils";
 import type { Candidate, EvaluatorContext } from "../types";
 import { loadChildrenForCheckups } from "./checkup-data";
 
@@ -7,15 +7,11 @@ type ChildRow = Awaited<ReturnType<typeof loadChildrenForCheckups>>[number];
 /**
  * Pure part: one notice per due age (for example the 3 month visit), naming
  * all doses of that age that are due and not recorded. Skipped when a checkup
- * that covers them is booked in the future.
+ * that covers them is completed, booked ahead or was booked in the last 3 days.
  */
 export function vaccineCandidates(child: ChildRow, now: Date): Candidate[] {
   const given = new Set(child.vaccinationRecords.map((r) => r.vaccineKey));
-  const futureBooked = new Set(
-    child.checkupRecords
-      .filter((r) => r.scheduledAt && !r.completedAt && r.scheduledAt > now)
-      .map((r) => r.checkupKey)
-  );
+  const futureBooked = checkupKeysToSkipForVaccines(child.checkupRecords, now);
 
   const byAge = new Map<string, VaccineDose[]>();
   for (const dose of vaccinesToRemind(child.birthDate, given, futureBooked, now)) {
@@ -38,7 +34,8 @@ export function vaccineCandidates(child: ChildRow, now: Date): Candidate[] {
   }));
 }
 
-export async function evaluate({ prisma, now }: EvaluatorContext): Promise<Candidate[]> {
-  const children = await loadChildrenForCheckups(prisma, now);
+export async function evaluate(ctx: EvaluatorContext): Promise<Candidate[]> {
+  const { now } = ctx;
+  const children = await loadChildrenForCheckups(ctx);
   return children.flatMap((child) => vaccineCandidates(child, now));
 }

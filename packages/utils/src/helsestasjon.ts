@@ -262,9 +262,29 @@ export const VACCINE_REMINDER_MAX_OVERDUE_DAYS = 45;
 /** "Time to book" is only sent in the first days of a window. */
 export const TIME_TO_BOOK_MAX_DAYS_INTO_WINDOW = 14;
 
+/** A visit booked this recently probably happened even if nobody marked it done. */
+export const RECENT_VISIT_DAYS = 3;
+
+/**
+ * Checkups whose vaccine doses need no reminder: completed, booked in the
+ * future, or booked within the last RECENT_VISIT_DAYS days.
+ */
+export function checkupKeysToSkipForVaccines(
+  records: readonly { checkupKey: string; scheduledAt: Date | null; completedAt: Date | null }[],
+  now: Date
+): Set<string> {
+  const recentCutoff = now.getTime() - RECENT_VISIT_DAYS * DAY_MS;
+  return new Set(
+    records
+      .filter((r) => r.completedAt || (r.scheduledAt && r.scheduledAt.getTime() >= recentCutoff))
+      .map((r) => r.checkupKey)
+  );
+}
+
 /**
  * Doses from the existing programme whose due age is reached and that are not
- * recorded, skipping those a checkup booked in the future will cover.
+ * recorded, skipping those a covering checkup (see checkupKeysToSkipForVaccines)
+ * will handle or has just handled.
  */
 export function vaccinesToRemind(
   birthDate: Date,

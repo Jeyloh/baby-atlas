@@ -627,6 +627,7 @@ model NotificationLog {
 
   @@unique([userId, dedupeKey])
   @@index([sentAt])
+  @@index([dedupeKey])
   @@map("notification_logs")
 }
 
