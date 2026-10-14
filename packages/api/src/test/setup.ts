@@ -23,7 +23,12 @@ beforeEach(() => {
 
   // By default every record belongs to the test child, so recordProcedure's
   // ownership lookup passes. Tests override these to cover other cases.
-  const owned = { childId: TEST_CHILD_ID } as never;
+  // Timer records also carry a start, which the end and update procedures read
+  const owned = {
+    childId: TEST_CHILD_ID,
+    startTime: new Date("2024-01-15T10:00:00Z"),
+    endTime: null,
+  } as never;
   prismaMock.sleepRecord.findUnique.mockResolvedValue(owned);
   prismaMock.feedingRecord.findUnique.mockResolvedValue(owned);
   prismaMock.diaperRecord.findUnique.mockResolvedValue(owned);

@@ -15,6 +15,7 @@ import {
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 import { rethrowIfAlreadyEnded } from "../errors";
+import { assertUpdatedTimes, endTimeOrNow } from "../end-time";
 import { findReplayedRecord } from "../replay";
 
 export const feedingRouter = createTRPCRouter({
@@ -107,11 +108,17 @@ export const feedingRouter = createTRPCRouter({
         });
       }
 
+      const stored = await ctx.prisma.feedingRecord.findUnique({
+        where: { id: input.id },
+        select: { startTime: true },
+      });
+      if (!stored) throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
+
       const feeding = await ctx.prisma.feedingRecord
         .update({
           where: { id: input.id, endTime: null },
           data: {
-            endTime: input.endTime ?? new Date(),
+            endTime: endTimeOrNow(stored.startTime, input.endTime),
             side: input.side,
             leftDurationSeconds: input.leftDurationSeconds,
             rightDurationSeconds: input.rightDurationSeconds,
@@ -238,11 +245,18 @@ export const feedingRouter = createTRPCRouter({
         });
       }
 
+      const stored = await ctx.prisma.feedingRecord.findUnique({
+        where: { id: input.id },
+        select: { startTime: true, endTime: true },
+      });
+      if (!stored) throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
+      const endTime = assertUpdatedTimes(stored, input);
+
       const feeding = await ctx.prisma.feedingRecord.update({
         where: { id: input.id },
         data: {
           startTime: input.startTime,
-          endTime: input.endTime,
+          endTime,
           side: input.side,
           leftDurationSeconds: input.leftDurationSeconds,
           rightDurationSeconds: input.rightDurationSeconds,

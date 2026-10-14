@@ -12,6 +12,7 @@ import {
 import { getDateRange, calculateDurationMinutes } from "@baby-atlas/utils";
 import { createTRPCRouter, householdProcedure, recordProcedure } from "../trpc";
 import { rethrowIfAlreadyEnded } from "../errors";
+import { assertEndTime, assertUpdatedTimes, endTimeOrNow } from "../end-time";
 import { findReplayedRecord } from "../replay";
 
 export const pumpingRouter = createTRPCRouter({
@@ -72,11 +73,17 @@ export const pumpingRouter = createTRPCRouter({
         });
       }
 
+      const stored = await ctx.prisma.pumpingRecord.findUnique({
+        where: { id: input.id },
+        select: { startTime: true },
+      });
+      if (!stored) throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
+
       const pumping = await ctx.prisma.pumpingRecord
         .update({
           where: { id: input.id, endTime: null },
           data: {
-            endTime: input.endTime ?? new Date(),
+            endTime: endTimeOrNow(stored.startTime, input.endTime),
             amountMl: input.amountMl,
             notes: input.notes,
           },
@@ -100,7 +107,8 @@ export const pumpingRouter = createTRPCRouter({
         data: {
           childId: input.childId,
           startTime: input.startTime,
-          endTime: input.endTime,
+          // A manual log is a finished event. Only the start procedures leave a timer open.
+          endTime: assertEndTime(input.startTime, input.endTime) ?? input.startTime,
           amountMl: input.amountMl,
           side: input.side,
           notes: input.notes,
@@ -120,11 +128,18 @@ export const pumpingRouter = createTRPCRouter({
         });
       }
 
+      const stored = await ctx.prisma.pumpingRecord.findUnique({
+        where: { id: input.id },
+        select: { startTime: true, endTime: true },
+      });
+      if (!stored) throw new TRPCError({ code: "NOT_FOUND", message: "Not found" });
+      const endTime = assertUpdatedTimes(stored, input);
+
       const pumping = await ctx.prisma.pumpingRecord.update({
         where: { id: input.id },
         data: {
           startTime: input.startTime,
-          endTime: input.endTime,
+          endTime,
           amountMl: input.amountMl,
           side: input.side,
           notes: input.notes,

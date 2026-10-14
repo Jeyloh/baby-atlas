@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { prismaMock } from "../test/setup";
 import {
   createTestContext,
@@ -340,7 +340,14 @@ describe("timelineRouter", () => {
       expect(types).toContain("DIAPER");
     });
   });
+
   describe("getRunningTimers", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2024-01-16T00:00:00Z"));
+    });
+    afterEach(() => vi.useRealTimers());
+
     it("lists open records of every timer type, oldest first, with open-record filters", async () => {
       const caller = createCaller(createTestContext());
 
@@ -349,7 +356,6 @@ describe("timelineRouter", () => {
       ] as never);
       prismaMock.feedingRecord.findMany.mockResolvedValue([
         createTestFeedingRecord({ id: "feed1", endTime: null, feedingType: "BREAST", startTime: new Date("2024-01-15T08:00:00Z") }),
-        createTestFeedingRecord({ id: "feed2", endTime: null, feedingType: "BOTTLE", side: null, startTime: new Date("2024-01-15T09:00:00Z") }),
       ] as never);
       prismaMock.pumpingRecord.findMany.mockResolvedValue([
         { id: "pump1", startTime: new Date("2024-01-15T07:00:00Z"), side: null },
@@ -358,22 +364,30 @@ describe("timelineRouter", () => {
         { id: "act1", startTime: new Date("2024-01-15T10:00:00Z"), activityType: "TUMMY_TIME" },
       ] as never);
 
-      const result = await caller.getRunningTimers({ childId });
+      const { timers: result, memberRole } = await caller.getRunningTimers({ childId });
+      expect(memberRole).toBe("CAREGIVER");
 
       expect(result.map((t) => [t.kind, t.recordId])).toEqual([
         ["pumping", "pump1"],
         ["breast", "feed1"],
-        ["bottle", "feed2"],
         ["activity", "act1"],
         ["sleep", "sleep1"],
       ]);
       expect(result.find((t) => t.recordId === "sleep1")?.sleepType).toBe("NIGHT");
       expect(prismaMock.sleepRecord.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { childId, endTime: null } })
+        expect.objectContaining({
+          where: { childId, endTime: null, startTime: { gte: new Date("2024-01-13T00:00:00Z") } },
+        })
       );
+      // Bottles are logged without a timer and never count as running
       expect(prismaMock.feedingRecord.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { childId, endTime: null, feedingType: { in: ["BREAST", "BOTTLE"] } },
+          where: {
+            childId,
+            endTime: null,
+            startTime: { gte: new Date("2024-01-13T00:00:00Z") },
+            feedingType: "BREAST",
+          },
         })
       );
     });

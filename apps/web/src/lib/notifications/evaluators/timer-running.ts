@@ -93,7 +93,7 @@ function parseOverrides(value: unknown): TimerThresholdOverrides {
 }
 
 /**
- * Forgotten timers: sleep, breastfeeds, bottles, pumping and activities that
+ * Forgotten timers: sleep, breastfeeds, pumping and activities that
  * are still running past a threshold (see packages/utils timer-thresholds).
  * Only children in households where somebody has a push subscription are
  * read, and only timers that started in the last 72 hours.
@@ -126,8 +126,8 @@ export const evaluate: Evaluate = async ({ prisma, now }) => {
       select: { id: true, startTime: true, sleepType: true, child: { select: childSelect } },
     }),
     prisma.feedingRecord.findMany({
-      where: { ...base, feedingType: { in: ["BREAST", "BOTTLE"] } },
-      select: { id: true, startTime: true, feedingType: true, child: { select: childSelect } },
+      where: { ...base, feedingType: "BREAST" },
+      select: { id: true, startTime: true, child: { select: childSelect } },
     }),
     prisma.pumpingRecord.findMany({
       where: base,
@@ -153,7 +153,7 @@ export const evaluate: Evaluate = async ({ prisma, now }) => {
 
   const timers: OpenTimer[] = [
     ...sleep.map((r) => open("sleep", r, r.child, r.sleepType)),
-    ...feeding.map((r) => open(r.feedingType === "BOTTLE" ? "bottle" : "breast", r, r.child)),
+    ...feeding.map((r) => open("breast", r, r.child)),
     ...pumping.map((r) => open("pumping", r, r.child)),
     ...activity.map((r) => open("activity", r, r.child)),
   ];

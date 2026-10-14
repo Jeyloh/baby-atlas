@@ -7,7 +7,6 @@ export type TimerThresholdKey =
   | "nap"
   | "nightSleep"
   | "breastfeeding"
-  | "bottle"
   | "pumping"
   | "activity";
 
@@ -19,7 +18,6 @@ export const DEFAULT_TIMER_THRESHOLD_MINUTES: Record<TimerThresholdKey, number> 
   nap: 180,
   nightSleep: 780,
   breastfeeding: 60,
-  bottle: 30,
   pumping: 45,
   activity: 120,
 };
@@ -29,7 +27,6 @@ export const TYPICAL_TIMER_MINUTES: Record<TimerThresholdKey, number> = {
   nap: 60,
   nightSleep: 600,
   breastfeeding: 20,
-  bottle: 15,
   pumping: 20,
   activity: 30,
 };
@@ -39,7 +36,7 @@ export const MAX_TIMER_TIER = 2;
 
 export type TimerTier = 0 | 1 | 2;
 
-export type RunningTimerKind = "sleep" | "breast" | "bottle" | "pumping" | "activity";
+export type RunningTimerKind = "sleep" | "breast" | "pumping" | "activity";
 
 /** The threshold type of a running record. */
 export function timerThresholdKey(
@@ -51,8 +48,6 @@ export function timerThresholdKey(
       return sleepType === "NIGHT" ? "nightSleep" : "nap";
     case "breast":
       return "breastfeeding";
-    case "bottle":
-      return "bottle";
     case "pumping":
       return "pumping";
     case "activity":
@@ -100,11 +95,11 @@ export function endTimeProblem(startTime: Date, endTime: Date, now: Date): EndTi
   return null;
 }
 
-/** The table a running timer is stored in. Bottle and breast feeds are both "feeding". */
+/** The table a running timer is stored in. Breastfeeds are stored as "feeding". */
 export type TimerRecordType = "sleep" | "feeding" | "pumping" | "activity";
 
 export function timerRecordType(kind: RunningTimerKind): TimerRecordType {
-  return kind === "breast" || kind === "bottle" ? "feeding" : kind;
+  return kind === "breast" ? "feeding" : kind;
 }
 
 const RECORD_TYPES: readonly TimerRecordType[] = ["sleep", "feeding", "pumping", "activity"];

@@ -34,6 +34,19 @@ describe("breastSideDurations", () => {
     });
   });
 
+  it("never lets the stored side exceed the total when the end is corrected earlier", () => {
+    const record = { side: "RIGHT" as const, leftDurationSeconds: 1200, rightDurationSeconds: 0 };
+    expect(breastSideDurations(undefined, record, 900)).toEqual({
+      leftDurationSeconds: 900,
+      rightDurationSeconds: 0,
+    });
+    const mirrored = { side: "LEFT" as const, leftDurationSeconds: 0, rightDurationSeconds: 1200 };
+    expect(breastSideDurations(undefined, mirrored, 900)).toEqual({
+      leftDurationSeconds: 0,
+      rightDurationSeconds: 900,
+    });
+  });
+
   it("gives the whole duration to the running side when nothing is stored", () => {
     const record = { side: "LEFT" as const, leftDurationSeconds: null, rightDurationSeconds: null };
     expect(breastSideDurations(undefined, record, 1200)).toEqual({

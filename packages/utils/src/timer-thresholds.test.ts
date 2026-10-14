@@ -24,7 +24,6 @@ describe("timerThresholdKey", () => {
 
   it("maps the other kinds", () => {
     expect(timerThresholdKey("breast")).toBe("breastfeeding");
-    expect(timerThresholdKey("bottle")).toBe("bottle");
     expect(timerThresholdKey("pumping")).toBe("pumping");
     expect(timerThresholdKey("activity")).toBe("activity");
   });
@@ -39,7 +38,7 @@ describe("thresholdMinutes", () => {
 
   it("uses a valid override for that type only", () => {
     expect(thresholdMinutes("nap", { nap: 90 })).toBe(90);
-    expect(thresholdMinutes("bottle", { nap: 90 })).toBe(DEFAULT_TIMER_THRESHOLD_MINUTES.bottle);
+    expect(thresholdMinutes("pumping", { nap: 90 })).toBe(DEFAULT_TIMER_THRESHOLD_MINUTES.pumping);
   });
 
   it("ignores nonsense overrides", () => {
@@ -120,9 +119,8 @@ describe("fixTimer param", () => {
     expect(parseFixTimerParam("sleep:../x")).toBeNull();
   });
 
-  it("stores breast and bottle feeds as feeding", () => {
+  it("stores breastfeeds as feeding", () => {
     expect(timerRecordType("breast")).toBe("feeding");
-    expect(timerRecordType("bottle")).toBe("feeding");
     expect(timerRecordType("sleep")).toBe("sleep");
     expect(timerRecordType("activity")).toBe("activity");
   });

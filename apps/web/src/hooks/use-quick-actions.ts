@@ -54,11 +54,12 @@ export function breastSideDurations(
     };
   }
   if (record?.side === "LEFT") {
-    const right = record.rightDurationSeconds ?? 0;
+    // The stored side can exceed the total when the end time is corrected to before it
+    const right = Math.min(record.rightDurationSeconds ?? 0, totalSeconds);
     return { leftDurationSeconds: Math.max(0, totalSeconds - right), rightDurationSeconds: right };
   }
   if (record?.side === "RIGHT") {
-    const left = record.leftDurationSeconds ?? 0;
+    const left = Math.min(record.leftDurationSeconds ?? 0, totalSeconds);
     return { leftDurationSeconds: left, rightDurationSeconds: Math.max(0, totalSeconds - left) };
   }
   return {};

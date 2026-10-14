@@ -4,7 +4,6 @@ import type { RunningTimer } from "@/hooks/use-running-timers";
 
 const mocks = vi.hoisted(() => ({
   userId: "user1" as string | undefined,
-  updateFeeding: vi.fn(),
   endActivity: vi.fn(),
   invalidate: vi.fn(async () => undefined),
 }));
@@ -16,13 +15,13 @@ vi.mock("@/lib/trpc/provider", () => ({
       feeding: { invalidate: mocks.invalidate },
       activity: { invalidate: mocks.invalidate },
     }),
-    feeding: { update: { useMutation: () => ({ mutateAsync: mocks.updateFeeding }) } },
     activity: { end: { useMutation: () => ({ mutateAsync: mocks.endActivity }) } },
   },
 }));
 vi.mock("@/hooks/use-last-activities", () => ({ useUserId: () => mocks.userId }));
 
-import { useFixTimer, FixTimerUnavailableError } from "./use-fix-timer";
+import { TRPCClientError } from "@trpc/client";
+import { useFixTimer, FixTimerUnavailableError, TimerAlreadyEndedError } from "./use-fix-timer";
 import { useOutbox } from "@/lib/offline/outbox";
 import { useTimerStore } from "@/stores/timer-store";
 
@@ -99,16 +98,34 @@ describe("useFixTimer", () => {
     });
   });
 
-  it("uses the mutations for bottle feeds and activities, then refreshes queries", async () => {
+  it("uses the mutation for activities, then refreshes queries", async () => {
     const { result } = renderHook(() => useFixTimer("child1"));
-
-    await act(() => result.current(timer({ kind: "bottle" }), END));
-    expect(mocks.updateFeeding).toHaveBeenCalledWith({ id: "rec1", endTime: END });
 
     await act(() => result.current(timer({ kind: "activity" }), END));
     expect(mocks.endActivity).toHaveBeenCalledWith({ id: "rec1", endTime: END });
 
     expect(useOutbox.getState().entries).toEqual([]);
+    expect(mocks.invalidate).toHaveBeenCalled();
+  });
+
+  it("treats a CONFLICT on an activity as already ended: clears it locally and refreshes", async () => {
+    const conflict = new TRPCClientError("conflict", {
+      result: { error: { data: { code: "CONFLICT", httpStatus: 409 } } } as never,
+    });
+    Object.assign(conflict, { data: { code: "CONFLICT", httpStatus: 409 } });
+    mocks.endActivity.mockRejectedValueOnce(conflict);
+    const localId = useTimerStore.getState().startTimer({
+      type: "activity",
+      childId: "child1",
+      recordId: "rec1",
+      startTime: START.getTime(),
+    });
+    const { result } = renderHook(() => useFixTimer("child1"));
+
+    await expect(act(() => result.current(timer({ kind: "activity" }), END))).rejects.toBeInstanceOf(
+      TimerAlreadyEndedError
+    );
+    expect(useTimerStore.getState().timers[localId]).toBeUndefined();
     expect(mocks.invalidate).toHaveBeenCalled();
   });
 
