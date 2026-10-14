@@ -6,15 +6,15 @@ import {
 import type { Candidate, Evaluate } from "../types";
 
 const HOUR_MS = 60 * 60 * 1000;
-/** Only remind this long after the allowed time, so stale reminders are never sent. */
-export const REMINDER_WINDOW_MS = 2 * HOUR_MS;
+/** A reminder held back (quiet hours) is still sent this long after the allowed time. */
+export const REMINDER_WINDOW_MS = 12 * HOUR_MS;
 /** Longest interval setting (48 h) plus the reminder window, for the dose lookup. */
 const LOOKBACK_MS = 48 * HOUR_MS + REMINDER_WINDOW_MS;
 
 /**
  * Tells caregivers when the time the parent set as the earliest next dose has
  * passed. Only for medicines with the reminder switched on, never when the
- * 24-hour limit is already reached, and only within two hours of that time.
+ * 24-hour limit is already reached, and only within 12 hours of that time.
  * One notice per last dose record. Factual: no advice about dosing.
  */
 export const evaluate: Evaluate = async ({ prisma, now }) => {
@@ -62,11 +62,11 @@ export const evaluate: Evaluate = async ({ prisma, now }) => {
       { minIntervalHours: medicine.minIntervalHours, maxDosesPer24h: medicine.maxDosesPer24h },
       now
     );
-    if (!status.lastDose || !status.nextByInterval) continue;
+    if (!status.lastDose || !status.nextAllowedAt) continue;
     // The 24-hour limit still holds the next dose back
     if (status.maxReached) continue;
 
-    const allowedMs = status.nextByInterval.getTime();
+    const allowedMs = status.nextAllowedAt.getTime();
     if (allowedMs > now.getTime() || now.getTime() - allowedMs > REMINDER_WINDOW_MS) continue;
 
     candidates.push({
@@ -80,7 +80,7 @@ export const evaluate: Evaluate = async ({ prisma, now }) => {
       params: {
         medicine: medicine.name,
         child: medicine.child.name,
-        time: formatMinutesOfDay(osloMinutesOfDay(status.nextByInterval)),
+        time: formatMinutesOfDay(osloMinutesOfDay(status.nextAllowedAt)),
       },
     });
   }

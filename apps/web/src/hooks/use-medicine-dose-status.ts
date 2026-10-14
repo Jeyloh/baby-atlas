@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { medicineDoseStatus, type MedicineDoseStatus } from "@baby-atlas/utils";
+import {
+  medicineDoseStatus,
+  type MedicineDoseRecord,
+  type MedicineDoseStatus,
+} from "@baby-atlas/utils";
 import { trpc } from "@/lib/trpc/provider";
+import { sharedFreshness } from "@/lib/shared-freshness";
 
 export interface MedicineWithStatus {
   id: string;
@@ -11,6 +16,7 @@ export interface MedicineWithStatus {
   minIntervalHours: number | null;
   maxDosesPer24h: number | null;
   remindNextDose: boolean;
+  records: MedicineDoseRecord[];
   status: MedicineDoseStatus;
 }
 
@@ -26,14 +32,13 @@ function useNow(intervalMs = 60_000): Date {
 
 /**
  * Active medicines for a child with their dose status against the limits the
- * parent has set. `at` is when a dose would be given (default: now).
+ * parent has set, as of now.
  */
-export function useMedicineDoseStatus(childId: string, at?: Date | null) {
+export function useMedicineDoseStatus(childId: string) {
   const now = useNow();
-  const query = trpc.medicine.doseStatus.useQuery({ childId });
+  const query = trpc.medicine.doseStatus.useQuery({ childId }, sharedFreshness);
 
   const medicines = useMemo<MedicineWithStatus[]>(() => {
-    const reference = at ?? now;
     return (query.data ?? []).map((m) => ({
       id: m.id,
       name: m.name,
@@ -41,9 +46,10 @@ export function useMedicineDoseStatus(childId: string, at?: Date | null) {
       minIntervalHours: m.minIntervalHours,
       maxDosesPer24h: m.maxDosesPer24h,
       remindNextDose: m.remindNextDose,
-      status: medicineDoseStatus(m.records, m, reference),
+      records: m.records,
+      status: medicineDoseStatus(m.records, m, now),
     }));
-  }, [query.data, now, at]);
+  }, [query.data, now]);
 
   return { medicines, now, isLoading: query.isLoading };
 }

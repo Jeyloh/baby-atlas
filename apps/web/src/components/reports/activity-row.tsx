@@ -299,6 +299,7 @@ export function ActivityRow({ activity, childId, childName: childNameProp, autoO
   const deleteMedicine = trpc.medicine.deleteRecord.useMutation({
     onSuccess: () => {
       utils.medicine.list.invalidate();
+      utils.medicine.doseStatus.invalidate();
       utils.timeline.getList.invalidate({ childId });
       utils.timeline.getDay.invalidate({ childId });
       utils.timeline.getWeek.invalidate({ childId });

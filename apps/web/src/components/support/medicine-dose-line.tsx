@@ -5,6 +5,12 @@ import { isToday } from "date-fns";
 import type { MedicineDoseStatus } from "@baby-atlas/utils";
 import { useFormatters } from "@/lib/format";
 
+/** Time of day for today, date and time otherwise. */
+export function useDoseClock() {
+  const f = useFormatters();
+  return (date: Date) => (isToday(date) ? f.time(date) : f.dateTime(date));
+}
+
 interface MedicineDoseLineProps {
   status: MedicineDoseStatus;
   maxDosesPer24h: number | null;
@@ -17,11 +23,10 @@ interface MedicineDoseLineProps {
  */
 export function MedicineDoseLines({ status, maxDosesPer24h, now }: MedicineDoseLineProps) {
   const t = useTranslations("support.medicineStatus");
-  const f = useFormatters();
+  const clock = useDoseClock();
 
   if (!status.lastDose) return null;
 
-  const clock = (date: Date) => (isToday(date) ? f.time(date) : f.dateTime(date));
   const waiting = status.nextAllowedAt !== null && status.nextAllowedAt > now;
 
   let next: string | null = null;

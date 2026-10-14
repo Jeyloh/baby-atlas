@@ -128,6 +128,46 @@ describe("medicineRouter", () => {
     });
   });
 
+  describe("viewer role", () => {
+    beforeEach(() => {
+      prismaMock.householdMember.findUnique.mockResolvedValue(
+        createTestMembership({ role: "VIEWER" }) as never
+      );
+      prismaMock.medicine.findUnique.mockResolvedValue(createTestMedicine() as never);
+      prismaMock.medicineRecord.findUnique.mockResolvedValue({
+        medicine: { childId: TEST_IDS.childId },
+      } as never);
+    });
+
+    it("cannot update, delete or log doses", async () => {
+      const caller = createCaller(createTestContext());
+
+      await expect(
+        caller.update({ id: medicineId, remindNextDose: true })
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(caller.delete({ id: medicineId })).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(caller.logRecord({ medicineId })).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(
+        caller.updateRecord({ id: recordId, skipped: true })
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(caller.deleteRecord({ id: recordId })).rejects.toMatchObject({
+        code: "FORBIDDEN",
+      });
+
+      expect(prismaMock.medicine.update).not.toHaveBeenCalled();
+      expect(prismaMock.medicine.delete).not.toHaveBeenCalled();
+      expect(prismaMock.medicineRecord.create).not.toHaveBeenCalled();
+      expect(prismaMock.medicineRecord.update).not.toHaveBeenCalled();
+      expect(prismaMock.medicineRecord.delete).not.toHaveBeenCalled();
+    });
+
+    it("can read dose status", async () => {
+      prismaMock.medicine.findMany.mockResolvedValue([] as never);
+      const caller = createCaller(createTestContext());
+      await expect(caller.doseStatus({ childId })).resolves.toEqual([]);
+    });
+  });
+
   describe("dose limits", () => {
     it("saves interval, max doses and reminder on create", async () => {
       const caller = createCaller(createTestContext());

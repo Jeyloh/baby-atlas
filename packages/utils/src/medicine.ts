@@ -77,3 +77,80 @@ export function medicineDoseStatus(
 
   return { lastDose, dosesLast24h, nextByInterval, nextByMax, nextAllowedAt, tooSoon, maxReached };
 }
+
+export interface MedicineDoseCheck {
+  /** Nearest given dose at or before `at` */
+  previousDose: { id: string; time: Date } | null;
+  /** Nearest given dose after `at` (only when a dose is back-dated) */
+  laterDose: { id: string; time: Date } | null;
+  /** The previous dose is closer than the interval setting */
+  tooSoonAfterPrevious: boolean;
+  /** Earliest time the interval setting allows after the previous dose */
+  allowedFrom: Date | null;
+  /** The later dose is closer than the interval setting */
+  tooCloseToLater: boolean;
+  /** The most doses already given in any 24 h window that includes `at` */
+  maxInWindow: number;
+  /** Adding a dose at `at` would put some 24 h window over the limit */
+  overMax: boolean;
+  /** Any of the above: worth asking before saving */
+  needsConfirm: boolean;
+}
+
+/**
+ * Checks a dose about to be saved at `at` (possibly back-dated) against the
+ * doses on both sides of it: the interval to the nearest dose before and after,
+ * and the limit in every rolling 24 h window that contains `at`.
+ */
+export function medicineDoseCheck(
+  records: MedicineDoseRecord[],
+  settings: MedicineDoseSettings,
+  at: Date
+): MedicineDoseCheck {
+  const atMs = at.getTime();
+  const given = records
+    .filter((r) => !r.skipped)
+    .sort((a, b) => a.time.getTime() - b.time.getTime());
+
+  const before = given.filter((r) => r.time.getTime() <= atMs);
+  const after = given.filter((r) => r.time.getTime() > atMs);
+  const prev = before[before.length - 1];
+  const later = after[0];
+
+  const { minIntervalHours, maxDosesPer24h } = settings;
+  const intervalMs =
+    minIntervalHours != null && minIntervalHours > 0 ? minIntervalHours * HOUR_MS : null;
+
+  const allowedFrom =
+    prev && intervalMs !== null ? new Date(prev.time.getTime() + intervalMs) : null;
+  const tooSoonAfterPrevious = allowedFrom !== null && atMs < allowedFrom.getTime();
+  const tooCloseToLater =
+    later !== undefined && intervalMs !== null && later.time.getTime() - atMs < intervalMs;
+
+  // Windows [start, start + 24 h) that contain `at` start at `at` or at an
+  // existing dose less than 24 h before it. The fullest one decides.
+  const starts = [
+    atMs,
+    ...given.map((r) => r.time.getTime()).filter((t) => t <= atMs && t > atMs - WINDOW_MS),
+  ];
+  let maxInWindow = 0;
+  for (const start of starts) {
+    const count = given.filter((r) => {
+      const t = r.time.getTime();
+      return t >= start && t < start + WINDOW_MS;
+    }).length;
+    if (count > maxInWindow) maxInWindow = count;
+  }
+  const overMax = maxDosesPer24h != null && maxInWindow >= maxDosesPer24h;
+
+  return {
+    previousDose: prev ? { id: prev.id, time: prev.time } : null,
+    laterDose: later ? { id: later.id, time: later.time } : null,
+    tooSoonAfterPrevious,
+    allowedFrom,
+    tooCloseToLater,
+    maxInWindow,
+    overMax,
+    needsConfirm: tooSoonAfterPrevious || tooCloseToLater || overMax,
+  };
+}

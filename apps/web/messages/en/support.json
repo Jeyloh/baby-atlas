@@ -64,8 +64,8 @@
     "lastDose": "Last dose {time}",
     "dosesOfMax": "{count} of {max} doses in the last 24 hours",
     "doses": "{count, plural, one {# dose} other {# doses}} in the last 24 hours",
-    "nextFrom": "The next dose can be given from {time}, according to your setting",
+    "nextFrom": "According to your settings, the next dose can be given from {time}.",
     "intervalPassed": "The time you set between doses has passed",
-    "maxReached": "The limit you set is reached. The next dose can be given from {time}, according to your setting"
+    "maxReached": "The limit you set is reached. According to your settings, the next dose can be given from {time}."
   }
 }

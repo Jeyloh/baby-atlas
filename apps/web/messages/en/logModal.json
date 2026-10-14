@@ -94,11 +94,11 @@
     "limits": {
       "title": "Dose settings (optional)",
       "hint": "You decide. The app lets you know if you log a dose before the time you set, or over the limit you set.",
-      "minInterval": "At the earliest every (hours)",
+      "minInterval": "Minimum hours between doses",
       "minIntervalPlaceholder": "for example 6",
-      "maxDoses": "Most doses in 24 hours",
+      "maxDoses": "Maximum doses per 24 hours",
       "maxDosesPlaceholder": "for example 4",
-      "remind": "Notify me when the next dose can be given",
+      "remind": "Notify me when the time I set between doses has passed",
       "remindNeedsInterval": "Needs an interval to be set.",
       "invalidInterval": "The interval must be between 0.5 and 48 hours.",
       "invalidMax": "The number of doses must be a whole number between 1 and 24.",
@@ -109,8 +109,9 @@
     "confirm": {
       "title": "Log the dose anyway?",
       "lastDose": "The previous dose was given at {time}.",
-      "tooSoon": "Your settings say the next dose is at the earliest {time}.",
-      "maxReached": "You have logged {count} doses in the last 24 hours, and the limit you set is {max}.",
+      "tooSoon": "According to your settings, the next dose can be given from {time}.",
+      "tooCloseToLater": "A dose is already logged at {time}, closer than the time you set between doses.",
+      "maxReached": "You have already logged {count} doses within 24 hours, and the limit you set is {max}.",
       "action": "Log anyway",
       "cancel": "Cancel"
     }

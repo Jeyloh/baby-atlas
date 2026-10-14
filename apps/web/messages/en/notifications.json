@@ -2,7 +2,7 @@
   "push": {
     "medicineNextDose": {
       "title": "{medicine} for {child}",
-      "body": "The next dose can be given from {time}, according to your setting."
+      "body": "According to your settings, the next dose can be given from {time}."
     },
     "test": {
       "title": "Test notification from Baby Atlas",
@@ -61,7 +61,7 @@
       },
       "MEDICINE_NEXT_DOSE": {
         "label": "Medicine",
-        "description": "When the earliest next dose time you have set is reached."
+        "description": "When the time you set between doses has passed. The notice waits until quiet hours are over."
       },
       "FEED_DUE": {
         "label": "Feed coming up",

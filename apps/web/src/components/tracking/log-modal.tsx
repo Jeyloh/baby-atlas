@@ -51,7 +51,8 @@ import {
   parseLimits,
   type MedicineLimitsValues,
 } from "@/components/tracking/medicine-limits-fields";
-import { MedicineDoseLines } from "@/components/support/medicine-dose-line";
+import { MedicineDoseLines, useDoseClock } from "@/components/support/medicine-dose-line";
+import { medicineDoseCheck } from "@baby-atlas/utils";
 import { useMedicineDoseStatus } from "@/hooks/use-medicine-dose-status";
 
 type LogType = "sleep" | "breast" | "bottle" | "diaper" | "solids" | "pumping" | "medicine" | "growth" | "temperature" | "activity";
@@ -1258,7 +1259,6 @@ const MEDICINE_UNITS: MedicineUnit[] = ["ml", "drops", "tsp"];
 
 function MedicineModal({ childId, onClose }: { childId: string; onClose: () => void }) {
   const t = useTranslations("logModal");
-  const f = useFormatters();
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
@@ -1279,7 +1279,8 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
     childId,
     activeOnly: true,
   });
-  const { medicines: doseStatuses, now } = useMedicineDoseStatus(childId, startTime);
+  const { medicines: doseStatuses, now } = useMedicineDoseStatus(childId);
+  const clock = useDoseClock();
 
   const createMedicine = trpc.medicine.create.useMutation({
     onSuccess: (result) => {
@@ -1333,7 +1334,7 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
   // Logging too soon or over the limit is allowed, but asks first
   const handleSave = () => {
     if (!selectedMedicineId || !startTime) return;
-    if (selectedStatus && (selectedStatus.status.tooSoon || selectedStatus.status.maxReached)) {
+    if (doseCheck?.needsConfirm) {
       setConfirmOpen(true);
       return;
     }
@@ -1356,6 +1357,9 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
 
   const selectedMedicine = medicines?.find((m: { id: string }) => m.id === selectedMedicineId);
   const selectedStatus = doseStatuses.find((m) => m.id === selectedMedicineId);
+  // Checked against the time the dose is logged for, on both sides of it
+  const doseCheck =
+    selectedStatus && startTime ? medicineDoseCheck(selectedStatus.records, selectedStatus, startTime) : null;
   const isLoading =
     createMedicine.isPending || logMedicineRecord.isPending || updateMedicine.isPending;
 
@@ -1533,26 +1537,21 @@ function MedicineModal({ childId, onClose }: { childId: string; onClose: () => v
           <DialogHeader>
             <DialogTitle>{t("medicine.confirm.title")}</DialogTitle>
           </DialogHeader>
-          {selectedStatus && (
+          {selectedStatus && doseCheck && (
             <div className="space-y-2 text-sm">
-              {selectedStatus.status.lastDose && (
-                <p>
-                  {t("medicine.confirm.lastDose", {
-                    time: f.time(selectedStatus.status.lastDose.time),
-                  })}
-                </p>
+              {doseCheck.previousDose && (
+                <p>{t("medicine.confirm.lastDose", { time: clock(doseCheck.previousDose.time) })}</p>
               )}
-              {selectedStatus.status.tooSoon && selectedStatus.status.nextByInterval && (
-                <p>
-                  {t("medicine.confirm.tooSoon", {
-                    time: f.time(selectedStatus.status.nextByInterval),
-                  })}
-                </p>
+              {doseCheck.tooSoonAfterPrevious && doseCheck.allowedFrom && (
+                <p>{t("medicine.confirm.tooSoon", { time: clock(doseCheck.allowedFrom) })}</p>
               )}
-              {selectedStatus.status.maxReached && selectedStatus.maxDosesPer24h && (
+              {doseCheck.tooCloseToLater && doseCheck.laterDose && (
+                <p>{t("medicine.confirm.tooCloseToLater", { time: clock(doseCheck.laterDose.time) })}</p>
+              )}
+              {doseCheck.overMax && selectedStatus.maxDosesPer24h && (
                 <p>
                   {t("medicine.confirm.maxReached", {
-                    count: selectedStatus.status.dosesLast24h,
+                    count: doseCheck.maxInWindow,
                     max: selectedStatus.maxDosesPer24h,
                   })}
                 </p>
