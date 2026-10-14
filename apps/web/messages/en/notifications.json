@@ -1,5 +1,9 @@
 {
   "push": {
+    "medicineNextDose": {
+      "title": "{medicine} for {child}",
+      "body": "The next dose can be given from {time}, according to your setting."
+    },
     "test": {
       "title": "Test notification from Baby Atlas",
       "body": "Notifications work on this device."

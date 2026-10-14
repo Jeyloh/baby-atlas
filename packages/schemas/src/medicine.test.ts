@@ -14,6 +14,42 @@ const validChildId = "cljk2j3k40000a1b2c3d4e5f6";
 const validMedicineId = "cljk2j3k40001a1b2c3d4e5f7";
 const validRecordId = "cljk2j3k40002a1b2c3d4e5f8";
 
+describe("medicine dose limits", () => {
+  const base = { childId: validChildId, name: "Paracet", dosage: "5 ml" };
+
+  it("accepts limits at the edges of the range", () => {
+    expect(
+      createMedicineSchema.parse({ ...base, minIntervalHours: 0.5, maxDosesPer24h: 1 })
+    ).toMatchObject({ minIntervalHours: 0.5, maxDosesPer24h: 1 });
+    expect(
+      createMedicineSchema.parse({
+        ...base,
+        minIntervalHours: 48,
+        maxDosesPer24h: 24,
+        remindNextDose: true,
+      })
+    ).toMatchObject({ minIntervalHours: 48, maxDosesPer24h: 24, remindNextDose: true });
+  });
+
+  it("rejects limits outside the range", () => {
+    expect(() => createMedicineSchema.parse({ ...base, minIntervalHours: 0.49 })).toThrow();
+    expect(() => createMedicineSchema.parse({ ...base, minIntervalHours: 48.5 })).toThrow();
+    expect(() => createMedicineSchema.parse({ ...base, maxDosesPer24h: 0 })).toThrow();
+    expect(() => createMedicineSchema.parse({ ...base, maxDosesPer24h: 25 })).toThrow();
+    expect(() => createMedicineSchema.parse({ ...base, maxDosesPer24h: 1.5 })).toThrow();
+  });
+
+  it("allows null to clear a limit on update", () => {
+    const result = updateMedicineSchema.parse({
+      id: validMedicineId,
+      minIntervalHours: null,
+      maxDosesPer24h: null,
+    });
+    expect(result.minIntervalHours).toBeNull();
+    expect(result.maxDosesPer24h).toBeNull();
+  });
+});
+
 describe("createMedicineSchema", () => {
   it("requires childId, name, and dosage", () => {
     expect(() =>

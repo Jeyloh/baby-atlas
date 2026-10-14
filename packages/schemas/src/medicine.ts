@@ -1,12 +1,18 @@
 import { z } from "zod";
 import { idSchema, dateRangeSchema } from "./common";
 
+export const minIntervalHoursSchema = z.number().min(0.5).max(48);
+export const maxDosesPer24hSchema = z.number().int().min(1).max(24);
+
 export const createMedicineSchema = z.object({
   childId: idSchema,
   name: z.string().min(1).max(100),
   dosage: z.string().min(1).max(100),
   frequency: z.string().max(100).optional(),
   notes: z.string().max(500).optional(),
+  minIntervalHours: minIntervalHoursSchema.optional().nullable(),
+  maxDosesPer24h: maxDosesPer24hSchema.optional().nullable(),
+  remindNextDose: z.boolean().optional(),
 });
 export type CreateMedicineInput = z.infer<typeof createMedicineSchema>;
 
@@ -17,6 +23,9 @@ export const updateMedicineSchema = z.object({
   frequency: z.string().max(100).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   isActive: z.boolean().optional(),
+  minIntervalHours: minIntervalHoursSchema.optional().nullable(),
+  maxDosesPer24h: maxDosesPer24hSchema.optional().nullable(),
+  remindNextDose: z.boolean().optional(),
 });
 export type UpdateMedicineInput = z.infer<typeof updateMedicineSchema>;
 

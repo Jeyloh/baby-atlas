@@ -1,1 +1,11 @@
-{}
+{
+  "medicineStatus": {
+    "title": "Medisin siste døgn",
+    "lastDose": "Siste dose {time}",
+    "dosesOfMax": "{count} av {max} doser siste 24 timer",
+    "doses": "{count, plural, one {# dose} other {# doser}} siste 24 timer",
+    "nextFrom": "Neste dose kan gis fra {time} ifølge innstillingen din",
+    "intervalPassed": "Tiden du har satt mellom doser har gått",
+    "maxReached": "Grensen du har satt er nådd. Neste dose kan gis fra {time} ifølge innstillingen din"
+  }
+}
