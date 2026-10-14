@@ -2,63 +2,74 @@ import { addDaysToKey, digestWeekToSend, isoWeekLabel, osloStartOfDay } from "@b
 import type { Candidate, Evaluate } from "../types";
 
 /**
- * "Your week is ready": Sunday from 18:00 Oslo, and Monday until 12:00 as a
- * catch-up. One notice per child per ISO week (the dispatcher logs
- * `(userId, dedupeKey)`), and only when that week has at least some records.
- * Quiet hours are handled by the dispatcher: a Sunday notice held back by
- * quiet hours goes out on Monday morning if it is still inside the window.
+ * "Last week is ready": Monday from 08:00 to 20:00 Oslo, for the Monday to
+ * Sunday week that just ended. One notice per child per ISO week (the
+ * dispatcher logs `(userId, dedupeKey)`), and only when that week has at least
+ * some records. A notice held back by quiet hours goes out later the same day.
  */
 export const evaluate: Evaluate = async ({ prisma, now }) => {
   const weekStart = digestWeekToSend(now);
   if (!weekStart) return [];
+  const label = isoWeekLabel(weekStart);
 
   // Only children someone could be notified about: a non-viewer member with a push subscription
+  const recipientFilter = { role: { not: "VIEWER" as const }, user: { pushSubscriptions: { some: {} } } };
   const children = await prisma.child.findMany({
-    where: {
-      household: {
-        members: {
-          some: { role: { not: "VIEWER" }, user: { pushSubscriptions: { some: {} } } },
-        },
-      },
+    where: { household: { members: { some: recipientFilter } } },
+    select: {
+      id: true,
+      name: true,
+      household: { select: { members: { where: recipientFilter, select: { userId: true } } } },
     },
-    select: { id: true, name: true },
   });
   if (children.length === 0) return [];
 
-  const ids = children.map((c) => c.id);
+  // Skip children whose digest already went to everyone who could get it
+  const logs = await prisma.notificationLog.findMany({
+    where: { dedupeKey: { in: children.map((c) => `digest:${c.id}:${label}`) } },
+    select: { userId: true, dedupeKey: true },
+  });
+  const sentTo = new Map<string, Set<string>>();
+  for (const log of logs) {
+    const users = sentTo.get(log.dedupeKey) ?? new Set<string>();
+    users.add(log.userId);
+    sentTo.set(log.dedupeKey, users);
+  }
+  const pending = children.filter((child) => {
+    const sent = sentTo.get(`digest:${child.id}:${label}`);
+    return !child.household.members.every((m) => sent?.has(m.userId));
+  });
+  if (pending.length === 0) return [];
+
+  const ids = pending.map((c) => c.id);
   const from = osloStartOfDay(weekStart);
   const to = osloStartOfDay(addDaysToKey(weekStart, 7));
   const within = { gte: from, lt: to };
 
-  // One bounded query per record type, one row per child that has any
+  // One grouped query per record type: one row per child that has any
   const [sleep, feedings, diapers, pumping] = await Promise.all([
-    prisma.sleepRecord.findMany({
+    prisma.sleepRecord.groupBy({
+      by: ["childId"],
       where: { childId: { in: ids }, startTime: within },
-      distinct: ["childId"],
-      select: { childId: true },
     }),
-    prisma.feedingRecord.findMany({
+    prisma.feedingRecord.groupBy({
+      by: ["childId"],
       where: { childId: { in: ids }, startTime: within },
-      distinct: ["childId"],
-      select: { childId: true },
     }),
-    prisma.diaperRecord.findMany({
+    prisma.diaperRecord.groupBy({
+      by: ["childId"],
       where: { childId: { in: ids }, time: within },
-      distinct: ["childId"],
-      select: { childId: true },
     }),
-    prisma.pumpingRecord.findMany({
+    prisma.pumpingRecord.groupBy({
+      by: ["childId"],
       where: { childId: { in: ids }, startTime: within },
-      distinct: ["childId"],
-      select: { childId: true },
     }),
   ]);
   const withRecords = new Set(
     [...sleep, ...feedings, ...diapers, ...pumping].map((r) => r.childId)
   );
 
-  const label = isoWeekLabel(weekStart);
-  return children
+  return pending
     .filter((child) => withRecords.has(child.id))
     .map(
       (child): Candidate => ({

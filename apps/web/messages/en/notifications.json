@@ -19,8 +19,8 @@
       "body": "{text}"
     },
     "weeklyDigest": {
-      "title": "Week {week} for {name} is ready",
-      "body": "See how sleep, feeding and diapers went this week compared with the week before."
+      "title": "Weekly summary for {name}",
+      "body": "See how last week (week {week}) went: sleep, feeding and diapers compared with the week before."
     }
   },
   "settings": {

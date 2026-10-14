@@ -1,6 +1,8 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { ActiveTimers } from "@/components/tracking/active-timers";
@@ -47,15 +49,19 @@ export default function LogPage({
   const tCommon = useTranslations("common");
   const { data: child, isLoading } = trpc.child.get.useQuery({ id: childId });
 
+  const router = useRouter();
   const [modalType, setModalType] = useState<LogType | null>(null);
 
   // App shortcuts open this page as /log?type=sleep to land straight in a form
   useEffect(() => {
     const requested = new URLSearchParams(window.location.search).get("type");
-    if (requested && (LOG_TYPES as readonly string[]).includes(requested)) {
+    if (requested === null) return;
+    if ((LOG_TYPES as readonly string[]).includes(requested)) {
       setModalType(requested as LogType);
     }
-  }, []);
+    // Drop the parameter, so a reload or going back does not reopen the form
+    router.replace(`/dashboard/${childId}/log` as Route);
+  }, [childId, router]);
 
   if (isLoading) {
     return (

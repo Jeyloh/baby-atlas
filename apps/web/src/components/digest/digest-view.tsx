@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { useTranslations } from "next-intl";
+import { keepPreviousData } from "@tanstack/react-query";
 import { addDaysToKey } from "@baby-atlas/utils";
 import {
   ArrowDown,
@@ -69,10 +70,11 @@ function weekHref(childId: string, weekStart: string): Route {
 export function DigestView({ childId, week }: { childId: string; week?: string }) {
   const t = useTranslations("digest");
   const f = useFormatters();
-  const { data, isLoading, isError, refetch } = trpc.digest.week.useQuery({
-    childId,
-    weekStart: week,
-  });
+  // Keep showing the last week while the next one loads, so the page does not jump
+  const { data, isLoading, isError, refetch } = trpc.digest.week.useQuery(
+    { childId, weekStart: week },
+    { placeholderData: keepPreviousData }
+  );
 
   if (isLoading) {
     return (

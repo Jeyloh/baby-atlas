@@ -36,10 +36,10 @@
   },
   "averages": {
     "title": "Average per day",
-    "hint": "Based on the days that were logged. Days without logs are not counted.",
+    "hint": "Based on the days that were logged. Days without logs are not counted, and neither is today.",
     "sleepTotal": "Total sleep",
     "sleepNight": "Night sleep",
-    "sleepNaps": "Naps",
+    "sleepNaps": "Daytime naps",
     "napsCount": "{count} naps per day",
     "feeds": "Feeds",
     "bottle": "Bottle",
@@ -55,13 +55,15 @@
     "given": "{count, plural, =0 {No doses given} one {# dose given} other {# doses given}}",
     "skipped": "{count, plural, one {# skipped} other {# skipped}}",
     "regular": "Regular dose: {dosage}",
+    "firstLast": "First: {first}. Last: {last}.",
     "inactive": "Not in use now"
   },
   "temperatures": {
     "title": "Temperature",
     "highest": "Highest: {value} ({date} at {time})",
     "count": "{count, plural, one {# reading} other {# readings}}",
-    "reading": "{date} at {time}: {value}"
+    "reading": "{date} at {time}: {value}",
+    "latestOnly": "showing the {shown} latest"
   },
   "vaccines": {
     "title": "Vaccines",

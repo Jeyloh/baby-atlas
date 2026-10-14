@@ -12,6 +12,11 @@ import { digestRouter, growthChange, summarizePeriod } from "./digest";
 
 const createCaller = createCallerFactory(digestRouter);
 
+// groupBy has a generic signature that the mock typing cannot follow
+const medicineGroupBy = prismaMock.medicineRecord.groupBy as unknown as {
+  mockResolvedValue: (value: unknown) => void;
+};
+
 const WEEK = [
   "2026-10-12",
   "2026-10-13",
@@ -179,6 +184,10 @@ describe("digestRouter", () => {
     prismaMock.journalEntry.findMany.mockResolvedValue([]);
     prismaMock.medicine.findMany.mockResolvedValue([]);
     prismaMock.temperatureRecord.findMany.mockResolvedValue([]);
+    prismaMock.temperatureRecord.count.mockResolvedValue(0);
+    prismaMock.temperatureRecord.findFirst.mockResolvedValue(null);
+    medicineGroupBy.mockResolvedValue([]);
+    prismaMock.medicineRecord.findMany.mockResolvedValue([]);
     prismaMock.vaccinationRecord.findMany.mockResolvedValue([]);
     prismaMock.checkupRecord.findFirst.mockResolvedValue(null);
   });
@@ -231,6 +240,29 @@ describe("digestRouter", () => {
         gte: new Date("2026-09-27T22:00:00.000Z"),
         lt: new Date("2026-10-11T22:00:00.000Z"),
       });
+    });
+
+    it("clamps a future week to the week that is running now", async () => {
+      const caller = createCaller(createTestContext());
+      const result = await caller.week({ childId, weekStart: "2027-03-01" });
+
+      expect(result.weekStart).toBe("2026-10-12");
+      expect(result.weekStart).toBe(result.currentWeekStart);
+    });
+
+    it("leaves today out of the running week's averages", async () => {
+      prismaMock.diaperRecord.findMany.mockResolvedValue([
+        { time: new Date("2026-10-13T08:00:00Z"), diaperType: "WET" },
+        { time: new Date("2026-10-14T05:00:00Z"), diaperType: "WET" },
+      ] as never);
+      const caller = createCaller(createTestContext());
+      const result = await caller.week({ childId, weekStart: "2026-10-12" });
+
+      // Monday to Tuesday are complete, Wednesday (today) is left out
+      expect(result.current.days).toBe(6);
+      expect(result.current.diapers.wetPerDay).toBe(1);
+      expect(result.current.totalRecords).toBe(1);
+      expect(result.previous.days).toBe(7);
     });
 
     it("moves a given date to its Monday", async () => {
@@ -355,10 +387,6 @@ describe("digestRouter", () => {
           dosage: "2,5 ml",
           frequency: null,
           isActive: true,
-          records: [
-            { time: new Date("2026-10-10T08:00:00Z"), dosageGiven: "2,5 ml", skipped: false },
-            { time: new Date("2026-10-10T14:00:00Z"), dosageGiven: null, skipped: true },
-          ],
         },
         {
           id: "clq1234567890abcdefghij99",
@@ -366,23 +394,92 @@ describe("digestRouter", () => {
           dosage: "1 dråpe",
           frequency: null,
           isActive: false,
-          records: [],
         },
       ] as never);
+      medicineGroupBy.mockResolvedValue([
+        {
+          medicineId: TEST_IDS.medicineId,
+          skipped: false,
+          _count: { _all: 2 },
+          _min: { time: new Date("2026-10-10T08:00:00Z") },
+          _max: { time: new Date("2026-10-11T08:00:00Z") },
+        },
+        {
+          medicineId: TEST_IDS.medicineId,
+          skipped: true,
+          _count: { _all: 1 },
+          _min: { time: new Date("2026-10-10T14:00:00Z") },
+          _max: { time: new Date("2026-10-10T14:00:00Z") },
+        },
+      ] as never);
+      prismaMock.medicineRecord.findMany.mockResolvedValue([
+        { medicineId: TEST_IDS.medicineId, time: new Date("2026-10-10T08:00:00Z"), dosageGiven: "2,5 ml" },
+        { medicineId: TEST_IDS.medicineId, time: new Date("2026-10-11T08:00:00Z"), dosageGiven: null },
+      ] as never);
+      prismaMock.temperatureRecord.count.mockResolvedValue(40);
+      prismaMock.temperatureRecord.findFirst.mockResolvedValue({
+        time: new Date("2026-10-10T13:00:00Z"),
+        temperatureCelsius: 39.1,
+      } as never);
       prismaMock.temperatureRecord.findMany.mockResolvedValue([
-        { time: new Date("2026-10-10T07:00:00Z"), temperatureCelsius: 38.2 },
-        { time: new Date("2026-10-10T13:00:00Z"), temperatureCelsius: 39.1 },
         { time: new Date("2026-10-11T07:00:00Z"), temperatureCelsius: 37.4 },
+        { time: new Date("2026-10-10T13:00:00Z"), temperatureCelsius: 39.1 },
       ] as never);
 
       const caller = createCaller(createTestContext());
       const result = await caller.report({ childId });
 
       expect(result.medicines).toHaveLength(1);
-      expect(result.medicines[0]!.given).toHaveLength(1);
-      expect(result.medicines[0]!.skipped).toBe(1);
-      expect(result.temperatures.readings).toHaveLength(3);
+      const medicine = result.medicines[0]!;
+      expect(medicine.givenCount).toBe(2);
+      expect(medicine.skipped).toBe(1);
+      expect(medicine.firstDose).toEqual(new Date("2026-10-10T08:00:00Z"));
+      expect(medicine.lastDose).toEqual(new Date("2026-10-11T08:00:00Z"));
+      expect(medicine.doses).toHaveLength(2);
+      expect(result.temperatures.count).toBe(40);
+      expect(result.temperatures.latest).toHaveLength(2);
       expect(result.temperatures.highest?.celsius).toBe(39.1);
+      // Newest first, capped at 30
+      expect(prismaMock.temperatureRecord.findMany.mock.calls[0]![0]).toMatchObject({
+        orderBy: { time: "desc" },
+        take: 30,
+      });
+    });
+
+    it("only lists individual doses for medicines with few doses", async () => {
+      prismaMock.medicine.findMany.mockResolvedValue([
+        { id: TEST_IDS.medicineId, name: "Paracet", dosage: "2,5 ml", frequency: null, isActive: true },
+      ] as never);
+      medicineGroupBy.mockResolvedValue([
+        {
+          medicineId: TEST_IDS.medicineId,
+          skipped: false,
+          _count: { _all: 25 },
+          _min: { time: new Date("2026-10-01T08:00:00Z") },
+          _max: { time: new Date("2026-10-12T08:00:00Z") },
+        },
+      ] as never);
+
+      const caller = createCaller(createTestContext());
+      const result = await caller.report({ childId });
+
+      expect(result.medicines[0]!.givenCount).toBe(25);
+      expect(result.medicines[0]!.doses).toEqual([]);
+      expect(prismaMock.medicineRecord.findMany).not.toHaveBeenCalled();
+    });
+
+    it("leaves today out of the averages", async () => {
+      prismaMock.feedingRecord.findMany.mockResolvedValue([
+        { startTime: new Date("2026-10-13T08:00:00Z"), feedingType: "BREAST", amountMl: null },
+        // Today, 14 October: not a full day yet
+        { startTime: new Date("2026-10-14T05:00:00Z"), feedingType: "BREAST", amountMl: null },
+      ] as never);
+
+      const caller = createCaller(createTestContext());
+      const result = await caller.report({ childId });
+
+      expect(result.averages.days).toBe(27);
+      expect(result.averages.feeds.total).toBe(1);
     });
   });
 });

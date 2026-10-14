@@ -58,6 +58,18 @@ describe("device owner", () => {
     expect(dropBrowserPushSubscription).toHaveBeenCalledOnce();
   });
 
+  it("removes saved visit report notes when the owner changes or the device is released", async () => {
+    await claimDevice(queryClient, alice);
+    localStorage.setItem("baby-atlas:report-questions:child-1", "Spørsmål");
+
+    await claimDevice(queryClient, bob);
+    expect(localStorage.getItem("baby-atlas:report-questions:child-1")).toBeNull();
+
+    localStorage.setItem("baby-atlas:report-questions:child-2", "Spørsmål");
+    await releaseDevice(queryClient);
+    expect(localStorage.getItem("baby-atlas:report-questions:child-2")).toBeNull();
+  });
+
   it("unsets the old owner before clearing, so a late load of its data is dropped", async () => {
     await claimDevice(queryClient, alice);
     let ownerDuringClear: string | undefined = "not called";

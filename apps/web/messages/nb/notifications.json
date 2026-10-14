@@ -19,8 +19,8 @@
       "body": "{text}"
     },
     "weeklyDigest": {
-      "title": "Uke {week} for {name} er klar",
-      "body": "Se hvordan søvn, mating og bleier gikk denne uken, sammenlignet med uken før."
+      "title": "Ukesoppsummering for {name}",
+      "body": "Se hvordan forrige uke (uke {week}) gikk: søvn, mating og bleier sammenlignet med uken før."
     }
   },
   "settings": {

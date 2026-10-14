@@ -2,23 +2,34 @@ import { describe, it, expect, vi } from "vitest";
 import type { PrismaClient } from "@baby-atlas/db";
 import { evaluate } from "./weekly-digest";
 
-// Sunday 18 October 2026, 20:00 in Oslo (CEST)
-const SUNDAY_EVENING = new Date("2026-10-18T18:00:00Z");
+// Monday 19 October 2026, 10:00 in Oslo (CEST): the digest covers 12 to 18 October
+const MONDAY_MORNING = new Date("2026-10-19T08:00:00Z");
 
-function createPrisma(options: {
-  children?: { id: string; name: string }[];
+interface Options {
+  children?: { id: string; name: string; members: string[] }[];
   sleepChildIds?: string[];
   feedingChildIds?: string[];
-}) {
-  const rows = (ids: string[] = []) => vi.fn(async () => ids.map((childId) => ({ childId })));
+  logs?: { userId: string; dedupeKey: string }[];
+}
+
+function createPrisma(options: Options) {
+  const groups = (ids: string[] = []) => vi.fn(async () => ids.map((childId) => ({ childId })));
+  const children = options.children ?? [{ id: "child-1", name: "Mia", members: ["u1"] }];
   return {
     child: {
-      findMany: vi.fn(async () => options.children ?? [{ id: "child-1", name: "Mia" }]),
+      findMany: vi.fn(async () =>
+        children.map((c) => ({
+          id: c.id,
+          name: c.name,
+          household: { members: c.members.map((userId) => ({ userId })) },
+        }))
+      ),
     },
-    sleepRecord: { findMany: rows(options.sleepChildIds) },
-    feedingRecord: { findMany: rows(options.feedingChildIds) },
-    diaperRecord: { findMany: rows() },
-    pumpingRecord: { findMany: rows() },
+    notificationLog: { findMany: vi.fn(async () => options.logs ?? []) },
+    sleepRecord: { groupBy: groups(options.sleepChildIds) },
+    feedingRecord: { groupBy: groups(options.feedingChildIds) },
+    diaperRecord: { groupBy: groups() },
+    pumpingRecord: { groupBy: groups() },
   };
 }
 
@@ -26,25 +37,27 @@ const run = (prisma: ReturnType<typeof createPrisma>, now: Date) =>
   evaluate({ prisma: prisma as unknown as PrismaClient, now });
 
 describe("weekly digest evaluator", () => {
-  it("does nothing outside Sunday evening and Monday morning", async () => {
+  it("does nothing outside Monday 08:00 to 20:00 Oslo", async () => {
     const prisma = createPrisma({ sleepChildIds: ["child-1"] });
 
     expect(await run(prisma, new Date("2026-10-14T10:00:00Z"))).toEqual([]);
-    expect(await run(prisma, new Date("2026-10-18T15:59:00Z"))).toEqual([]);
-    expect(await run(prisma, new Date("2026-10-19T10:00:00Z"))).toEqual([]);
+    // Sunday evening: the week is not over yet
+    expect(await run(prisma, new Date("2026-10-18T18:00:00Z"))).toEqual([]);
+    expect(await run(prisma, new Date("2026-10-19T05:59:00Z"))).toEqual([]);
+    expect(await run(prisma, new Date("2026-10-19T18:00:00Z"))).toEqual([]);
     expect(prisma.child.findMany).not.toHaveBeenCalled();
   });
 
-  it("returns one candidate per child with records, pointing at the digest page", async () => {
+  it("returns one candidate per child with records, pointing at last week's digest", async () => {
     const prisma = createPrisma({
       children: [
-        { id: "child-1", name: "Mia" },
-        { id: "child-2", name: "Ola" },
+        { id: "child-1", name: "Mia", members: ["u1"] },
+        { id: "child-2", name: "Ola", members: ["u1"] },
       ],
       sleepChildIds: ["child-1"],
     });
 
-    const candidates = await run(prisma, SUNDAY_EVENING);
+    const candidates = await run(prisma, MONDAY_MORNING);
 
     expect(candidates).toEqual([
       {
@@ -61,41 +74,53 @@ describe("weekly digest evaluator", () => {
 
   it("skips children without any records that week", async () => {
     const prisma = createPrisma({});
-    expect(await run(prisma, SUNDAY_EVENING)).toEqual([]);
+    expect(await run(prisma, MONDAY_MORNING)).toEqual([]);
   });
 
-  it("keeps the same dedupe key on Monday morning, so the week is sent once", async () => {
-    const prisma = createPrisma({ feedingChildIds: ["child-1"] });
+  it("skips children whose digest already went to every recipient, before counting records", async () => {
+    const prisma = createPrisma({
+      children: [{ id: "child-1", name: "Mia", members: ["u1", "u2"] }],
+      sleepChildIds: ["child-1"],
+      logs: [
+        { userId: "u1", dedupeKey: "digest:child-1:2026-W42" },
+        { userId: "u2", dedupeKey: "digest:child-1:2026-W42" },
+      ],
+    });
 
-    const sunday = await run(prisma, SUNDAY_EVENING);
-    // Monday 19 October, 08:00 Oslo
-    const monday = await run(prisma, new Date("2026-10-19T06:00:00Z"));
+    expect(await run(prisma, MONDAY_MORNING)).toEqual([]);
+    expect(prisma.sleepRecord.groupBy).not.toHaveBeenCalled();
+  });
 
-    expect(monday).toHaveLength(1);
-    expect(monday[0]!.dedupeKey).toBe(sunday[0]!.dedupeKey);
+  it("still returns a child when only some recipients have it", async () => {
+    const prisma = createPrisma({
+      children: [{ id: "child-1", name: "Mia", members: ["u1", "u2"] }],
+      sleepChildIds: ["child-1"],
+      logs: [{ userId: "u1", dedupeKey: "digest:child-1:2026-W42" }],
+    });
+
+    expect(await run(prisma, MONDAY_MORNING)).toHaveLength(1);
   });
 
   it("looks only at the Monday to Sunday week in Oslo time", async () => {
     const prisma = createPrisma({ sleepChildIds: ["child-1"] });
-    await run(prisma, SUNDAY_EVENING);
+    await run(prisma, MONDAY_MORNING);
 
-    expect(prisma.sleepRecord.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          childId: { in: ["child-1"] },
-          startTime: {
-            gte: new Date("2026-10-11T22:00:00.000Z"),
-            lt: new Date("2026-10-18T22:00:00.000Z"),
-          },
+    expect(prisma.sleepRecord.groupBy).toHaveBeenCalledWith({
+      by: ["childId"],
+      where: {
+        childId: { in: ["child-1"] },
+        startTime: {
+          gte: new Date("2026-10-11T22:00:00.000Z"),
+          lt: new Date("2026-10-18T22:00:00.000Z"),
         },
-      })
-    );
+      },
+    });
   });
 
   it("returns nothing and runs no record queries without notifiable children", async () => {
     const prisma = createPrisma({ children: [] });
 
-    expect(await run(prisma, SUNDAY_EVENING)).toEqual([]);
-    expect(prisma.sleepRecord.findMany).not.toHaveBeenCalled();
+    expect(await run(prisma, MONDAY_MORNING)).toEqual([]);
+    expect(prisma.sleepRecord.groupBy).not.toHaveBeenCalled();
   });
 });

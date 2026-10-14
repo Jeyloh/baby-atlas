@@ -28,8 +28,6 @@ const REPORT_PERIODS = {
   "12w": 84,
 } as const;
 const MAX_REPORT_DAYS = 366;
-const MAX_MEDICINE_DOSES = 200;
-const MAX_TEMPERATURES = 200;
 const MAX_JOURNAL_ENTRIES = 50;
 
 // ----------------------------------------------------------------------------
@@ -242,6 +240,15 @@ export function growthChange(inWeek: GrowthPoint[], before: GrowthPoint[]): Grow
 
 const keyOf = (date: Date) => date.toISOString().slice(0, 10);
 
+/** The days of a period without today, which is only partly logged. */
+export function completedDayKeys(dayKeys: string[], todayKey: string): string[] {
+  return dayKeys.filter((key) => key !== todayKey);
+}
+
+/** Medicines with at most this many doses in the period list every dose. */
+const LIST_DOSES_UP_TO = 10;
+const MAX_TEMPERATURE_LIST = 30;
+
 export const digestRouter = createTRPCRouter({
   /**
    * One Monday to Sunday week (default: the last complete week in Europe/Oslo)
@@ -250,9 +257,12 @@ export const digestRouter = createTRPCRouter({
   week: householdProcedure
     .input(z.object({ childId: z.string().cuid(), weekStart: DAY_KEY.optional() }))
     .query(async ({ ctx, input }) => {
-      const weekStart = input.weekStart
-        ? mondayOfKey(input.weekStart)
-        : lastFullWeekStart(new Date());
+      const now = new Date();
+      const todayKey = osloDayKey(now);
+      const currentWeekStart = mondayOfKey(todayKey);
+      // A future week has no data: stop at the week that is running now
+      const requested = input.weekStart ? mondayOfKey(input.weekStart) : lastFullWeekStart(now);
+      const weekStart = requested > currentWeekStart ? currentWeekStart : requested;
       const previousStart = addDaysToKey(weekStart, -7);
       const weekEnd = addDaysToKey(weekStart, 6);
       const nextStart = addDaysToKey(weekStart, 7);
@@ -313,7 +323,11 @@ export const digestRouter = createTRPCRouter({
       const summaryFor = (week: "current" | "previous"): PeriodSummary => {
         const pick = week === "current" ? inWeek : beforeWeek;
         return summarizePeriod({
-          dayKeys: weekDayKeys(week === "current" ? weekStart : previousStart),
+          // Today is still going, so it would pull the averages down
+          dayKeys: completedDayKeys(
+            weekDayKeys(week === "current" ? weekStart : previousStart),
+            todayKey
+          ),
           sleep: pick(sleep, (r) => r.startTime),
           feedings: pick(feedings, (r) => r.startTime),
           diapers: pick(diapers, (r) => r.time),
@@ -330,7 +344,7 @@ export const digestRouter = createTRPCRouter({
         weekEnd,
         previousWeekStart: previousStart,
         // The week that is running now, so the page can stop "next" there
-        currentWeekStart: mondayOfKey(osloDayKey(new Date())),
+        currentWeekStart,
         isoWeek: isoWeekLabel(weekStart),
         current: {
           ...summaryFor("current"),
@@ -397,6 +411,7 @@ export const digestRouter = createTRPCRouter({
       const dateTo = dateOnly(addDaysToKey(toKey, 1));
       const dayKeys: string[] = [];
       for (let key = fromKey; key <= toKey; key = addDaysToKey(key, 1)) dayKeys.push(key);
+      const averageKeys = completedDayKeys(dayKeys, toKey);
 
       const [
         child,
@@ -444,20 +459,24 @@ export const digestRouter = createTRPCRouter({
             dosage: true,
             frequency: true,
             isActive: true,
-            records: {
-              where: { time: { gte: windowStart, lt: windowEnd } },
-              orderBy: { time: "asc" },
-              take: MAX_MEDICINE_DOSES,
-              select: { time: true, dosageGiven: true, skipped: true },
-            },
           },
         }),
-        ctx.prisma.temperatureRecord.findMany({
-          where: { childId, time: { gte: windowStart, lt: windowEnd } },
-          orderBy: { time: "asc" },
-          take: MAX_TEMPERATURES,
-          select: { time: true, temperatureCelsius: true },
-        }),
+        Promise.all([
+          ctx.prisma.temperatureRecord.count({
+            where: { childId, time: { gte: windowStart, lt: windowEnd } },
+          }),
+          ctx.prisma.temperatureRecord.findFirst({
+            where: { childId, time: { gte: windowStart, lt: windowEnd } },
+            orderBy: [{ temperatureCelsius: "desc" }, { time: "desc" }],
+            select: { time: true, temperatureCelsius: true },
+          }),
+          ctx.prisma.temperatureRecord.findMany({
+            where: { childId, time: { gte: windowStart, lt: windowEnd } },
+            orderBy: { time: "desc" },
+            take: MAX_TEMPERATURE_LIST,
+            select: { time: true, temperatureCelsius: true },
+          }),
+        ]),
         ctx.prisma.vaccinationRecord.findMany({
           where: { childId },
           orderBy: { givenAt: "asc" },
@@ -475,16 +494,45 @@ export const digestRouter = createTRPCRouter({
         }),
       ]);
 
-      const highest = temperatures.reduce<(typeof temperatures)[number] | null>(
-        (max, t) => (!max || t.temperatureCelsius > max.temperatureCelsius ? t : max),
-        null
+      const [temperatureCount, highest, latestTemperatures] = temperatures;
+
+      // Per medicine: counts and first/last dose from one grouped query, and
+      // the doses themselves only when there are few enough to list
+      const medicineIds = medicines.map((m) => m.id);
+      const period = { gte: windowStart, lt: windowEnd };
+      const doseStats =
+        medicineIds.length === 0
+          ? []
+          : await ctx.prisma.medicineRecord.groupBy({
+              by: ["medicineId", "skipped"],
+              where: { medicineId: { in: medicineIds }, time: period },
+              _count: { _all: true },
+              _min: { time: true },
+              _max: { time: true },
+            });
+      const givenStats = new Map(
+        doseStats.filter((s) => !s.skipped).map((s) => [s.medicineId, s])
       );
+      const skippedCounts = new Map(
+        doseStats.filter((s) => s.skipped).map((s) => [s.medicineId, s._count._all])
+      );
+      const listedIds = medicineIds.filter(
+        (id) => (givenStats.get(id)?._count._all ?? 0) <= LIST_DOSES_UP_TO
+      );
+      const listedDoses =
+        listedIds.length === 0
+          ? []
+          : await ctx.prisma.medicineRecord.findMany({
+              where: { medicineId: { in: listedIds }, skipped: false, time: period },
+              orderBy: { time: "asc" },
+              select: { medicineId: true, time: true, dosageGiven: true },
+            });
 
       return {
         child,
         range: { from: fromKey, to: toKey, days: dayKeys.length, period: effective },
         lastCheckupDate: lastCheckupKey,
-        averages: summarizePeriod({ dayKeys, sleep, feedings, diapers, pumping }),
+        averages: summarizePeriod({ dayKeys: averageKeys, sleep, feedings, diapers, pumping }),
         growth: growth.map((g) => ({
           date: keyOf(g.date),
           weightKg: g.weightKg,
@@ -492,25 +540,31 @@ export const digestRouter = createTRPCRouter({
           headCircumferenceCm: g.headCircumferenceCm,
         })),
         medicines: medicines
-          // Medicines that were active or given in the period
-          .filter((m) => m.isActive || m.records.length > 0)
-          .map((m) => ({
-            id: m.id,
-            name: m.name,
-            dosage: m.dosage,
-            frequency: m.frequency,
-            isActive: m.isActive,
-            given: m.records
-              .filter((r) => !r.skipped)
-              .map((r) => ({ time: r.time, dosageGiven: r.dosageGiven })),
-            skipped: m.records.filter((r) => r.skipped).length,
-          })),
+          // Medicines that are in use or were given or skipped in the period
+          .filter((m) => m.isActive || givenStats.has(m.id) || skippedCounts.has(m.id))
+          .map((m) => {
+            const stats = givenStats.get(m.id);
+            return {
+              id: m.id,
+              name: m.name,
+              dosage: m.dosage,
+              frequency: m.frequency,
+              isActive: m.isActive,
+              givenCount: stats?._count._all ?? 0,
+              firstDose: stats?._min.time ?? null,
+              lastDose: stats?._max.time ?? null,
+              skipped: skippedCounts.get(m.id) ?? 0,
+              // Only for few doses: the first and last are enough otherwise
+              doses: listedDoses
+                .filter((d) => d.medicineId === m.id)
+                .map((d) => ({ time: d.time, dosageGiven: d.dosageGiven })),
+            };
+          }),
         temperatures: {
-          readings: temperatures.map((t) => ({
-            time: t.time,
-            celsius: t.temperatureCelsius,
-          })),
+          count: temperatureCount,
           highest: highest ? { time: highest.time, celsius: highest.temperatureCelsius } : null,
+          // Newest first, capped; `count` tells how many there are in all
+          latest: latestTemperatures.map((t) => ({ time: t.time, celsius: t.temperatureCelsius })),
         },
         vaccinations: vaccinations.map((v) => ({
           vaccineKey: v.vaccineKey,
