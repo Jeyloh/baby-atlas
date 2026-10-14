@@ -3,6 +3,12 @@
     "test": {
       "title": "Test notification from Baby Atlas",
       "body": "Notifications work on this device."
+    },
+    "timerRunning": {
+      "title1": "Did you forget to stop the timer?",
+      "body1": "{childName}'s {type, select, nap {nap} nightSleep {night sleep} breastfeeding {breastfeed} bottle {bottle feed} pumping {pumping session} other {activity}} has been running for {hours, plural, =0 {{minutes} min} other {# h {minutes} min}}. Tap to set the end time.",
+      "title2": "The timer is still running",
+      "body2": "{childName}'s {type, select, nap {nap} nightSleep {night sleep} breastfeeding {breastfeed} bottle {bottle feed} pumping {pumping session} other {activity}} has now been running for {hours, plural, =0 {{minutes} min} other {# h {minutes} min}}. Tap to correct the end time."
     }
   },
   "settings": {
@@ -80,6 +86,22 @@
       "title": "Mute children",
       "description": "No notifications about children you mute.",
       "none": "You have no children to mute yet."
+    },
+    "timerThresholds": {
+      "summary": "Advanced: when a timer counts as forgotten",
+      "description": "You get a first notification when a timer has run this long, and another when it has run twice as long. An empty value uses the default.",
+      "unit": "minutes",
+      "default": "Default: {minutes} min",
+      "invalid": "Enter a whole number from 1 to 1440.",
+      "reset": "Reset to defaults",
+      "types": {
+        "nap": "Nap",
+        "nightSleep": "Night sleep",
+        "breastfeeding": "Breastfeeding",
+        "bottle": "Bottle",
+        "pumping": "Pumping",
+        "activity": "Activity"
+      }
     }
   }
 }

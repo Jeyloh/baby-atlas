@@ -1,1 +1,36 @@
-{}
+{
+  "timerFix": {
+    "title": "Is the timer still running?",
+    "description": "{type} started {start} and has been running for {duration}.",
+    "type": {
+      "nap": "The nap",
+      "nightSleep": "The night sleep",
+      "breastfeeding": "The breastfeed",
+      "bottle": "The bottle feed",
+      "pumping": "The pumping session",
+      "activity": "The activity"
+    },
+    "actions": {
+      "setEndTime": "Set end time",
+      "stillGoing": "Still going"
+    },
+    "dialog": {
+      "title": "Set end time",
+      "description": "{type} started {start}. Choose when it actually ended.",
+      "endLabel": "End time",
+      "durationPreview": "Duration: {duration}",
+      "save": "Save end time",
+      "saving": "Saving …"
+    },
+    "errors": {
+      "invalid": "Choose a valid time.",
+      "beforeStart": "The end time must be after the start.",
+      "inFuture": "The end time cannot be in the future."
+    },
+    "toast": {
+      "saved": "End time saved",
+      "failed": "Could not save the end time. Try again.",
+      "alreadyEnded": "The timer has already stopped"
+    }
+  }
+}

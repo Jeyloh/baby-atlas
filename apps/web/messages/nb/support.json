@@ -1,1 +1,36 @@
-{}
+{
+  "timerFix": {
+    "title": "Går tidtakeren fortsatt?",
+    "description": "{type} startet {start} og har pågått i {duration}.",
+    "type": {
+      "nap": "Luren",
+      "nightSleep": "Nattesøvnen",
+      "breastfeeding": "Ammingen",
+      "bottle": "Flaskemåltidet",
+      "pumping": "Pumpingen",
+      "activity": "Aktiviteten"
+    },
+    "actions": {
+      "setEndTime": "Sett sluttid",
+      "stillGoing": "Den pågår fortsatt"
+    },
+    "dialog": {
+      "title": "Sett sluttid",
+      "description": "{type} startet {start}. Velg når det egentlig sluttet.",
+      "endLabel": "Sluttid",
+      "durationPreview": "Varighet: {duration}",
+      "save": "Lagre sluttid",
+      "saving": "Lagrer …"
+    },
+    "errors": {
+      "invalid": "Velg et gyldig tidspunkt.",
+      "beforeStart": "Sluttiden må være etter starttidspunktet.",
+      "inFuture": "Sluttiden kan ikke være frem i tid."
+    },
+    "toast": {
+      "saved": "Sluttiden er lagret",
+      "failed": "Kunne ikke lagre sluttiden. Prøv igjen.",
+      "alreadyEnded": "Tidtakeren er allerede stoppet"
+    }
+  }
+}
