@@ -3,6 +3,10 @@
     "test": {
       "title": "Test notification from Baby Atlas",
       "body": "Notifications work on this device."
+    },
+    "weeklyDigest": {
+      "title": "Week {week} for {name} is ready",
+      "body": "See how sleep, feeding and diapers went this week compared with the week before."
     }
   },
   "settings": {

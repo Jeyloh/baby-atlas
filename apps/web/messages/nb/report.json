@@ -1,1 +1,80 @@
-{}
+{
+  "title": "Besøksrapport",
+  "notFound": "Fant ikke barnet",
+  "intro": "Samler det som er logget, så det er lett å ta med til helsestasjonen eller legen. Se over rapporten før du skriver den ut.",
+  "loading": "Lager rapporten …",
+  "error": "Kunne ikke lage rapporten",
+  "retry": "Prøv igjen",
+  "print": "Skriv ut / lagre som PDF",
+  "period": {
+    "label": "Periode",
+    "4w": "Siste 4 uker",
+    "8w": "Siste 8 uker",
+    "12w": "Siste 12 uker",
+    "sinceCheckup": "Siden siste helsestasjonsbesøk",
+    "range": "{start} – {end}"
+  },
+  "header": {
+    "title": "Besøksrapport for {name}",
+    "generated": "Utarbeidet {date} fra Baby Atlas"
+  },
+  "child": {
+    "title": "Barnet",
+    "name": "Navn",
+    "born": "Født",
+    "age": "Alder",
+    "period": "Periode"
+  },
+  "empty": "Ingenting registrert i perioden.",
+  "growth": {
+    "title": "Vekst og størrelse",
+    "date": "Dato",
+    "weight": "Vekt (kg)",
+    "height": "Lengde (cm)",
+    "head": "Hode (cm)",
+    "noValue": "–"
+  },
+  "averages": {
+    "title": "Snitt per dag",
+    "hint": "Regnet ut fra dagene som er logget. Dager uten logg teller ikke med.",
+    "sleepTotal": "Søvn totalt",
+    "sleepNight": "Nattesøvn",
+    "sleepNaps": "Lurer",
+    "napsCount": "{count} lurer per dag",
+    "feeds": "Måltider",
+    "bottle": "Flaske",
+    "wet": "Tissebleier",
+    "dirty": "Bæsjebleier",
+    "pumping": "Utpumpet",
+    "loggedDays": "{logged} av {total} dager med logg"
+  },
+  "medicines": {
+    "title": "Medisin",
+    "dose": "{date} kl. {time}",
+    "doseWithAmount": "{date} kl. {time}, {amount}",
+    "given": "{count, plural, =0 {Ingen doser gitt} one {# dose gitt} other {# doser gitt}}",
+    "skipped": "{count, plural, one {# hoppet over} other {# hoppet over}}",
+    "regular": "Fast dose: {dosage}",
+    "inactive": "Ikke i bruk nå"
+  },
+  "temperatures": {
+    "title": "Temperatur",
+    "highest": "Høyeste: {value} ({date} kl. {time})",
+    "count": "{count, plural, one {# måling} other {# målinger}}",
+    "reading": "{date} kl. {time}: {value}"
+  },
+  "vaccines": {
+    "title": "Vaksiner",
+    "given": "Gitt {date}",
+    "dose": "dose {dose}"
+  },
+  "journal": {
+    "title": "Dagbok: helsestasjon, lege og sykdom"
+  },
+  "questions": {
+    "title": "Spørsmål til helsestasjonen",
+    "hint": "Skriv det du vil huske å spørre om. Teksten lagres bare på denne enheten.",
+    "placeholder": "For eksempel: Hvordan går det med spisingen?"
+  },
+  "footer": "Rapporten bygger på det som er logget i Baby Atlas og kan mangle ting. Den erstatter ikke vurderingen til helsestasjonen eller legen."
+}

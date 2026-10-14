@@ -1,1 +1,80 @@
-{}
+{
+  "title": "Visit report",
+  "notFound": "Child not found",
+  "intro": "Collects what has been logged, so it is easy to bring to the health station or the doctor. Look the report over before you print it.",
+  "loading": "Building the report …",
+  "error": "Could not build the report",
+  "retry": "Try again",
+  "print": "Print / save as PDF",
+  "period": {
+    "label": "Period",
+    "4w": "Last 4 weeks",
+    "8w": "Last 8 weeks",
+    "12w": "Last 12 weeks",
+    "sinceCheckup": "Since the last checkup",
+    "range": "{start} – {end}"
+  },
+  "header": {
+    "title": "Visit report for {name}",
+    "generated": "Prepared {date} from Baby Atlas"
+  },
+  "child": {
+    "title": "The child",
+    "name": "Name",
+    "born": "Born",
+    "age": "Age",
+    "period": "Period"
+  },
+  "empty": "Nothing recorded in this period.",
+  "growth": {
+    "title": "Growth and size",
+    "date": "Date",
+    "weight": "Weight (kg)",
+    "height": "Length (cm)",
+    "head": "Head (cm)",
+    "noValue": "–"
+  },
+  "averages": {
+    "title": "Average per day",
+    "hint": "Based on the days that were logged. Days without logs are not counted.",
+    "sleepTotal": "Total sleep",
+    "sleepNight": "Night sleep",
+    "sleepNaps": "Naps",
+    "napsCount": "{count} naps per day",
+    "feeds": "Feeds",
+    "bottle": "Bottle",
+    "wet": "Wet diapers",
+    "dirty": "Dirty diapers",
+    "pumping": "Pumped",
+    "loggedDays": "{logged} of {total} days logged"
+  },
+  "medicines": {
+    "title": "Medicine",
+    "dose": "{date} at {time}",
+    "doseWithAmount": "{date} at {time}, {amount}",
+    "given": "{count, plural, =0 {No doses given} one {# dose given} other {# doses given}}",
+    "skipped": "{count, plural, one {# skipped} other {# skipped}}",
+    "regular": "Regular dose: {dosage}",
+    "inactive": "Not in use now"
+  },
+  "temperatures": {
+    "title": "Temperature",
+    "highest": "Highest: {value} ({date} at {time})",
+    "count": "{count, plural, one {# reading} other {# readings}}",
+    "reading": "{date} at {time}: {value}"
+  },
+  "vaccines": {
+    "title": "Vaccines",
+    "given": "Given {date}",
+    "dose": "dose {dose}"
+  },
+  "journal": {
+    "title": "Journal: health station, doctor and sickness"
+  },
+  "questions": {
+    "title": "Questions for the health station",
+    "hint": "Write what you want to remember to ask. The text is only saved on this device.",
+    "placeholder": "For example: How is the eating going?"
+  },
+  "footer": "The report is based on what was logged in Baby Atlas and may be missing things. It does not replace the assessment of the health station or the doctor."
+}

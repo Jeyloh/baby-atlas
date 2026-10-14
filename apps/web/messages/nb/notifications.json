@@ -3,6 +3,10 @@
     "test": {
       "title": "Testvarsel fra Baby Atlas",
       "body": "Varslene fungerer på denne enheten."
+    },
+    "weeklyDigest": {
+      "title": "Uke {week} for {name} er klar",
+      "body": "Se hvordan søvn, mating og bleier gikk denne uken, sammenlignet med uken før."
     }
   },
   "settings": {

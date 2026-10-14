@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/provider";
 import { ActiveTimers } from "@/components/tracking/active-timers";
@@ -21,7 +21,8 @@ import {
   Sparkles,
 } from "lucide-react";
 
-type LogType = "sleep" | "breast" | "bottle" | "diaper" | "solids" | "pumping" | "medicine" | "growth" | "temperature" | "activity";
+const LOG_TYPES = ["sleep", "breast", "bottle", "diaper", "solids", "pumping", "medicine", "growth", "temperature", "activity"] as const;
+type LogType = (typeof LOG_TYPES)[number];
 
 type TrackingLabelKey =
   | "sleep"
@@ -47,6 +48,14 @@ export default function LogPage({
   const { data: child, isLoading } = trpc.child.get.useQuery({ id: childId });
 
   const [modalType, setModalType] = useState<LogType | null>(null);
+
+  // App shortcuts open this page as /log?type=sleep to land straight in a form
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("type");
+    if (requested && (LOG_TYPES as readonly string[]).includes(requested)) {
+      setModalType(requested as LogType);
+    }
+  }, []);
 
   if (isLoading) {
     return (
