@@ -7,7 +7,7 @@ import { translatePush } from "@/lib/notifications/translate";
 export const runtime = "nodejs";
 
 /** One test notification per user in each window of this length */
-export const TEST_WINDOW_MS = 30_000;
+const TEST_WINDOW_MS = 30_000;
 
 function jsonResponse(status: number, body: unknown) {
   return Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
