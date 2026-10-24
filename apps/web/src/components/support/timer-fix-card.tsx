@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Hourglass } from "lucide-react";
@@ -56,7 +57,7 @@ export function useTimerFixCards({ childId }: SupportCardProps): {
     const rest = new URLSearchParams(searchParams.toString());
     rest.delete("fixTimer");
     const query = rest.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.replace((query ? `${pathname}?${query}` : pathname) as Route, { scroll: false });
   }, [fixTimerParam, searchParams, pathname, router]);
 
   // Open the dialog once the running timers are known

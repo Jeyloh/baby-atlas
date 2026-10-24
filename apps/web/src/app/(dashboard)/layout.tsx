@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -14,7 +15,7 @@ export default async function DashboardLayout({
 
   if (!session?.user) {
     // Come back to this page after signing in (a shortcut, a notification link)
-    redirect(loginUrlFor((await headers()).get("x-pathname")));
+    redirect(loginUrlFor((await headers()).get("x-pathname")) as Route);
   }
 
   return (
