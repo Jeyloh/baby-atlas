@@ -1,0 +1,36 @@
+# Runs the push notification dispatcher every 5 minutes.
+# GitHub runs scheduled workflows best effort: runs can start late or be skipped
+# under load. The dispatcher is idempotent (NotificationLog claim), so a late or
+# extra run never double-sends. Needs the repository secret CRON_SECRET (same
+# value as in Vercel).
+name: Notifications cron
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: notifications-cron
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: github.repository == 'Jeyloh/baby-atlas'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Call dispatcher
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::warning::CRON_SECRET is not set, skipping"
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            --retry 2 --retry-delay 10 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://baby-atlas.vercel.app/api/cron/notifications
